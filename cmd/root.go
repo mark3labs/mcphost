@@ -39,10 +39,10 @@ func convertAnthropicContentToContentBlock(content []llm.AnthropicContent) []Con
 }
 
 var (
-	renderer *glamour.TermRenderer
-
+	renderer      *glamour.TermRenderer
 	configFile    string
 	messageWindow int
+	modelFlag     string // New flag for model selection
 )
 
 const (
@@ -53,9 +53,17 @@ const (
 
 var rootCmd = &cobra.Command{
 	Use:   "mcphost",
-	Short: "Chat with Claude 3.5 Sonnet or Ollama models",
-	Long: `MCPHost is a CLI tool that allows you to interact with Claude 3.5 Sonnet or Ollama models.
-It supports various tools through MCP servers and provides streaming responses.`,
+	Short: "Chat with AI models through a unified interface",
+	Long: `MCPHost is a CLI tool that allows you to interact with various AI models
+through a unified interface. It supports various tools through MCP servers
+and provides streaming responses.
+
+Available models can be specified using the --model flag:
+- Anthropic Claude (default): anthropic:claude-3-5-sonnet-latest
+- Ollama models: ollama:modelname
+
+Example:
+  mcphost -m ollama:qwen2.5:3b`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return runMCPHost()
 	},
@@ -72,6 +80,35 @@ func init() {
 		StringVar(&configFile, "config", "", "config file (default is $HOME/mcp.json)")
 	rootCmd.PersistentFlags().
 		IntVar(&messageWindow, "message-window", 10, "number of messages to keep in context")
+	rootCmd.PersistentFlags().
+		StringVarP(&modelFlag, "model", "m", "anthropic:claude-3-5-sonnet-latest", 
+			"model to use (format: provider:model, e.g. anthropic:claude-3-5-sonnet-latest or ollama:qwen2.5:3b)")
+}
+
+// Add new function to create provider
+func createProvider(modelString string) (llm.Provider, error) {
+	parts := strings.Split(modelString, ":")
+	if len(parts) < 2 {
+		return nil, fmt.Errorf("invalid model format. Expected provider:model, got %s", modelString)
+	}
+
+	provider := parts[0]
+	model := strings.Join(parts[1:], ":")
+
+	switch provider {
+	case "anthropic":
+		apiKey := os.Getenv("ANTHROPIC_API_KEY")
+		if apiKey == "" {
+			return nil, fmt.Errorf("ANTHROPIC_API_KEY environment variable not set")
+		}
+		return llm.NewAnthropicProvider(apiKey), nil
+
+	case "ollama":
+		return llm.NewOllamaProvider(model)
+
+	default:
+		return nil, fmt.Errorf("unsupported provider: %s", provider)
+	}
 }
 
 func pruneMessages[T MessageParam | api.Message](messages []T) []T {
@@ -285,34 +322,49 @@ func runPrompt(
 		break
 	}
 
-	if str, err := renderer.Render("\nClaude: "); err == nil {
+	if str, err := renderer.Render("\nAssistant: "); err == nil {
 		fmt.Print(str)
 	}
 
 	toolResults := []ContentBlock{}
 
-	// Type assert to get the concrete AnthropicMessage type
-	anthropicMsg, ok := message.(*llm.AnthropicMessage)
-	if !ok {
-		return fmt.Errorf("unexpected message type: %T", message)
-	}
+	var messageContent []ContentBlock
 
-	for _, block := range anthropicMsg.Msg.Content {
-		switch block.Type {
-		case "text":
-			if err := updateRenderer(); err != nil {
-				return fmt.Errorf("error updating renderer: %v", err)
-			}
-			str, err := renderer.Render(block.Text + "\n")
-			if err != nil {
-				log.Error("Failed to render response", "error", err)
-				fmt.Print(block.Text + "\n")
-				continue
-			}
-			fmt.Print(str)
+	switch msg := message.(type) {
+	case *llm.AnthropicMessage:
+		for _, block := range msg.Msg.Content {
+			switch block.Type {
+			case "text":
+				if err := updateRenderer(); err != nil {
+					return fmt.Errorf("error updating renderer: %v", err)
+				}
+				str, err := renderer.Render(block.Text + "\n")
+				if err != nil {
+					log.Error("Failed to render response", "error", err)
+					fmt.Print(block.Text + "\n")
+					continue
+				}
+				fmt.Print(str)
+				messageContent = append(messageContent, ContentBlock{
+					Type: "text",
+					Text: block.Text,
+				})
 
-		case "tool_use":
-			log.Info("🔧 Using tool", "name", block.Name)
+			case "tool_use":
+				log.Info("🔧 Using tool", "name", block.Name)
+				messageContent = append(messageContent, ContentBlock{
+					Type:  "tool_use",
+					ID:    block.ID,
+					Name:  block.Name,
+					Input: block.Input,
+				})
+
+				// Log usage statistics for Anthropic
+				inputTokens, outputTokens := msg.GetUsage()
+				log.Info("Usage statistics",
+					"input_tokens", inputTokens,
+					"output_tokens", outputTokens,
+					"total_tokens", inputTokens+outputTokens)
 
 			parts := strings.Split(block.Name, "__")
 			if len(parts) != 2 {
@@ -394,9 +446,40 @@ func runPrompt(
 		}
 	}
 
+	case *llm.OllamaMessage:
+		// Handle Ollama message
+		if err := updateRenderer(); err != nil {
+			return fmt.Errorf("error updating renderer: %v", err)
+		}
+		str, err := renderer.Render(msg.GetContent() + "\n")
+		if err != nil {
+			log.Error("Failed to render response", "error", err)
+			fmt.Print(msg.GetContent() + "\n")
+		} else {
+			fmt.Print(str)
+		}
+		messageContent = append(messageContent, ContentBlock{
+			Type: "text",
+			Text: msg.GetContent(),
+		})
+
+		// Handle tool calls if present
+		for _, toolCall := range msg.GetToolCalls() {
+			input, _ := json.Marshal(toolCall.GetArguments())
+			messageContent = append(messageContent, ContentBlock{
+				Type:  "tool_use",
+				Name:  toolCall.GetName(),
+				Input: input,
+			})
+		}
+
+	default:
+		return fmt.Errorf("unexpected message type: %T", message)
+	}
+
 	*messages = append(*messages, MessageParam{
 		Role:    message.GetRole(),
-		Content: convertAnthropicContentToContentBlock(anthropicMsg.Msg.Content),
+		Content: messageContent,
 	})
 
 	if len(toolResults) > 0 {
@@ -408,21 +491,22 @@ func runPrompt(
 		return runPrompt(provider, mcpClients, tools, "", messages)
 	}
 
-	inputTokens, outputTokens := message.GetUsage()
-	log.Info("Usage statistics",
-		"input_tokens", inputTokens,
-		"output_tokens", outputTokens,
-		"total_tokens", inputTokens+outputTokens)
-
 	fmt.Println() // Add spacing
 	return nil
 }
 
 func runMCPHost() error {
-	apiKey := os.Getenv("ANTHROPIC_API_KEY")
-	if apiKey == "" {
-		return fmt.Errorf("ANTHROPIC_API_KEY environment variable not set")
+	// Create the provider based on the model flag
+	provider, err := createProvider(modelFlag)
+	if err != nil {
+		return fmt.Errorf("error creating provider: %v", err)
 	}
+
+	// Split the model flag and get just the model name
+	modelName := strings.Split(modelFlag, ":")[1]
+	log.Info("Model loaded", 
+		"provider", provider.Name(),
+		"model", modelName)
 
 	mcpConfig, err := loadMCPConfig()
 	if err != nil {
@@ -449,7 +533,6 @@ func runMCPHost() error {
 		log.Info("Server connected", "name", name)
 	}
 
-	provider := llm.NewAnthropicProvider(apiKey)
 
 	var allTools []llm.Tool
 	for serverName, mcpClient := range mcpClients {

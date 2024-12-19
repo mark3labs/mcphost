@@ -6,6 +6,7 @@ import (
     "encoding/json"
     "fmt"
     "net/http"
+    "strings"
 )
 
 // AnthropicProvider implements the Provider interface for Anthropic's Claude
@@ -23,6 +24,27 @@ type AnthropicClient struct {
 // AnthropicMessage adapts Anthropic's message format to our Message interface
 type AnthropicMessage struct {
     Msg AnthropicAPIMessage
+}
+
+// AnthropicToolCall implements the ToolCall interface for Anthropic tool calls
+type AnthropicToolCall struct {
+    block AnthropicContent
+}
+
+func (t *AnthropicToolCall) GetName() string {
+    return t.block.Name
+}
+
+func (t *AnthropicToolCall) GetArguments() map[string]interface{} {
+    var args map[string]interface{}
+    if err := json.Unmarshal(t.block.Input, &args); err != nil {
+        return nil
+    }
+    return args
+}
+
+func (t *AnthropicToolCall) GetID() string {
+    return t.block.ID
 }
 
 // Internal Anthropic API types
@@ -88,7 +110,7 @@ func (m *AnthropicMessage) GetContent() string {
             content += block.Text + "\n"
         }
     }
-    return content
+    return strings.TrimSpace(content)
 }
 
 func (m *AnthropicMessage) GetToolCalls() []ToolCall {
@@ -101,28 +123,17 @@ func (m *AnthropicMessage) GetToolCalls() []ToolCall {
     return calls
 }
 
-type AnthropicToolCall struct {
-    block AnthropicContent
-}
-
-func (t *AnthropicToolCall) GetName() string {
-    return t.block.Name
-}
-
-func (t *AnthropicToolCall) GetArguments() map[string]interface{} {
-    var args map[string]interface{}
-    if err := json.Unmarshal(t.block.Input, &args); err != nil {
-        return nil
-    }
-    return args
-}
-
-func (t *AnthropicToolCall) GetID() string {
-    return t.block.ID
-}
-
 func (m *AnthropicMessage) GetUsage() (int, int) {
     return m.Msg.Usage.InputTokens, m.Msg.Usage.OutputTokens
+}
+
+func (m *AnthropicMessage) GetToolCallID() string {
+    for _, block := range m.Msg.Content {
+        if block.Type == "tool_result" {
+            return block.ToolUseID
+        }
+    }
+    return ""
 }
 
 // NewAnthropicProvider creates a new Anthropic provider
@@ -142,7 +153,7 @@ func (p *AnthropicProvider) CreateMessage(ctx context.Context, prompt string, me
     for i, msg := range messages {
         content := []AnthropicContent{{
             Type: "text",
-            Text: msg.GetContent(),
+            Text: strings.TrimSpace(msg.GetContent()),
         }}
         
         // Add tool calls if present
@@ -207,6 +218,41 @@ func (p *AnthropicProvider) SupportsTools() bool {
 
 func (p *AnthropicProvider) Name() string {
     return "anthropic"
+}
+
+func (p *AnthropicProvider) CreateToolResponse(toolCallID string, content interface{}) (Message, error) {
+    // Convert content to string if needed
+    var contentStr string
+    switch v := content.(type) {
+    case string:
+        contentStr = v
+    default:
+        // Marshal other types to JSON
+        bytes, err := json.Marshal(v)
+        if err != nil {
+            return nil, fmt.Errorf("error marshaling tool response: %w", err)
+        }
+        contentStr = string(bytes)
+    }
+
+    // Create a tool result message
+    return &AnthropicMessage{
+        Msg: AnthropicAPIMessage{
+            Role: "assistant",
+            Content: []AnthropicContent{
+                {
+                    Type:      "tool_result",
+                    ToolUseID: toolCallID,
+                    Content: []AnthropicContent{
+                        {
+                            Type: "text",
+                            Text: contentStr,
+                        },
+                    },
+                },
+            },
+        },
+    }, nil
 }
 
 // Internal API methods

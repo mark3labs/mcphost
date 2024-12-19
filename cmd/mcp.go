@@ -251,11 +251,16 @@ func handleHelpCommand() {
 	markdown.WriteString("- **/history**: Display conversation history\n")
 	markdown.WriteString("- **/quit**: Exit the application\n")
 	markdown.WriteString("\nYou can also press Ctrl+C at any time to quit.\n")
-	markdown.WriteString("\n## Subcommands\n\n")
-	markdown.WriteString(
-		"- **ollama**: Use an Ollama model instead of Claude\n",
-	)
-	markdown.WriteString("  Example: `mcphost ollama --model mistral`\n")
+	
+	markdown.WriteString("\n## Available Models\n\n")
+	markdown.WriteString("Specify models using the --model or -m flag:\n\n")
+	markdown.WriteString("- **Anthropic Claude**: `anthropic:claude-3-5-sonnet-latest`\n")
+	markdown.WriteString("- **Ollama Models**: `ollama:modelname`\n")
+	markdown.WriteString("\nExamples:\n")
+	markdown.WriteString("```\n")
+	markdown.WriteString("mcphost -m anthropic:claude-3-5-sonnet-latest\n")
+	markdown.WriteString("mcphost -m ollama:qwen2.5:3b\n")
+	markdown.WriteString("```\n")
 
 	rendered, err := renderer.Render(markdown.String())
 	if err != nil {
