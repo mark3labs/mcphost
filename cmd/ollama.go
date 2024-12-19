@@ -2,10 +2,11 @@ package cmd
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
+
+	"github.com/mark3labs/mcphost/pkg/llm"
 
 	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/huh/spinner"
@@ -15,11 +16,6 @@ import (
 	api "github.com/ollama/ollama/api"
 	"github.com/spf13/cobra"
 )
-
-// F is a helper function to get a pointer to a value
-func F[T any](v T) *T {
-	return &v
-}
 
 var (
 	modelName string
@@ -54,11 +50,134 @@ func modelSupportsTools(client *api.Client, modelName string) bool {
 	return false
 }
 
+func runLLMPrompt(
+	provider llm.Provider,
+	mcpClients map[string]*mcpclient.StdioMCPClient,
+	tools []llm.Tool,
+	prompt string,
+	messages []llm.Message,
+) error {
+	if prompt != "" {
+		fmt.Printf("\n%s\n", promptStyle.Render("You: "+prompt))
+	}
+
+	var err error
+	var response llm.Message
+
+	action := func() {
+		response, err = provider.CreateMessage(
+			context.Background(),
+			prompt,
+			messages,
+			tools,
+		)
+	}
+
+	_ = spinner.New().Title("Thinking...").Action(action).Run()
+	if err != nil {
+		return err
+	}
+
+	fmt.Print(responseStyle.Render("\nAssistant: "))
+	if err := updateRenderer(); err != nil {
+		return fmt.Errorf("error updating renderer: %v", err)
+	}
+
+	rendered, err := renderer.Render(response.GetContent() + "\n")
+	if err != nil {
+		log.Error("Failed to render response", "error", err)
+		fmt.Print(response.GetContent() + "\n")
+	} else {
+		fmt.Print(rendered)
+	}
+
+	messages = append(messages, response)
+
+	// Handle tool calls
+	for _, toolCall := range response.GetToolCalls() {
+		log.Info("🔧 Using tool", "name", toolCall.GetName())
+
+		parts := strings.Split(toolCall.GetName(), "__")
+		if len(parts) != 2 {
+			fmt.Printf(
+				"Error: Invalid tool name format: %s\n",
+				toolCall.GetName(),
+			)
+			continue
+		}
+
+		serverName, toolName := parts[0], parts[1]
+		mcpClient, ok := mcpClients[serverName]
+		if !ok {
+			fmt.Printf("Error: Server not found: %s\n", serverName)
+			continue
+		}
+
+		var toolResult *mcp.CallToolResult
+		action := func() {
+			ctx, cancel := context.WithTimeout(
+				context.Background(),
+				10*time.Second,
+			)
+			defer cancel()
+
+			req := mcp.CallToolRequest{}
+			req.Params.Name = toolName
+			req.Params.Arguments = toolCall.GetArguments()
+			toolResult, err = mcpClient.CallTool(ctx, req)
+		}
+
+		_ = spinner.New().
+			Title(fmt.Sprintf("Running tool %s...", toolName)).
+			Action(action).
+			Run()
+
+		if err != nil {
+			fmt.Printf("\n%s\n", errorStyle.Render(
+				fmt.Sprintf("Error calling tool %s: %v", toolName, err),
+			))
+			continue
+		}
+
+		// Create a tool response message
+		toolResponseMsg := &llm.OllamaMessage{
+			Message: api.Message{
+				Role:    "tool",
+				Content: fmt.Sprintf("%v", toolResult.Content),
+			},
+		}
+		messages = append(messages, toolResponseMsg)
+
+		// Make another call to get the model's response to the tool result
+		return runLLMPrompt(provider, mcpClients, tools, "", messages)
+	}
+
+	fmt.Println() // Add spacing
+	return nil
+}
+
 func init() {
 	ollamaCmd.Flags().
 		StringVar(&modelName, "model", "", "Ollama model to use (required)")
 	_ = ollamaCmd.MarkFlagRequired("model")
 	rootCmd.AddCommand(ollamaCmd)
+}
+
+func mcpToolsToLLMTools(serverName string, mcpTools []mcp.Tool) []llm.Tool {
+	llmTools := make([]llm.Tool, len(mcpTools))
+	for i, tool := range mcpTools {
+		namespacedName := fmt.Sprintf("%s__%s", serverName, tool.Name)
+		llmTools[i] = llm.Tool{
+			Name:        namespacedName,
+			Description: tool.Description,
+			InputSchema: llm.Schema{
+				Type:       tool.InputSchema.Type,
+				Properties: tool.InputSchema.Properties,
+				Required:   tool.InputSchema.Required,
+			},
+		}
+	}
+	return llmTools
 }
 
 func mcpToolsToOllamaTools(serverName string, mcpTools []mcp.Tool) []api.Tool {
@@ -153,52 +272,46 @@ func runOllama() error {
 		}
 	}()
 
-	client, err := api.ClientFromEnvironment()
+	provider, err := llm.NewOllamaProvider(modelName)
 	if err != nil {
-		return fmt.Errorf("error creating Ollama client: %v", err)
+		return fmt.Errorf("error creating Ollama provider: %v", err)
 	}
 
-	var allTools []api.Tool
-	var activeClients map[string]*mcpclient.StdioMCPClient
-
-	if modelSupportsTools(client, modelName) {
-		activeClients = mcpClients // Use the full set of clients
-		for serverName, mcpClient := range mcpClients {
-			ctx, cancel := context.WithTimeout(
-				context.Background(),
-				10*time.Second,
-			)
-			toolsResult, err := mcpClient.ListTools(ctx, mcp.ListToolsRequest{})
-			cancel()
-
-			if err != nil {
-				log.Error(
-					"Error fetching tools",
-					"server",
-					serverName,
-					"error",
-					err,
-				)
-				continue
-			}
-
-			serverTools := mcpToolsToOllamaTools(serverName, toolsResult.Tools)
-			allTools = append(allTools, serverTools...)
-			log.Info(
-				"Tools loaded",
-				"server",
-				serverName,
-				"count",
-				len(toolsResult.Tools),
-			)
-		}
-	} else {
-		activeClients = nil // No active clients when tools are disabled
+	if !provider.SupportsTools() {
 		fmt.Printf("\n%s\n\n",
 			errorStyle.Render(fmt.Sprintf(
 				"Warning: Model %s does not support function calling. Tools will be disabled.",
 				modelName,
 			)),
+		)
+		mcpClients = nil // Disable tools
+	}
+
+	var allTools []llm.Tool
+	for serverName, mcpClient := range mcpClients {
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		toolsResult, err := mcpClient.ListTools(ctx, mcp.ListToolsRequest{})
+		cancel()
+
+		if err != nil {
+			log.Error(
+				"Error fetching tools",
+				"server",
+				serverName,
+				"error",
+				err,
+			)
+			continue
+		}
+
+		serverTools := mcpToolsToLLMTools(serverName, toolsResult.Tools)
+		allTools = append(allTools, serverTools...)
+		log.Info(
+			"Tools loaded",
+			"server",
+			serverName,
+			"count",
+			len(toolsResult.Tools),
 		)
 	}
 
@@ -207,13 +320,29 @@ func runOllama() error {
 	}
 
 	// Initialize messages with system prompt
-	messages := []api.Message{
-		{
+	var messages []llm.Message
+	messages = append(messages, &llm.OllamaMessage{
+		Message: api.Message{
 			Role: "system",
 			Content: `You are a helpful AI assistant with access to external tools. Respond directly to questions and requests.
 Only use tools when specifically needed to accomplish a task. If you can answer without using tools, do so.
 When you do need to use a tool, explain what you're doing first.`,
 		},
+	})
+
+	if len(messages) > 0 {
+		var ollamaMessages []api.Message
+		for _, msg := range messages {
+			if ollamaMsg, ok := msg.(*llm.OllamaMessage); ok {
+				ollamaMessages = append(ollamaMessages, ollamaMsg.Message)
+			}
+		}
+		pruned := pruneMessages(ollamaMessages)
+		newMessages := make([]llm.Message, len(pruned))
+		for i, msg := range pruned {
+			newMessages[i] = &llm.OllamaMessage{Message: msg}
+		}
+		messages = newMessages
 	}
 
 	// Main interaction loop
@@ -247,7 +376,7 @@ When you do need to use a tool, explain what you're doing first.`,
 		handled, err := handleSlashCommand(
 			prompt,
 			mcpConfig,
-			activeClients,
+			mcpClients,
 			messages,
 		)
 		if err != nil {
@@ -258,168 +387,23 @@ When you do need to use a tool, explain what you're doing first.`,
 		}
 
 		if len(messages) > 0 {
-			messages = pruneMessages(messages)
+			var ollamaMessages []api.Message
+			for _, msg := range messages {
+				if ollamaMsg, ok := msg.(*llm.OllamaMessage); ok {
+					ollamaMessages = append(ollamaMessages, ollamaMsg.Message)
+				}
+			}
+			pruned := pruneMessages(ollamaMessages)
+			newMessages := make([]llm.Message, len(pruned))
+			for i, msg := range pruned {
+				newMessages[i] = &llm.OllamaMessage{Message: msg}
+			}
+			messages = newMessages
 		}
-		err = runOllamaPrompt(client, mcpClients, allTools, prompt, &messages)
+
+		err = runLLMPrompt(provider, mcpClients, allTools, prompt, messages)
 		if err != nil {
 			return err
 		}
 	}
-}
-
-func runOllamaPrompt(
-	client *api.Client,
-	mcpClients map[string]*mcpclient.StdioMCPClient,
-	tools []api.Tool,
-	prompt string,
-	messages *[]api.Message,
-) error {
-	if prompt != "" {
-		fmt.Printf("\n%s\n", promptStyle.Render("You: "+prompt))
-		*messages = append(*messages, api.Message{
-			Role:    "user",
-			Content: prompt,
-		})
-	}
-
-	var err error
-	var responseContent string
-	var toolCalls []api.ToolCall
-
-	action := func() {
-		err = client.Chat(context.Background(), &api.ChatRequest{
-			Model:    modelName,
-			Messages: *messages,
-			Tools:    tools,
-			Stream:   F(false), // Disable streaming
-		}, func(response api.ChatResponse) error {
-			if response.Done {
-				responseContent = response.Message.Content
-				toolCalls = response.Message.ToolCalls
-				if len(toolCalls) > 0 && responseContent == "" {
-					responseContent = "Using tools..."
-				}
-				*messages = append(*messages, response.Message)
-			}
-			return nil
-		})
-	}
-
-	_ = spinner.New().Title("Thinking...").Action(action).Run()
-	if err != nil {
-		return err
-	}
-
-	// Print the response
-	if err := updateRenderer(); err != nil {
-		return fmt.Errorf("error updating renderer: %v", err)
-	}
-
-	fmt.Print(responseStyle.Render("\nAssistant: "))
-	rendered, err := renderer.Render(responseContent + "\n")
-	if err != nil {
-		log.Error("Failed to render response", "error", err)
-		fmt.Print(responseContent + "\n")
-	} else {
-		fmt.Print(rendered)
-	}
-
-	// Handle tool calls if present
-	if len(toolCalls) > 0 {
-		for _, toolCall := range toolCalls {
-			log.Info(
-				"🔧 Using tool",
-				"name",
-				toolCall.Function.Name,
-			)
-
-			parts := strings.Split(toolCall.Function.Name, "__")
-			if len(parts) != 2 {
-				fmt.Printf(
-					"Error: Invalid tool name format: %s\n",
-					toolCall.Function.Name,
-				)
-				continue
-			}
-
-			serverName, toolName := parts[0], parts[1]
-			mcpClient, ok := mcpClients[serverName]
-			if !ok {
-				fmt.Printf("Error: Server not found: %s\n", serverName)
-				continue
-			}
-
-			var toolResultPtr *mcp.CallToolResult
-			action := func() {
-				ctx, cancel := context.WithTimeout(
-					context.Background(),
-					10*time.Second,
-				)
-				defer cancel()
-
-				req := mcp.CallToolRequest{}
-				req.Params.Name = toolName
-				req.Params.Arguments = toolCall.Function.Arguments
-				toolResultPtr, err = mcpClient.CallTool(
-					ctx,
-					req,
-				)
-			}
-			_ = spinner.New().
-				Title(fmt.Sprintf("Running tool %s...", toolName)).
-				Action(action).
-				Run()
-
-			if err != nil {
-				errMsg := fmt.Sprintf(
-					"Error calling tool %s: %v",
-					toolName,
-					err,
-				)
-				fmt.Printf("\n%s\n", errorStyle.Render(errMsg))
-
-				// Add error message directly to messages array as JSON string
-				*messages = append(*messages, api.Message{
-					Role:    "tool",
-					Content: fmt.Sprintf(`{"error": "%s"}`, errMsg),
-				})
-				continue
-			}
-
-			toolResult := *toolResultPtr
-			// Check if there's an error in the tool result
-			if toolResult.IsError {
-				errMsg := fmt.Sprintf("Tool error: %v", toolResult.Result)
-				fmt.Printf("\n%s\n", errorStyle.Render(errMsg))
-				*messages = append(*messages, api.Message{
-					Role:    "tool",
-					Content: fmt.Sprintf(`{"error": %q}`, errMsg),
-				})
-				continue
-			}
-
-			// Convert the tool result to a proper JSON string
-			var resultContent string
-			jsonBytes, err := json.Marshal(toolResult)
-			if err != nil {
-				errMsg := fmt.Sprintf("Error marshaling tool result: %v", err)
-				fmt.Printf("\n%s\n", errorStyle.Render(errMsg))
-				resultContent = fmt.Sprintf(`{"error": %q}`, errMsg)
-			} else {
-				resultContent = string(jsonBytes)
-			}
-
-			*messages = append(*messages, api.Message{
-				Role:    "tool",
-				Content: resultContent,
-			})
-
-		}
-
-		// Make another call to get Ollama's response to the tool results
-		return runOllamaPrompt(client, mcpClients, tools, "", messages)
-	}
-
-	fmt.Println() // Add spacing
-	return nil
 }

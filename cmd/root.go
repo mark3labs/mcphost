@@ -12,14 +12,31 @@ import (
 	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/huh/spinner"
 	"github.com/charmbracelet/log"
-	"github.com/ollama/ollama/api"
 
 	"github.com/charmbracelet/glamour"
 	mcpclient "github.com/mark3labs/mcp-go/client"
 	"github.com/mark3labs/mcp-go/mcp"
+	"github.com/mark3labs/mcphost/pkg/llm"
+	"github.com/ollama/ollama/api"
 	"github.com/spf13/cobra"
 	"golang.org/x/term"
 )
+
+func convertAnthropicContentToContentBlock(content []llm.AnthropicContent) []ContentBlock {
+	blocks := make([]ContentBlock, len(content))
+	for i, block := range content {
+		blocks[i] = ContentBlock{
+			Type:      block.Type,
+			Text:      block.Text,
+			ID:        block.ID,
+			ToolUseID: block.ToolUseID,
+			Name:      block.Name,
+			Input:     block.Input,
+			Content:   block.Content,
+		}
+	}
+	return blocks
+}
 
 var (
 	renderer *glamour.TermRenderer
@@ -179,9 +196,9 @@ func updateRenderer() error {
 }
 
 func runPrompt(
-	client *AnthropicClient,
+	provider llm.Provider,
 	mcpClients map[string]*mcpclient.StdioMCPClient,
-	tools []Tool,
+	tools []llm.Tool,
 	prompt string,
 	messages *[]MessageParam,
 ) error {
@@ -200,21 +217,42 @@ func runPrompt(
 		)
 	}
 
-	var message *Message
+	var message llm.Message
 	var err error
 	backoff := initialBackoff
 	retries := 0
 
+	// Convert MessageParam to llm.Message for provider
+	llmMessages := make([]llm.Message, len(*messages))
+	for i, msg := range *messages {
+		anthropicContent := make([]llm.AnthropicContent, len(msg.Content))
+		for j, block := range msg.Content {
+			anthropicContent[j] = llm.AnthropicContent{
+				Type:      block.Type,
+				Text:      block.Text,
+				ID:        block.ID,
+				ToolUseID: block.ToolUseID,
+				Name:      block.Name,
+				Input:     block.Input,
+				Content:   block.Content,
+			}
+		}
+		
+		llmMessages[i] = &llm.AnthropicMessage{
+			Msg: llm.AnthropicAPIMessage{
+				Role:    msg.Role,
+				Content: anthropicContent,
+			},
+		}
+	}
+
 	for {
 		action := func() {
-			message, err = client.CreateMessage(
+			message, err = provider.CreateMessage(
 				context.Background(),
-				CreateMessageRequest{
-					Model:     "claude-3-5-sonnet-20240620",
-					MaxTokens: 4096,
-					Messages:  *messages,
-					Tools:     tools,
-				},
+				prompt,
+				llmMessages,
+				tools,
 			)
 		}
 		_ = spinner.New().Title("Thinking...").Action(action).Run()
@@ -253,7 +291,13 @@ func runPrompt(
 
 	toolResults := []ContentBlock{}
 
-	for _, block := range message.Content {
+	// Type assert to get the concrete AnthropicMessage type
+	anthropicMsg, ok := message.(*llm.AnthropicMessage)
+	if !ok {
+		return fmt.Errorf("unexpected message type: %T", message)
+	}
+
+	for _, block := range anthropicMsg.Msg.Content {
 		switch block.Type {
 		case "text":
 			if err := updateRenderer(); err != nil {
@@ -351,8 +395,8 @@ func runPrompt(
 	}
 
 	*messages = append(*messages, MessageParam{
-		Role:    "assistant",
-		Content: message.Content,
+		Role:    message.GetRole(),
+		Content: convertAnthropicContentToContentBlock(anthropicMsg.Msg.Content),
 	})
 
 	if len(toolResults) > 0 {
@@ -361,13 +405,14 @@ func runPrompt(
 			Content: toolResults,
 		})
 		// Make another call to get Claude's response to the tool results
-		return runPrompt(client, mcpClients, tools, "", messages)
+		return runPrompt(provider, mcpClients, tools, "", messages)
 	}
 
+	inputTokens, outputTokens := message.GetUsage()
 	log.Info("Usage statistics",
-		"input_tokens", message.Usage.InputTokens,
-		"output_tokens", message.Usage.OutputTokens,
-		"total_tokens", message.Usage.InputTokens+message.Usage.OutputTokens)
+		"input_tokens", inputTokens,
+		"output_tokens", outputTokens,
+		"total_tokens", inputTokens+outputTokens)
 
 	fmt.Println() // Add spacing
 	return nil
@@ -404,9 +449,9 @@ func runMCPHost() error {
 		log.Info("Server connected", "name", name)
 	}
 
-	client := NewAnthropicClient(apiKey)
+	provider := llm.NewAnthropicProvider(apiKey)
 
-	var allTools []Tool
+	var allTools []llm.Tool
 	for serverName, mcpClient := range mcpClients {
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		toolsResult, err := mcpClient.ListTools(ctx, mcp.ListToolsRequest{})
@@ -485,7 +530,7 @@ func runMCPHost() error {
 		if len(messages) > 0 {
 			messages = pruneMessages(messages)
 		}
-		err = runPrompt(client, mcpClients, allTools, prompt, &messages)
+		err = runPrompt(provider, mcpClients, allTools, prompt, &messages)
 		if err != nil {
 			return err
 		}

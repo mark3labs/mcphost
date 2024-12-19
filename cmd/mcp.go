@@ -17,6 +17,7 @@ import (
 
 	mcpclient "github.com/mark3labs/mcp-go/client"
 	"github.com/mark3labs/mcp-go/mcp"
+	"github.com/mark3labs/mcphost/pkg/llm"
 	api "github.com/ollama/ollama/api"
 )
 
@@ -71,16 +72,16 @@ type ServerConfig struct {
 func mcpToolsToAnthropicTools(
 	serverName string,
 	mcpTools []mcp.Tool,
-) []Tool {
-	anthropicTools := make([]Tool, len(mcpTools))
+) []llm.Tool {
+	anthropicTools := make([]llm.Tool, len(mcpTools))
 
 	for i, tool := range mcpTools {
 		namespacedName := fmt.Sprintf("%s__%s", serverName, tool.Name)
 
-		anthropicTools[i] = Tool{
+		anthropicTools[i] = llm.Tool{
 			Name:        namespacedName,
 			Description: tool.Description,
-			InputSchema: InputSchema{
+			InputSchema: llm.Schema{
 				Type:       tool.InputSchema.Type,
 				Properties: tool.InputSchema.Properties,
 				Required:   tool.InputSchema.Required,
