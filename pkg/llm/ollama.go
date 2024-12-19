@@ -75,32 +75,54 @@ func NewOllamaProvider(model string) (*OllamaProvider, error) {
 
 func (p *OllamaProvider) CreateMessage(ctx context.Context, prompt string, messages []Message, tools []Tool) (Message, error) {
     // Convert generic messages to Ollama format
-    ollamaMessages := make([]api.Message, len(messages))
-    for i, msg := range messages {
+    ollamaMessages := make([]api.Message, 0, len(messages)+1)
+    
+    // Add existing messages, filtering out tool-related messages
+    for _, msg := range messages {
+        // Skip empty messages and tool responses
+        if msg.GetContent() == "" || msg.GetRole() == "tool" {
+            continue
+        }
+        
         ollamaMsg := api.Message{
             Role:    msg.GetRole(),
             Content: msg.GetContent(),
         }
-
-        // Convert tool calls if present
-        for _, call := range msg.GetToolCalls() {
-            ollamaMsg.ToolCalls = append(ollamaMsg.ToolCalls, api.ToolCall{
-                Function: api.ToolCallFunction{
-                    Name:      call.GetName(),
-                    Arguments: call.GetArguments(),
-                },
-            })
+        
+        // Only add tool calls for assistant messages
+        if msg.GetRole() == "assistant" {
+            for _, call := range msg.GetToolCalls() {
+                if call.GetName() != "" { // Skip empty tool calls
+                    ollamaMsg.ToolCalls = append(ollamaMsg.ToolCalls, api.ToolCall{
+                        Function: api.ToolCallFunction{
+                            Name:      call.GetName(),
+                            Arguments: call.GetArguments(),
+                        },
+                    })
+                }
+            }
         }
-
-        ollamaMessages[i] = ollamaMsg
+        
+        ollamaMessages = append(ollamaMessages, ollamaMsg)
     }
 
-    // Add the new prompt
+    // Add the new prompt if not empty
     if prompt != "" {
         ollamaMessages = append(ollamaMessages, api.Message{
             Role:    "user",
             Content: prompt,
         })
+    }
+
+    // Ensure we have a system message at the start
+    if len(ollamaMessages) == 0 || ollamaMessages[0].Role != "system" {
+        systemMsg := api.Message{
+            Role: "system",
+            Content: `You are a helpful AI assistant. Respond directly and naturally to questions and requests.
+Keep track of the conversation context and previous information shared by the user.
+Only use tools when specifically needed to accomplish a task.`,
+        }
+        ollamaMessages = append([]api.Message{systemMsg}, ollamaMessages...)
     }
 
     // Convert tools to Ollama format
@@ -124,6 +146,16 @@ func (p *OllamaProvider) CreateMessage(ctx context.Context, prompt string, messa
         }
     }
 
+    // Only make the API call if we have messages
+    if len(ollamaMessages) == 0 {
+        return &OllamaMessage{
+            Message: api.Message{
+                Role:    "assistant",
+                Content: "I don't have any context to respond to. Could you please provide a message or question?",
+            },
+        }, nil
+    }
+
     var response api.Message
     err := p.client.Chat(ctx, &api.ChatRequest{
         Model:    p.model,
@@ -140,6 +172,15 @@ func (p *OllamaProvider) CreateMessage(ctx context.Context, prompt string, messa
     if err != nil {
         return nil, err
     }
+
+    // Clean up any empty tool calls in the response
+    var cleanToolCalls []api.ToolCall
+    for _, call := range response.ToolCalls {
+        if call.Function.Name != "" {
+            cleanToolCalls = append(cleanToolCalls, call)
+        }
+    }
+    response.ToolCalls = cleanToolCalls
 
     return &OllamaMessage{Message: response}, nil
 }
