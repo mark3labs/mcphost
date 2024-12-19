@@ -4,6 +4,7 @@ import (
     "context"
     "encoding/json"
     "fmt"
+    "time"
     api "github.com/ollama/ollama/api"
     "strings"
 )
@@ -31,7 +32,7 @@ func (m *OllamaMessage) GetContent() string {
 func (m *OllamaMessage) GetToolCalls() []ToolCall {
     var calls []ToolCall
     for _, call := range m.Message.ToolCalls {
-        calls = append(calls, &OllamaToolCall{call})
+        calls = append(calls, NewOllamaToolCall(call))
     }
     return calls
 }
@@ -40,13 +41,25 @@ func (m *OllamaMessage) GetUsage() (int, int) {
     return 0, 0 // Ollama doesn't provide token usage info
 }
 
-func (m *OllamaMessage) GetToolCallID() string {
+func (m *OllamaMessage) IsToolResponse() bool {
+    return m.Message.Role == "tool"
+}
+
+func (m *OllamaMessage) GetToolResponseID() string {
     return m.ToolCallID
 }
 
 // OllamaToolCall adapts Ollama's tool call format
 type OllamaToolCall struct {
     call api.ToolCall
+    id   string // Store a unique ID for the tool call
+}
+
+func NewOllamaToolCall(call api.ToolCall) *OllamaToolCall {
+    return &OllamaToolCall{
+        call: call,
+        id:   fmt.Sprintf("tc_%s_%d", call.Function.Name, time.Now().UnixNano()),
+    }
 }
 
 func (t *OllamaToolCall) GetName() string {
@@ -58,7 +71,7 @@ func (t *OllamaToolCall) GetArguments() map[string]interface{} {
 }
 
 func (t *OllamaToolCall) GetID() string {
-    return t.call.Function.Name // Use function name as ID since Ollama doesn't have tool call IDs
+    return t.id
 }
 
 // NewOllamaProvider creates a new Ollama provider
@@ -201,13 +214,11 @@ func (p *OllamaProvider) Name() string {
 }
 
 func (p *OllamaProvider) CreateToolResponse(toolCallID string, content interface{}) (Message, error) {
-    // Convert content to string if needed
-    var contentStr string
+    contentStr := ""
     switch v := content.(type) {
     case string:
         contentStr = v
     default:
-        // Marshal other types to JSON
         bytes, err := json.Marshal(v)
         if err != nil {
             return nil, fmt.Errorf("error marshaling tool response: %w", err)
@@ -215,7 +226,6 @@ func (p *OllamaProvider) CreateToolResponse(toolCallID string, content interface
         contentStr = string(bytes)
     }
 
-    // Create a tool response message
     return &OllamaMessage{
         Message: api.Message{
             Role:    "tool",

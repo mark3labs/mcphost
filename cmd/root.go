@@ -22,22 +22,6 @@ import (
 	"golang.org/x/term"
 )
 
-func convertAnthropicContentToContentBlock(content []llm.AnthropicContent) []ContentBlock {
-	blocks := make([]ContentBlock, len(content))
-	for i, block := range content {
-		blocks[i] = ContentBlock{
-			Type:      block.Type,
-			Text:      block.Text,
-			ID:        block.ID,
-			ToolUseID: block.ToolUseID,
-			Name:      block.Name,
-			Input:     block.Input,
-			Content:   block.Content,
-		}
-	}
-	return blocks
-}
-
 var (
 	renderer      *glamour.TermRenderer
 	configFile    string

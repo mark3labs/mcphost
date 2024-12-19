@@ -13,11 +13,14 @@ type Message interface {
 	// GetToolCalls returns any tool calls made in this message
 	GetToolCalls() []ToolCall
 	
+	// IsToolResponse returns true if this message is a response from a tool
+	IsToolResponse() bool
+	
+	// GetToolResponseID returns the ID of the tool call this message is responding to
+	GetToolResponseID() string
+	
 	// GetUsage returns token usage statistics if available
 	GetUsage() (input int, output int)
-	
-	// GetToolCallID returns the ID of the tool call this message is responding to (for tool responses)
-	GetToolCallID() string
 }
 
 // ToolCall represents a tool invocation

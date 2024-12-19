@@ -7,6 +7,7 @@ import (
     "fmt"
     "net/http"
     "strings"
+    "time"
 )
 
 // AnthropicProvider implements the Provider interface for Anthropic's Claude
@@ -29,6 +30,13 @@ type AnthropicMessage struct {
 // AnthropicToolCall implements the ToolCall interface for Anthropic tool calls
 type AnthropicToolCall struct {
     block AnthropicContent
+}
+
+func NewAnthropicToolCall(block AnthropicContent) *AnthropicToolCall {
+    if block.ID == "" {
+        block.ID = fmt.Sprintf("tc_%s_%d", block.Name, time.Now().UnixNano())
+    }
+    return &AnthropicToolCall{block: block}
 }
 
 func (t *AnthropicToolCall) GetName() string {
@@ -65,13 +73,13 @@ type AnthropicUsage struct {
 }
 
 type AnthropicContent struct {
-    Type     string          `json:"type"`
-    Text     string          `json:"text,omitempty"`
-    ID       string          `json:"id,omitempty"`
-    ToolUseID string         `json:"tool_use_id,omitempty"`
-    Name     string          `json:"name,omitempty"`
-    Input    json.RawMessage `json:"input,omitempty"`
-    Content  interface{}     `json:"content,omitempty"`
+    Type      string          `json:"type"`
+    Text      string          `json:"text,omitempty"`
+    ID        string          `json:"id,omitempty"`
+    ToolUseID string          `json:"tool_use_id,omitempty"`
+    Name      string          `json:"name,omitempty"`
+    Input     json.RawMessage `json:"input,omitempty"`
+    Content   interface{}     `json:"content,omitempty"`  // Can be string for tool results
 }
 
 type AnthropicMessageParam struct {
@@ -117,7 +125,7 @@ func (m *AnthropicMessage) GetToolCalls() []ToolCall {
     var calls []ToolCall
     for _, block := range m.Msg.Content {
         if block.Type == "tool_use" {
-            calls = append(calls, &AnthropicToolCall{block})
+            calls = append(calls, NewAnthropicToolCall(block))
         }
     }
     return calls
@@ -127,7 +135,16 @@ func (m *AnthropicMessage) GetUsage() (int, int) {
     return m.Msg.Usage.InputTokens, m.Msg.Usage.OutputTokens
 }
 
-func (m *AnthropicMessage) GetToolCallID() string {
+func (m *AnthropicMessage) IsToolResponse() bool {
+    for _, block := range m.Msg.Content {
+        if block.Type == "tool_result" {
+            return true
+        }
+    }
+    return false
+}
+
+func (m *AnthropicMessage) GetToolResponseID() string {
     for _, block := range m.Msg.Content {
         if block.Type == "tool_result" {
             return block.ToolUseID
@@ -149,8 +166,9 @@ func NewAnthropicProvider(apiKey string) *AnthropicProvider {
 
 func (p *AnthropicProvider) CreateMessage(ctx context.Context, prompt string, messages []Message, tools []Tool) (Message, error) {
     // Convert generic messages to Anthropic format
-    anthropicMessages := make([]AnthropicMessageParam, len(messages))
-    for i, msg := range messages {
+    anthropicMessages := make([]AnthropicMessageParam, 0, len(messages))
+    
+    for _, msg := range messages {
         content := []AnthropicContent{{
             Type: "text",
             Text: strings.TrimSpace(msg.GetContent()),
@@ -167,13 +185,27 @@ func (p *AnthropicProvider) CreateMessage(ctx context.Context, prompt string, me
             })
         }
 
-        anthropicMessages[i] = AnthropicMessageParam{
-            Role:    msg.GetRole(),
-            Content: content,
+        // Handle tool responses
+        if msg.IsToolResponse() {
+            content = []AnthropicContent{{
+                Type:      "tool_result",
+                ToolUseID: msg.GetToolResponseID(),
+                Content: []AnthropicContent{{
+                    Type: "text",
+                    Text: msg.GetContent(),
+                }},
+            }}
+        }
+
+        if len(content) > 0 {
+            anthropicMessages = append(anthropicMessages, AnthropicMessageParam{
+                Role:    msg.GetRole(),
+                Content: content,
+            })
         }
     }
 
-    // Add the new prompt
+    // Add the new prompt if provided
     if prompt != "" {
         anthropicMessages = append(anthropicMessages, AnthropicMessageParam{
             Role: "user",
@@ -227,7 +259,6 @@ func (p *AnthropicProvider) CreateToolResponse(toolCallID string, content interf
     case string:
         contentStr = v
     default:
-        // Marshal other types to JSON
         bytes, err := json.Marshal(v)
         if err != nil {
             return nil, fmt.Errorf("error marshaling tool response: %w", err)
@@ -235,22 +266,17 @@ func (p *AnthropicProvider) CreateToolResponse(toolCallID string, content interf
         contentStr = string(bytes)
     }
 
-    // Create a tool result message
     return &AnthropicMessage{
         Msg: AnthropicAPIMessage{
             Role: "assistant",
-            Content: []AnthropicContent{
-                {
-                    Type:      "tool_result",
-                    ToolUseID: toolCallID,
-                    Content: []AnthropicContent{
-                        {
-                            Type: "text",
-                            Text: contentStr,
-                        },
-                    },
-                },
-            },
+            Content: []AnthropicContent{{
+                Type:      "tool_result",
+                ToolUseID: toolCallID,
+                Content: []AnthropicContent{{
+                    Type: "text",
+                    Text: contentStr,
+                }},
+            }},
         },
     }, nil
 }
