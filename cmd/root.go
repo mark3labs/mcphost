@@ -30,6 +30,7 @@ var (
 	configFile    string
 	messageWindow int
 	modelFlag     string // New flag for model selection
+	openaiBaseURL string // Base URL for OpenAI API
 )
 
 // Message types
@@ -122,6 +123,8 @@ func init() {
 	// Add debug flag
 	rootCmd.PersistentFlags().
 		BoolVar(&debugMode, "debug", false, "enable debug logging")
+	rootCmd.PersistentFlags().
+		StringVar(&openaiBaseURL, "openai-url", "", "base URL for OpenAI API (defaults to api.openai.com)")
 }
 
 // Add new function to create provider
@@ -157,8 +160,7 @@ func createProvider(modelString string) (llm.Provider, error) {
 				"OPENAI_API_KEY environment variable not set",
 			)
 		}
-		baseURL := os.Getenv("OPENAI_API_BASE") // Optional custom endpoint
-		return openai.NewProvider(apiKey, baseURL, model), nil
+		return openai.NewProvider(apiKey, openaiBaseURL, model), nil
 
 	default:
 		return nil, fmt.Errorf("unsupported provider: %s", provider)
