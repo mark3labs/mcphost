@@ -19,6 +19,7 @@ import (
 	"github.com/mark3labs/mcphost/pkg/history"
 	"github.com/mark3labs/mcphost/pkg/llm"
 	"github.com/mark3labs/mcphost/pkg/llm/anthropic"
+	"github.com/mark3labs/mcphost/pkg/llm/ollama"
 	"github.com/spf13/cobra"
 	"golang.org/x/term"
 )
@@ -144,7 +145,7 @@ func createProvider(modelString string) (llm.Provider, error) {
 		return anthropic.NewProvider(apiKey), nil
 
 	case "ollama":
-		return llm.NewOllamaProvider(model)
+		return ollama.NewProvider(model)
 
 	default:
 		return nil, fmt.Errorf("unsupported provider: %s", provider)
