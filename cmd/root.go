@@ -33,50 +33,6 @@ var (
 	openaiBaseURL string // Base URL for OpenAI API
 )
 
-// Message types
-type simpleMessage struct {
-	role           string
-	content        string
-	toolID         string
-	isToolResponse bool
-	toolCalls      []history.ContentBlock
-}
-
-func (m *simpleMessage) GetRole() string    { return m.role }
-func (m *simpleMessage) GetContent() string { return m.content }
-func (m *simpleMessage) GetToolCalls() []llm.ToolCall {
-	var calls []llm.ToolCall
-	for _, block := range m.toolCalls {
-		if block.Type == "tool_use" {
-			calls = append(calls, &toolCall{
-				id:   block.ID,
-				name: block.Name,
-				args: block.Input,
-			})
-		}
-	}
-	return calls
-}
-func (m *simpleMessage) IsToolResponse() bool      { return m.isToolResponse }
-func (m *simpleMessage) GetToolResponseID() string { return m.toolID }
-func (m *simpleMessage) GetUsage() (int, int)      { return 0, 0 }
-
-type toolCall struct {
-	id   string
-	name string
-	args json.RawMessage
-}
-
-func (t *toolCall) GetID() string   { return t.id }
-func (t *toolCall) GetName() string { return t.name }
-func (t *toolCall) GetArguments() map[string]interface{} {
-	var args map[string]interface{}
-	if err := json.Unmarshal(t.args, &args); err != nil {
-		return make(map[string]interface{})
-	}
-	return args
-}
-
 const (
 	initialBackoff = 1 * time.Second
 	maxBackoff     = 30 * time.Second
@@ -320,8 +276,6 @@ func runPrompt(
 		break
 	}
 
-	toolResults := []history.ContentBlock{}
-
 	var messageContent []history.ContentBlock
 
 	// Handle the message response
@@ -329,7 +283,7 @@ func runPrompt(
 		fmt.Print(str)
 	}
 
-	toolResults = []history.ContentBlock{}
+	toolResults := []history.ContentBlock{}
 	messageContent = []history.ContentBlock{}
 
 	// Add text content
