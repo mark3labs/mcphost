@@ -3,10 +3,9 @@ package anthropic
 import (
 	"context"
 	"encoding/json"
-	"fmt"
-	"log"
-	"strings"
 
+	"github.com/charmbracelet/log"
+	"github.com/mark3labs/mcphost/pkg/history"
 	"github.com/mark3labs/mcphost/pkg/llm"
 )
 
@@ -32,10 +31,11 @@ func (p *Provider) CreateMessage(
 	anthropicMessages := make([]MessageParam, 0, len(messages))
 
 	for _, msg := range messages {
-		content := []ContentBlock{{
-			Type: "text",
-			Text: strings.TrimSpace(msg.GetContent()),
-		}}
+		// content := []ContentBlock{{
+		// 	Type: "text",
+		// 	Text: strings.TrimSpace(msg.GetContent()),
+		// }}
+		content := []ContentBlock{}
 
 		// Add tool calls if present
 		for _, call := range msg.GetToolCalls() {
@@ -50,14 +50,40 @@ func (p *Provider) CreateMessage(
 
 		// Handle tool responses
 		if msg.IsToolResponse() {
-			log.Printf("Debug - Tool Response ID: %s", msg.GetToolResponseID())
-			log.Printf("Debug - Tool Response Content: %v", msg.GetContent())
-			content = []ContentBlock{{
-				Type:      "tool_result",
-				ToolUseID: msg.GetToolResponseID(),
-				Content:   msg.GetContent(), // Just use the string content directly
-			}}
-			log.Printf("Debug - Created Content Block: %+v", content[0])
+			if historyMsg, ok := msg.(*history.HistoryMessage); ok {
+				log.Debug(
+					"processing history message content",
+					"content",
+					historyMsg.Content,
+				)
+				for _, block := range historyMsg.Content {
+					if block.Type == "tool_result" {
+						toolBlock := ContentBlock{
+							Type:      "tool_result",
+							ToolUseID: block.ToolUseID,
+							Content:   block.Content,
+						}
+						content = append(content, toolBlock)
+						log.Debug(
+							"created tool result block",
+							"block",
+							toolBlock,
+						)
+					}
+				}
+			} else {
+				// Fallback to simple content handling
+				log.Debug("handling non-history tool response",
+					"id", msg.GetToolResponseID(),
+					"content", msg.GetContent())
+
+				content = []ContentBlock{{
+					Type:      "tool_result",
+					ToolUseID: msg.GetToolResponseID(),
+					Content:   msg.GetContent(),
+				}}
+				log.Debug("created fallback tool result block", "block", content[0])
+			}
 		}
 
 		if len(content) > 0 {
@@ -119,30 +145,46 @@ func (p *Provider) CreateToolResponse(
 	toolCallID string,
 	content interface{},
 ) (llm.Message, error) {
-	// Convert content to string if needed
-	var contentStr string
-	switch v := content.(type) {
-	case string:
-		contentStr = v
-	default:
-		bytes, err := json.Marshal(v)
-		if err != nil {
-			return nil, fmt.Errorf("error marshaling tool response: %w", err)
+	log.Debug("creating tool response",
+		"toolCallID", toolCallID,
+		"content", content)
+
+	// If content is already a string, use it directly
+	if contentStr, ok := content.(string); ok {
+		msg := &Message{
+			Msg: APIMessage{
+				Role: "tool",
+				Content: []ContentBlock{{
+					Type:      "tool_result",
+					ToolUseID: toolCallID,
+					Content:   content,
+					Text:      contentStr,
+				}},
+			},
 		}
-		contentStr = string(bytes)
+		log.Debug("created tool response message", "message", msg)
+		return msg, nil
 	}
 
-	return &Message{
+	// For structured content, preserve both the original structure and a string representation
+	contentJSON, err := json.Marshal(content)
+	if err != nil {
+		log.Warn("failed to marshal content to JSON", "error", err)
+		// Still continue with the original content
+	}
+
+	msg := &Message{
 		Msg: APIMessage{
-			Role: "assistant",
+			Role: "tool",
 			Content: []ContentBlock{{
 				Type:      "tool_result",
 				ToolUseID: toolCallID,
-				Content: []ContentBlock{{
-					Type: "text",
-					Text: contentStr,
-				}},
+				Content:   content,             // Preserve original structure
+				Text:      string(contentJSON), // Add string representation
 			}},
 		},
-	}, nil
+	}
+
+	log.Debug("created tool response message", "message", msg)
+	return msg, nil
 }

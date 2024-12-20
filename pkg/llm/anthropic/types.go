@@ -2,8 +2,10 @@ package anthropic
 
 import (
 	"encoding/json"
+	"fmt"
 	"strings"
 
+	"github.com/charmbracelet/log"
 	"github.com/mark3labs/mcphost/pkg/llm"
 )
 
@@ -67,14 +69,53 @@ func (m *Message) GetRole() string {
 }
 
 func (m *Message) GetContent() string {
-	// Concatenate all text content blocks
-	var content string
-	for _, block := range m.Msg.Content {
+	log.Debug("getting content from message", "message", m)
+
+	var content []string
+	for i, block := range m.Msg.Content {
+		log.Debug("processing content block", "index", i, "block", block)
+
 		if block.Type == "text" {
-			content += block.Text + " "
+			log.Debug("adding text block", "text", block.Text)
+			content = append(content, block.Text)
+		} else if block.Type == "tool_result" {
+			log.Debug("processing tool result block", "block", block)
+
+			// Handle the content directly if it's a string
+			if contentStr, ok := block.Content.(string); ok {
+				content = append(content, contentStr)
+				continue
+			}
+
+			// Handle array of maps structure
+			if contentArray, ok := block.Content.([]interface{}); ok {
+				for _, item := range contentArray {
+					if contentMap, ok := item.(map[string]interface{}); ok {
+						if text, ok := contentMap["text"]; ok {
+							textStr := fmt.Sprintf("%v", text)
+							log.Debug("extracted text from content map", "text", textStr)
+							content = append(content, textStr)
+						}
+					} else {
+						// If it's not a map, try to convert it directly to string
+						textStr := fmt.Sprintf("%v", item)
+						log.Debug("extracted direct content", "text", textStr)
+						content = append(content, textStr)
+					}
+				}
+			}
+
+			// If we still haven't found content and have Text field, use it
+			if len(content) == 0 && block.Text != "" {
+				log.Debug("falling back to direct text", "text", block.Text)
+				content = append(content, block.Text)
+			}
 		}
 	}
-	return strings.TrimSpace(content)
+
+	result := strings.TrimSpace(strings.Join(content, " "))
+	log.Debug("final content result", "content", result)
+	return result
 }
 
 func (m *Message) GetToolCalls() []llm.ToolCall {

@@ -104,6 +104,8 @@ func Execute() {
 	}
 }
 
+var debugMode bool
+
 func init() {
 	rootCmd.PersistentFlags().
 		StringVar(&configFile, "config", "", "config file (default is $HOME/mcp.json)")
@@ -112,6 +114,10 @@ func init() {
 	rootCmd.PersistentFlags().
 		StringVarP(&modelFlag, "model", "m", "anthropic:claude-3-5-sonnet-latest",
 			"model to use (format: provider:model, e.g. anthropic:claude-3-5-sonnet-latest or ollama:qwen2.5:3b)")
+
+	// Add debug flag
+	rootCmd.PersistentFlags().
+		BoolVar(&debugMode, "debug", false, "enable debug logging")
 }
 
 // Add new function to create provider
@@ -413,42 +419,48 @@ func runPrompt(
 		}
 
 		toolResult := *toolResultPtr
-		// Add the tool result directly to messages array
-		resultJSON, err := json.Marshal(toolResult.Content)
-		if err != nil {
-			errMsg := fmt.Sprintf("Error marshaling tool result: %v", err)
-			fmt.Printf("\n%s\n", errorStyle.Render(errMsg))
-			continue
-		}
 
-		// Parse the tool result
-		var resultText string
-		var parsedResult struct {
-			Type string `json:"type"`
-			Text string `json:"text"`
-		}
+		if toolResult.Content != nil {
+			log.Debug("raw tool result content", "content", toolResult.Content)
 
-		if err := json.Unmarshal(resultJSON, &parsedResult); err != nil {
-			// If we can't parse it as expected format, use error message
-			errMsg := fmt.Sprintf("Error parsing tool result: %v", err)
-			fmt.Printf("\n%s\n", errorStyle.Render(errMsg))
-			resultText = errMsg
-		} else {
-			if parsedResult.Type != "text" {
-				errMsg := fmt.Sprintf("Unsupported tool result type: %s", parsedResult.Type)
-				log.Warn(errMsg)
-				resultText = errMsg
-			} else {
-				resultText = parsedResult.Text
+			// Create the tool result block
+			resultBlock := history.ContentBlock{
+				Type:      "tool_result",
+				ToolUseID: toolCall.GetID(),
+				Content:   toolResult.Content,
 			}
-		}
 
-		toolResults = append(toolResults, history.ContentBlock{
-			Type:      "tool_result",
-			ToolUseID: toolCall.GetID(),
-			Content:   resultText,
-		})
-		log.Printf("Debug - Created Tool Result Block: %+v", toolResults[len(toolResults)-1])
+			// Since we know toolResult.Content is []interface{}, handle it directly
+			for _, item := range toolResult.Content {
+				switch content := item.(type) {
+				case map[string]interface{}:
+					if text, ok := content["text"]; ok {
+						resultBlock.Text = fmt.Sprintf("%v", text)
+						log.Debug("extracted text from content map", "text", resultBlock.Text)
+						break // Use first text found
+					}
+				case string:
+					// Try to parse string as JSON
+					var parsedContent interface{}
+					if err := json.Unmarshal([]byte(content), &parsedContent); err == nil {
+						log.Debug("parsed string content as JSON", "parsed", parsedContent)
+						if contentMap, ok := parsedContent.(map[string]interface{}); ok {
+							if text, ok := contentMap["text"]; ok {
+								resultBlock.Text = fmt.Sprintf("%v", text)
+								log.Debug("extracted text from parsed content", "text", resultBlock.Text)
+							}
+						}
+					} else {
+						// Use string content directly
+						resultBlock.Text = content
+						log.Debug("using string content directly", "text", content)
+					}
+				}
+			}
+
+			toolResults = append(toolResults, resultBlock)
+			log.Debug("created tool result block", "block", toolResults[len(toolResults)-1])
+		}
 	}
 
 	*messages = append(*messages, history.HistoryMessage{
@@ -470,6 +482,16 @@ func runPrompt(
 }
 
 func runMCPHost() error {
+	// Set up logging based on debug flag
+	if debugMode {
+		log.SetLevel(log.DebugLevel)
+		// Enable caller information for debug logs
+		log.SetReportCaller(true)
+	} else {
+		log.SetLevel(log.InfoLevel)
+		log.SetReportCaller(false)
+	}
+
 	// Create the provider based on the model flag
 	provider, err := createProvider(modelFlag)
 	if err != nil {
