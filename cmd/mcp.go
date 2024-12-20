@@ -251,7 +251,7 @@ func handleHelpCommand() {
 	markdown.WriteString("- **/history**: Display conversation history\n")
 	markdown.WriteString("- **/quit**: Exit the application\n")
 	markdown.WriteString("\nYou can also press Ctrl+C at any time to quit.\n")
-	
+
 	markdown.WriteString("\n## Available Models\n\n")
 	markdown.WriteString("Specify models using the --model or -m flag:\n\n")
 	markdown.WriteString("- **Anthropic Claude**: `anthropic:claude-3-5-sonnet-latest`\n")

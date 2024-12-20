@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	
+
 	"github.com/mark3labs/mcphost/pkg/llm"
 )
 
@@ -21,7 +21,6 @@ func NewAnthropicClient(apiKey string) *AnthropicClient {
 		client: &http.Client{},
 	}
 }
-
 
 type Message struct {
 	ID           string         `json:"id"`
@@ -60,7 +59,7 @@ type CreateMessageRequest struct {
 	Model     string         `json:"model"`
 	Messages  []MessageParam `json:"messages"`
 	MaxTokens int            `json:"max_tokens"`
-	Tools     []llm.Tool    `json:"tools,omitempty"`
+	Tools     []llm.Tool     `json:"tools,omitempty"`
 }
 
 func (c *AnthropicClient) CreateMessage(ctx context.Context, req CreateMessageRequest) (*Message, error) {
