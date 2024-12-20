@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/mark3labs/mcphost/pkg/llm"
@@ -49,14 +50,14 @@ func (p *Provider) CreateMessage(
 
 		// Handle tool responses
 		if msg.IsToolResponse() {
+			log.Printf("Debug - Tool Response ID: %s", msg.GetToolResponseID())
+			log.Printf("Debug - Tool Response Content: %v", msg.GetContent())
 			content = []ContentBlock{{
 				Type:      "tool_result",
 				ToolUseID: msg.GetToolResponseID(),
-				Content: []ContentBlock{{
-					Type: "text",
-					Text: msg.GetContent(),
-				}},
+				Content:   msg.GetContent(), // Just use the string content directly
 			}}
+			log.Printf("Debug - Created Content Block: %+v", content[0])
 		}
 
 		if len(content) > 0 {

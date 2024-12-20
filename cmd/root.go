@@ -16,9 +16,9 @@ import (
 	"github.com/charmbracelet/glamour"
 	mcpclient "github.com/mark3labs/mcp-go/client"
 	"github.com/mark3labs/mcp-go/mcp"
+	"github.com/mark3labs/mcphost/pkg/history"
 	"github.com/mark3labs/mcphost/pkg/llm"
 	"github.com/mark3labs/mcphost/pkg/llm/anthropic"
-	"github.com/ollama/ollama/api"
 	"github.com/spf13/cobra"
 	"golang.org/x/term"
 )
@@ -36,7 +36,7 @@ type simpleMessage struct {
 	content        string
 	toolID         string
 	isToolResponse bool
-	toolCalls      []ContentBlock
+	toolCalls      []history.ContentBlock
 }
 
 func (m *simpleMessage) GetRole() string    { return m.role }
@@ -145,7 +145,7 @@ func createProvider(modelString string) (llm.Provider, error) {
 	}
 }
 
-func pruneMessages[T MessageParam | api.Message](messages []T) []T {
+func pruneMessages(messages []history.HistoryMessage) []history.HistoryMessage {
 	if len(messages) <= messageWindow {
 		return messages
 	}
@@ -153,95 +153,53 @@ func pruneMessages[T MessageParam | api.Message](messages []T) []T {
 	// Keep only the most recent messages based on window size
 	messages = messages[len(messages)-messageWindow:]
 
-	switch any(messages[0]).(type) {
-	case MessageParam:
-		// Handle Anthropic messages
-		toolUseIds := make(map[string]bool)
-		toolResultIds := make(map[string]bool)
+	// Handle messages
+	toolUseIds := make(map[string]bool)
+	toolResultIds := make(map[string]bool)
 
-		// First pass: collect all tool use and result IDs
-		for _, msg := range messages {
-			m := any(msg).(MessageParam)
-			for _, block := range m.Content {
-				if block.Type == "tool_use" {
-					toolUseIds[block.ID] = true
-				} else if block.Type == "tool_result" {
-					toolResultIds[block.ToolUseID] = true
-				}
+	// First pass: collect all tool use and result IDs
+	for _, msg := range messages {
+		for _, block := range msg.Content {
+			if block.Type == "tool_use" {
+				toolUseIds[block.ID] = true
+			} else if block.Type == "tool_result" {
+				toolResultIds[block.ToolUseID] = true
 			}
 		}
-
-		// Second pass: filter out orphaned tool calls/results
-		var prunedMessages []T
-		for _, msg := range messages {
-			m := any(msg).(MessageParam)
-			var prunedBlocks []ContentBlock
-			for _, block := range m.Content {
-				keep := true
-				if block.Type == "tool_use" {
-					keep = toolResultIds[block.ID]
-				} else if block.Type == "tool_result" {
-					keep = toolUseIds[block.ToolUseID]
-				}
-				if keep {
-					prunedBlocks = append(prunedBlocks, block)
-				}
-			}
-			// Only include messages that have content or are not assistant messages
-			if (len(prunedBlocks) > 0 && m.Role == "assistant") || m.Role != "assistant" {
-				hasTextBlock := false
-				for _, block := range m.Content {
-					if block.Type == "text" {
-						hasTextBlock = true
-						break
-					}
-				}
-				if len(prunedBlocks) > 0 || hasTextBlock {
-					m.Content = prunedBlocks
-					prunedMessages = append(prunedMessages, any(m).(T))
-				}
-			}
-		}
-		return prunedMessages
-
-	case api.Message:
-		// Handle Ollama messages
-		var prunedMessages []T
-		for i, msg := range messages {
-			m := any(msg).(api.Message)
-
-			// If this message has tool calls, ensure we keep the next message (tool response)
-			if len(m.ToolCalls) > 0 {
-				if i+1 < len(messages) {
-					next := any(messages[i+1]).(api.Message)
-					if next.Role == "tool" {
-						prunedMessages = append(prunedMessages, msg)
-						prunedMessages = append(prunedMessages, messages[i+1])
-						continue
-					}
-				}
-				// If no matching tool response, skip this message
-				continue
-			}
-
-			// Skip tool responses that don't have a preceding tool call
-			if m.Role == "tool" {
-				if i > 0 {
-					prev := any(messages[i-1]).(api.Message)
-					if len(prev.ToolCalls) > 0 {
-						continue // Already handled in the tool call case
-					}
-				}
-				continue // Skip orphaned tool response
-			}
-
-			// Keep all other messages
-			prunedMessages = append(prunedMessages, msg)
-		}
-		return prunedMessages
 	}
 
-	return messages
+	// Second pass: filter out orphaned tool calls/results
+	var prunedMessages []history.HistoryMessage
+	for _, msg := range messages {
+		var prunedBlocks []history.ContentBlock
+		for _, block := range msg.Content {
+			keep := true
+			if block.Type == "tool_use" {
+				keep = toolResultIds[block.ID]
+			} else if block.Type == "tool_result" {
+				keep = toolUseIds[block.ToolUseID]
+			}
+			if keep {
+				prunedBlocks = append(prunedBlocks, block)
+			}
+		}
+		// Only include messages that have content or are not assistant messages
+		if (len(prunedBlocks) > 0 && msg.Role == "assistant") ||
+			msg.Role != "assistant" {
+			hasTextBlock := false
+			for _, block := range msg.Content {
+				if block.Type == "text" {
+					hasTextBlock = true
+					break
+				}
+			}
+			if len(prunedBlocks) > 0 || hasTextBlock {
+				msg.Content = prunedBlocks
+				prunedMessages = append(prunedMessages, msg)
+			}
+		}
+	}
+	return prunedMessages
 }
 
 func getTerminalWidth() int {
@@ -252,7 +210,7 @@ func getTerminalWidth() int {
 	return width - 20
 }
 
-func handleHistoryCommand(messages interface{}) {
+func handleHistoryCommand(messages []history.HistoryMessage) {
 	displayMessageHistory(messages)
 }
 
@@ -272,16 +230,16 @@ func runPrompt(
 	mcpClients map[string]*mcpclient.StdioMCPClient,
 	tools []llm.Tool,
 	prompt string,
-	messages *[]MessageParam,
+	messages *[]history.HistoryMessage,
 ) error {
 	// Display the user's prompt if it's not empty (i.e., not a tool response)
 	if prompt != "" {
 		fmt.Printf("\n%s\n", promptStyle.Render("You: "+prompt))
 		*messages = append(
 			*messages,
-			MessageParam{
+			history.HistoryMessage{
 				Role: "user",
-				Content: []ContentBlock{{
+				Content: []history.ContentBlock{{
 					Type: "text",
 					Text: prompt,
 				}},
@@ -295,42 +253,10 @@ func runPrompt(
 	retries := 0
 
 	// Convert MessageParam to llm.Message for provider
+	// Messages already implement llm.Message interface
 	llmMessages := make([]llm.Message, len(*messages))
-	for i, msg := range *messages {
-		var toolCalls []ContentBlock
-		var content string
-		var toolID string
-		isToolResponse := false
-
-		for _, block := range msg.Content {
-			switch block.Type {
-			case "text":
-				content = block.Text
-			case "tool_use":
-				toolCalls = append(toolCalls, block)
-			case "tool_result":
-				isToolResponse = true
-				toolID = block.ToolUseID
-				if str, ok := block.Content.(string); ok {
-					content = str
-				} else if blocks, ok := block.Content.([]ContentBlock); ok {
-					for _, b := range blocks {
-						if b.Type == "text" {
-							content = b.Text
-							break
-						}
-					}
-				}
-			}
-		}
-
-		llmMessages[i] = &simpleMessage{
-			role:           msg.Role,
-			content:        content,
-			toolID:         toolID,
-			isToolResponse: isToolResponse,
-			toolCalls:      toolCalls,
-		}
+	for i := range *messages {
+		llmMessages[i] = &(*messages)[i]
 	}
 
 	for {
@@ -372,17 +298,17 @@ func runPrompt(
 		break
 	}
 
-	toolResults := []ContentBlock{}
+	toolResults := []history.ContentBlock{}
 
-	var messageContent []ContentBlock
+	var messageContent []history.ContentBlock
 
 	// Handle the message response
 	if str, err := renderer.Render("\nAssistant: "); err == nil {
 		fmt.Print(str)
 	}
 
-	toolResults = []ContentBlock{}
-	messageContent = []ContentBlock{}
+	toolResults = []history.ContentBlock{}
+	messageContent = []history.ContentBlock{}
 
 	// Add text content
 	if message.GetContent() != "" {
@@ -396,7 +322,7 @@ func runPrompt(
 		} else {
 			fmt.Print(str)
 		}
-		messageContent = append(messageContent, ContentBlock{
+		messageContent = append(messageContent, history.ContentBlock{
 			Type: "text",
 			Text: message.GetContent(),
 		})
@@ -407,7 +333,7 @@ func runPrompt(
 		log.Info("🔧 Using tool", "name", toolCall.GetName())
 
 		input, _ := json.Marshal(toolCall.GetArguments())
-		messageContent = append(messageContent, ContentBlock{
+		messageContent = append(messageContent, history.ContentBlock{
 			Type:  "tool_use",
 			ID:    toolCall.GetID(),
 			Name:  toolCall.GetName(),
@@ -475,10 +401,10 @@ func runPrompt(
 			fmt.Printf("\n%s\n", errorStyle.Render(errMsg))
 
 			// Add error message as tool result
-			toolResults = append(toolResults, ContentBlock{
+			toolResults = append(toolResults, history.ContentBlock{
 				Type:      "tool_result",
 				ToolUseID: toolCall.GetID(),
-				Content: []ContentBlock{{
+				Content: []history.ContentBlock{{
 					Type: "text",
 					Text: errMsg,
 				}},
@@ -487,7 +413,7 @@ func runPrompt(
 		}
 
 		toolResult := *toolResultPtr
-		// Add the tool result directly to messages array as JSON string
+		// Add the tool result directly to messages array
 		resultJSON, err := json.Marshal(toolResult.Content)
 		if err != nil {
 			errMsg := fmt.Sprintf("Error marshaling tool result: %v", err)
@@ -495,23 +421,43 @@ func runPrompt(
 			continue
 		}
 
-		toolResults = append(toolResults, ContentBlock{
+		// Parse the tool result
+		var resultText string
+		var parsedResult struct {
+			Type string `json:"type"`
+			Text string `json:"text"`
+		}
+
+		if err := json.Unmarshal(resultJSON, &parsedResult); err != nil {
+			// If we can't parse it as expected format, use error message
+			errMsg := fmt.Sprintf("Error parsing tool result: %v", err)
+			fmt.Printf("\n%s\n", errorStyle.Render(errMsg))
+			resultText = errMsg
+		} else {
+			if parsedResult.Type != "text" {
+				errMsg := fmt.Sprintf("Unsupported tool result type: %s", parsedResult.Type)
+				log.Warn(errMsg)
+				resultText = errMsg
+			} else {
+				resultText = parsedResult.Text
+			}
+		}
+
+		toolResults = append(toolResults, history.ContentBlock{
 			Type:      "tool_result",
 			ToolUseID: toolCall.GetID(),
-			Content: []ContentBlock{{
-				Type: "text",
-				Text: string(resultJSON),
-			}},
+			Content:   resultText,
 		})
+		log.Printf("Debug - Created Tool Result Block: %+v", toolResults[len(toolResults)-1])
 	}
 
-	*messages = append(*messages, MessageParam{
+	*messages = append(*messages, history.HistoryMessage{
 		Role:    message.GetRole(),
 		Content: messageContent,
 	})
 
 	if len(toolResults) > 0 {
-		*messages = append(*messages, MessageParam{
+		*messages = append(*messages, history.HistoryMessage{
 			Role:    "user",
 			Content: toolResults,
 		})
@@ -593,7 +539,7 @@ func runMCPHost() error {
 		return fmt.Errorf("error initializing renderer: %v", err)
 	}
 
-	messages := make([]MessageParam, 0)
+	messages := make([]history.HistoryMessage, 0)
 
 	// Main interaction loop
 	for {
