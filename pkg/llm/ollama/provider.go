@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/log"
+	"github.com/mark3labs/mcphost/pkg/history"
 	"github.com/mark3labs/mcphost/pkg/llm"
 	api "github.com/ollama/ollama/api"
 )
@@ -59,9 +60,46 @@ func (p *Provider) CreateMessage(
 			"content", msg.GetContent(),
 			"is_tool_response", msg.IsToolResponse())
 
-		// Skip completely empty messages
-		if msg.GetContent() == "" && len(msg.GetToolCalls()) == 0 &&
-			!msg.IsToolResponse() {
+		// Handle tool responses
+		if msg.IsToolResponse() {
+			log.Debug("processing tool response message",
+				"raw_message", msg)
+
+			var content string
+
+			// Handle HistoryMessage format
+			if historyMsg, ok := msg.(*history.HistoryMessage); ok {
+				for _, block := range historyMsg.Content {
+					if block.Type == "tool_result" {
+						content = block.Text
+						break
+					}
+				}
+			}
+
+			// If no content found yet, try standard content extraction
+			if content == "" {
+				content = msg.GetContent()
+			}
+
+			if content == "" {
+				log.Debug("skipping empty tool response")
+				continue
+			}
+
+			ollamaMsg := api.Message{
+				Role:    "tool",
+				Content: content,
+			}
+			ollamaMessages = append(ollamaMessages, ollamaMsg)
+			log.Debug("added tool response message",
+				"role", ollamaMsg.Role,
+				"content", ollamaMsg.Content)
+			continue
+		}
+
+		// Skip completely empty messages (no content and no tool calls)
+		if msg.GetContent() == "" && len(msg.GetToolCalls()) == 0 {
 			log.Debug("skipping empty message")
 			continue
 		}
@@ -190,12 +228,18 @@ func (p *Provider) CreateToolResponse(
 	switch v := content.(type) {
 	case string:
 		contentStr = v
+		log.Debug("using string content directly")
 	default:
 		bytes, err := json.Marshal(v)
 		if err != nil {
+			log.Error("failed to marshal tool response",
+				"error", err,
+				"content", content)
 			return nil, fmt.Errorf("error marshaling tool response: %w", err)
 		}
 		contentStr = string(bytes)
+		log.Debug("marshaled content to JSON string",
+			"result", contentStr)
 	}
 
 	// Create message with explicit tool role
@@ -211,7 +255,8 @@ func (p *Provider) CreateToolResponse(
 	log.Debug("created tool response message",
 		"role", msg.GetRole(),
 		"content", msg.GetContent(),
-		"tool_call_id", msg.GetToolResponseID())
+		"tool_call_id", msg.GetToolResponseID(),
+		"raw_content", contentStr)
 
 	return msg, nil
 }
@@ -222,6 +267,8 @@ func convertProperties(props map[string]interface{}) map[string]struct {
 	Description string   `json:"description"`
 	Enum        []string `json:"enum,omitempty"`
 } {
+	log.Debug("converting properties", "input_props", props)
+
 	result := make(map[string]struct {
 		Type        string   `json:"type"`
 		Description string   `json:"description"`
@@ -229,6 +276,10 @@ func convertProperties(props map[string]interface{}) map[string]struct {
 	})
 
 	for name, prop := range props {
+		log.Debug("processing property",
+			"name", name,
+			"type", fmt.Sprintf("%T", prop))
+
 		if propMap, ok := prop.(map[string]interface{}); ok {
 			prop := struct {
 				Type        string   `json:"type"`
@@ -241,6 +292,10 @@ func convertProperties(props map[string]interface{}) map[string]struct {
 
 			// Handle enum if present
 			if enumRaw, ok := propMap["enum"].([]interface{}); ok {
+				log.Debug("processing enum values",
+					"property", name,
+					"raw_enum", enumRaw)
+
 				for _, e := range enumRaw {
 					if str, ok := e.(string); ok {
 						prop.Enum = append(prop.Enum, str)
@@ -249,8 +304,14 @@ func convertProperties(props map[string]interface{}) map[string]struct {
 			}
 
 			result[name] = prop
+			log.Debug("converted property",
+				"name", name,
+				"result", prop)
 		}
 	}
+
+	log.Debug("finished converting properties",
+		"result", result)
 	return result
 }
 

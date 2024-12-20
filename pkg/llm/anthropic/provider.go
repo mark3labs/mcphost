@@ -3,6 +3,8 @@ package anthropic
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"strings"
 
 	"github.com/charmbracelet/log"
 	"github.com/mark3labs/mcphost/pkg/history"
@@ -22,115 +24,106 @@ func NewProvider(apiKey string) *Provider {
 }
 
 func (p *Provider) CreateMessage(
-	ctx context.Context,
-	prompt string,
-	messages []llm.Message,
-	tools []llm.Tool,
+    ctx context.Context,
+    prompt string,
+    messages []llm.Message,
+    tools []llm.Tool,
 ) (llm.Message, error) {
-	// Convert generic messages to Anthropic format
-	anthropicMessages := make([]MessageParam, 0, len(messages))
+    anthropicMessages := make([]MessageParam, 0, len(messages))
 
-	for _, msg := range messages {
-		// content := []ContentBlock{{
-		// 	Type: "text",
-		// 	Text: strings.TrimSpace(msg.GetContent()),
-		// }}
-		content := []ContentBlock{}
+    for _, msg := range messages {
+        content := []ContentBlock{}
 
-		// Add tool calls if present
-		for _, call := range msg.GetToolCalls() {
-			input, _ := json.Marshal(call.GetArguments())
-			content = append(content, ContentBlock{
-				Type:  "tool_use",
-				ID:    call.GetID(),
-				Name:  call.GetName(),
-				Input: input,
-			})
-		}
+        // Add regular text content if present
+        if textContent := strings.TrimSpace(msg.GetContent()); textContent != "" {
+            content = append(content, ContentBlock{
+                Type: "text",
+                Text: textContent,
+            })
+        }
 
-		// Handle tool responses
-		if msg.IsToolResponse() {
-			if historyMsg, ok := msg.(*history.HistoryMessage); ok {
-				log.Debug(
-					"processing history message content",
-					"content",
-					historyMsg.Content,
-				)
-				for _, block := range historyMsg.Content {
-					if block.Type == "tool_result" {
-						toolBlock := ContentBlock{
-							Type:      "tool_result",
-							ToolUseID: block.ToolUseID,
-							Content:   block.Content,
-						}
-						content = append(content, toolBlock)
-						log.Debug(
-							"created tool result block",
-							"block",
-							toolBlock,
-						)
-					}
-				}
-			} else {
-				// Fallback to simple content handling
-				log.Debug("handling non-history tool response",
-					"id", msg.GetToolResponseID(),
-					"content", msg.GetContent())
+        // Add tool calls if present
+        for _, call := range msg.GetToolCalls() {
+            input, _ := json.Marshal(call.GetArguments())
+            content = append(content, ContentBlock{
+                Type:  "tool_use",
+                ID:    call.GetID(),
+                Name:  call.GetName(),
+                Input: input,
+            })
+        }
 
-				content = []ContentBlock{{
-					Type:      "tool_result",
-					ToolUseID: msg.GetToolResponseID(),
-					Content:   msg.GetContent(),
-				}}
-				log.Debug("created fallback tool result block", "block", content[0])
-			}
-		}
+        // Handle tool responses
+        if msg.IsToolResponse() {
+            if historyMsg, ok := msg.(*history.HistoryMessage); ok {
+                for _, block := range historyMsg.Content {
+                    if block.Type == "tool_result" {
+                        content = append(content, ContentBlock{
+                            Type:      "tool_result",
+                            ToolUseID: block.ToolUseID,
+                            Content:   block.Content,
+                        })
+                    }
+                }
+            } else {
+                // Always include tool response content
+                content = append(content, ContentBlock{
+                    Type:      "tool_result",
+                    ToolUseID: msg.GetToolResponseID(),
+                    Content:   msg.GetContent(),
+                })
+            }
+        }
 
-		if len(content) > 0 {
-			anthropicMessages = append(anthropicMessages, MessageParam{
-				Role:    msg.GetRole(),
-				Content: content,
-			})
-		}
-	}
+        // Always append the message, even if content is empty
+        // This maintains conversation flow
+        anthropicMessages = append(anthropicMessages, MessageParam{
+            Role:    msg.GetRole(),
+            Content: content,
+        })
+    }
 
-	// Add the new prompt if provided
-	if prompt != "" {
-		anthropicMessages = append(anthropicMessages, MessageParam{
-			Role: "user",
-			Content: []ContentBlock{{
-				Type: "text",
-				Text: prompt,
-			}},
-		})
-	}
+    // Add the new prompt if provided
+    if prompt != "" {
+        anthropicMessages = append(anthropicMessages, MessageParam{
+            Role: "user",
+            Content: []ContentBlock{{
+                Type: "text",
+                Text: prompt,
+            }},
+        })
+    }
 
-	// Convert tools to Anthropic format
-	anthropicTools := make([]Tool, len(tools))
-	for i, tool := range tools {
-		anthropicTools[i] = Tool{
-			Name:        tool.Name,
-			Description: tool.Description,
-			InputSchema: InputSchema{
-				Type:       tool.InputSchema.Type,
-				Properties: tool.InputSchema.Properties,
-				Required:   tool.InputSchema.Required,
-			},
-		}
-	}
+    // Convert tools to Anthropic format
+    anthropicTools := make([]Tool, len(tools))
+    for i, tool := range tools {
+        anthropicTools[i] = Tool{
+            Name:        tool.Name,
+            Description: tool.Description,
+            InputSchema: InputSchema{
+                Type:       tool.InputSchema.Type,
+                Properties: tool.InputSchema.Properties,
+                Required:   tool.InputSchema.Required,
+            },
+        }
+    }
 
-	// Make the API call
-	resp, err := p.client.CreateMessage(ctx, CreateRequest{
-		Model:     p.model,
-		Messages:  anthropicMessages,
-		MaxTokens: 4096,
-		Tools:     anthropicTools,
-	})
-	if err != nil {
-		return nil, err
-	}
+    // Add debug logging for message structure
+    debugJSON, _ := json.MarshalIndent(anthropicMessages, "", "  ")
+    log.Debug("sending messages to Anthropic", "messages", string(debugJSON))
 
-	return &Message{Msg: *resp}, nil
+    // Make the API call
+    resp, err := p.client.CreateMessage(ctx, CreateRequest{
+        Model:     p.model,
+        Messages:  anthropicMessages,
+        MaxTokens: 4096,
+        Tools:     anthropicTools,
+    })
+    if err != nil {
+        return nil, err
+    }
+
+    return &Message{Msg: *resp}, nil
 }
 
 func (p *Provider) SupportsTools() bool {
@@ -142,49 +135,43 @@ func (p *Provider) Name() string {
 }
 
 func (p *Provider) CreateToolResponse(
-	toolCallID string,
-	content interface{},
+    toolCallID string,
+    content interface{},
 ) (llm.Message, error) {
-	log.Debug("creating tool response",
-		"toolCallID", toolCallID,
-		"content", content)
+    log.Debug("creating tool response",
+        "toolCallID", toolCallID,
+        "content", content)
 
-	// If content is already a string, use it directly
-	if contentStr, ok := content.(string); ok {
-		msg := &Message{
-			Msg: APIMessage{
-				Role: "tool",
-				Content: []ContentBlock{{
-					Type:      "tool_result",
-					ToolUseID: toolCallID,
-					Content:   content,
-					Text:      contentStr,
-				}},
-			},
-		}
-		log.Debug("created tool response message", "message", msg)
-		return msg, nil
-	}
+    var contentStr string
+    var structuredContent interface{} = content
 
-	// For structured content, preserve both the original structure and a string representation
-	contentJSON, err := json.Marshal(content)
-	if err != nil {
-		log.Warn("failed to marshal content to JSON", "error", err)
-		// Still continue with the original content
-	}
+    // Convert content to string if needed
+    switch v := content.(type) {
+    case string:
+        contentStr = v
+    case []byte:
+        contentStr = string(v)
+    default:
+        // For structured content, create JSON representation
+        if jsonBytes, err := json.Marshal(content); err == nil {
+            contentStr = string(jsonBytes)
+        } else {
+            contentStr = fmt.Sprintf("%v", content)
+        }
+    }
 
-	msg := &Message{
-		Msg: APIMessage{
-			Role: "tool",
-			Content: []ContentBlock{{
-				Type:      "tool_result",
-				ToolUseID: toolCallID,
-				Content:   content,             // Preserve original structure
-				Text:      string(contentJSON), // Add string representation
-			}},
-		},
-	}
+    msg := &Message{
+        Msg: APIMessage{
+            Role: "tool",
+            Content: []ContentBlock{{
+                Type:      "tool_result",
+                ToolUseID: toolCallID,
+                Content:   structuredContent, // Original structure
+                Text:      contentStr,        // String representation
+            }},
+        },
+    }
 
-	log.Debug("created tool response message", "message", msg)
-	return msg, nil
+    log.Debug("created tool response message", "message", msg)
+    return msg, nil
 }
