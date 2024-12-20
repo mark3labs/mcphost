@@ -20,6 +20,7 @@ import (
 	"github.com/mark3labs/mcphost/pkg/llm"
 	"github.com/mark3labs/mcphost/pkg/llm/anthropic"
 	"github.com/mark3labs/mcphost/pkg/llm/ollama"
+	"github.com/mark3labs/mcphost/pkg/llm/openai"
 	"github.com/spf13/cobra"
 	"golang.org/x/term"
 )
@@ -90,10 +91,12 @@ and provides streaming responses.
 
 Available models can be specified using the --model flag:
 - Anthropic Claude (default): anthropic:claude-3-5-sonnet-latest
+- OpenAI: openai:gpt-4
 - Ollama models: ollama:modelname
 
 Example:
-  mcphost -m ollama:qwen2.5:3b`,
+  mcphost -m ollama:qwen2.5:3b
+  mcphost -m openai:gpt-4`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return runMCPHost()
 	},
@@ -146,6 +149,16 @@ func createProvider(modelString string) (llm.Provider, error) {
 
 	case "ollama":
 		return ollama.NewProvider(model)
+
+	case "openai":
+		apiKey := os.Getenv("OPENAI_API_KEY")
+		if apiKey == "" {
+			return nil, fmt.Errorf(
+				"OPENAI_API_KEY environment variable not set",
+			)
+		}
+		baseURL := os.Getenv("OPENAI_API_BASE") // Optional custom endpoint
+		return openai.NewProvider(apiKey, baseURL, model), nil
 
 	default:
 		return nil, fmt.Errorf("unsupported provider: %s", provider)
@@ -443,7 +456,7 @@ func runPrompt(
 			}
 
 			resultBlock.Text = strings.TrimSpace(resultText)
-			log.Debug("created tool result block", 
+			log.Debug("created tool result block",
 				"block", resultBlock,
 				"tool_id", toolCall.GetID())
 
