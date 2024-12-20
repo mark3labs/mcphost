@@ -1,6 +1,7 @@
 package ollama
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/mark3labs/mcphost/pkg/llm"
 	api "github.com/ollama/ollama/api"
@@ -19,6 +20,26 @@ func (m *OllamaMessage) GetRole() string {
 }
 
 func (m *OllamaMessage) GetContent() string {
+	// Handle tool responses
+	if m.Message.Role == "tool" {
+		// Try to unmarshal content if it's JSON
+		var contentMap []map[string]interface{}
+		if err := json.Unmarshal([]byte(m.Message.Content), &contentMap); err == nil {
+			var texts []string
+			for _, item := range contentMap {
+				if text, ok := item["text"].(string); ok {
+					texts = append(texts, text)
+				}
+			}
+			if len(texts) > 0 {
+				return strings.TrimSpace(strings.Join(texts, " "))
+			}
+		}
+		// Fallback to raw content if not JSON or no text found
+		return strings.TrimSpace(m.Message.Content)
+	}
+
+	// For regular messages
 	return strings.TrimSpace(m.Message.Content)
 }
 

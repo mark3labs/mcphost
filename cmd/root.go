@@ -123,7 +123,7 @@ func init() {
 
 // Add new function to create provider
 func createProvider(modelString string) (llm.Provider, error) {
-	parts := strings.Split(modelString, ":")
+	parts := strings.SplitN(modelString, ":", 2)
 	if len(parts) < 2 {
 		return nil, fmt.Errorf(
 			"invalid model format. Expected provider:model, got %s",
@@ -132,7 +132,7 @@ func createProvider(modelString string) (llm.Provider, error) {
 	}
 
 	provider := parts[0]
-	model := strings.Join(parts[1:], ":")
+	model := parts[1]
 
 	switch provider {
 	case "anthropic":
@@ -431,36 +431,23 @@ func runPrompt(
 				Content:   toolResult.Content,
 			}
 
-			// Since we know toolResult.Content is []interface{}, handle it directly
+			// Extract text content
+			var resultText string
+			// Handle array content directly since we know it's []interface{}
 			for _, item := range toolResult.Content {
-				switch content := item.(type) {
-				case map[string]interface{}:
-					if text, ok := content["text"]; ok {
-						resultBlock.Text = fmt.Sprintf("%v", text)
-						log.Debug("extracted text from content map", "text", resultBlock.Text)
-						break // Use first text found
-					}
-				case string:
-					// Try to parse string as JSON
-					var parsedContent interface{}
-					if err := json.Unmarshal([]byte(content), &parsedContent); err == nil {
-						log.Debug("parsed string content as JSON", "parsed", parsedContent)
-						if contentMap, ok := parsedContent.(map[string]interface{}); ok {
-							if text, ok := contentMap["text"]; ok {
-								resultBlock.Text = fmt.Sprintf("%v", text)
-								log.Debug("extracted text from parsed content", "text", resultBlock.Text)
-							}
-						}
-					} else {
-						// Use string content directly
-						resultBlock.Text = content
-						log.Debug("using string content directly", "text", content)
+				if contentMap, ok := item.(map[string]interface{}); ok {
+					if text, ok := contentMap["text"]; ok {
+						resultText += fmt.Sprintf("%v ", text)
 					}
 				}
 			}
 
+			resultBlock.Text = strings.TrimSpace(resultText)
+			log.Debug("created tool result block", 
+				"block", resultBlock,
+				"tool_id", toolCall.GetID())
+
 			toolResults = append(toolResults, resultBlock)
-			log.Debug("created tool result block", "block", toolResults[len(toolResults)-1])
 		}
 	}
 
@@ -500,10 +487,10 @@ func runMCPHost() error {
 	}
 
 	// Split the model flag and get just the model name
-	modelName := strings.Split(modelFlag, ":")[1]
+	parts := strings.SplitN(modelFlag, ":", 2)
 	log.Info("Model loaded",
 		"provider", provider.Name(),
-		"model", modelName)
+		"model", parts[1])
 
 	mcpConfig, err := loadMCPConfig()
 	if err != nil {
