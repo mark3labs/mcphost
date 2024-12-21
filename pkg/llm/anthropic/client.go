@@ -6,17 +6,25 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 )
 
 type Client struct {
-	apiKey string
-	client *http.Client
+	apiKey  string
+	client  *http.Client
+	baseURL string
 }
 
-func NewClient(apiKey string) *Client {
+func NewClient(apiKey string, baseURL string) *Client {
+	if baseURL == "" {
+		baseURL = "https://api.anthropic.com/v1"
+	} else if !strings.HasSuffix(baseURL, "/v1") {
+		baseURL = strings.TrimSuffix(baseURL, "/") + "/v1"
+	}
 	return &Client{
-		apiKey: apiKey,
-		client: &http.Client{},
+		apiKey:  apiKey,
+		baseURL: baseURL,
+		client:  &http.Client{},
 	}
 }
 
@@ -26,7 +34,7 @@ func (c *Client) CreateMessage(ctx context.Context, req CreateRequest) (*APIMess
 		return nil, fmt.Errorf("error marshaling request: %w", err)
 	}
 
-	httpReq, err := http.NewRequestWithContext(ctx, "POST", "https://api.anthropic.com/v1/messages", bytes.NewReader(body))
+	httpReq, err := http.NewRequestWithContext(ctx, "POST", fmt.Sprintf("%s/messages", c.baseURL), bytes.NewReader(body))
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
