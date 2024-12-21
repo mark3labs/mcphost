@@ -5,3 +5,6 @@ aidocs/
 *.log
 mcphost
 .idea
+test/
+build/
+scripts/
