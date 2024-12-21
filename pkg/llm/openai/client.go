@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 )
 
 type Client struct {
@@ -17,6 +18,8 @@ type Client struct {
 func NewClient(apiKey string, baseURL string) *Client {
 	if baseURL == "" {
 		baseURL = "https://api.openai.com/v1"
+	} else if !strings.HasSuffix(baseURL, "/v1") {
+		baseURL = strings.TrimSuffix(baseURL, "/") + "/v1"
 	}
 	return &Client{
 		apiKey:  apiKey,

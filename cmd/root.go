@@ -26,11 +26,14 @@ import (
 )
 
 var (
-	renderer      *glamour.TermRenderer
-	configFile    string
-	messageWindow int
-	modelFlag     string // New flag for model selection
-	openaiBaseURL string // Base URL for OpenAI API
+	renderer         *glamour.TermRenderer
+	configFile       string
+	messageWindow    int
+	modelFlag        string // New flag for model selection
+	openaiBaseURL    string // Base URL for OpenAI API
+	anthropicBaseURL string // 新增 anthropicBaseURL 变量
+	openaiAPIKey     string
+	anthropicAPIKey  string
 )
 
 const (
@@ -79,8 +82,13 @@ func init() {
 	// Add debug flag
 	rootCmd.PersistentFlags().
 		BoolVar(&debugMode, "debug", false, "enable debug logging")
-	rootCmd.PersistentFlags().
-		StringVar(&openaiBaseURL, "openai-url", "", "base URL for OpenAI API (defaults to api.openai.com)")
+
+	// Fix: 修改格式，确保每个标志都正确注册
+	flags := rootCmd.PersistentFlags()
+	flags.StringVar(&openaiBaseURL, "openai-url", "", "base URL for OpenAI API (defaults to api.openai.com)")
+	flags.StringVar(&anthropicBaseURL, "anthropic-url", "", "base URL for Anthropic API (defaults to api.anthropic.com)")
+	flags.StringVar(&openaiAPIKey, "openai-api-key", "", "OpenAI API key")
+	flags.StringVar(&anthropicAPIKey, "anthropic-api-key", "", "Anthropic API key")
 }
 
 // Add new function to create provider
@@ -98,22 +106,30 @@ func createProvider(modelString string) (llm.Provider, error) {
 
 	switch provider {
 	case "anthropic":
-		apiKey := os.Getenv("ANTHROPIC_API_KEY")
+		apiKey := anthropicAPIKey
+		if apiKey == "" {
+			apiKey = os.Getenv("ANTHROPIC_API_KEY")
+		}
+
 		if apiKey == "" {
 			return nil, fmt.Errorf(
-				"ANTHROPIC_API_KEY environment variable not set",
+				"Anthropic API key not provided. Use --anthropic-api-key flag or ANTHROPIC_API_KEY environment variable",
 			)
 		}
-		return anthropic.NewProvider(apiKey), nil
+		return anthropic.NewProvider(apiKey, anthropicBaseURL, model), nil
 
 	case "ollama":
 		return ollama.NewProvider(model)
 
 	case "openai":
-		apiKey := os.Getenv("OPENAI_API_KEY")
+		apiKey := openaiAPIKey
+		if apiKey == "" {
+			apiKey = os.Getenv("OPENAI_API_KEY")
+		}
+
 		if apiKey == "" {
 			return nil, fmt.Errorf(
-				"OPENAI_API_KEY environment variable not set",
+				"OpenAI API key not provided. Use --openai-api-key flag or OPENAI_API_KEY environment variable",
 			)
 		}
 		return openai.NewProvider(apiKey, openaiBaseURL, model), nil

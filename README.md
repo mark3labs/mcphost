@@ -155,3 +155,18 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Thanks to the Anthropic team for Claude and the MCP specification
 - Thanks to the Ollama team for their local LLM runtime
 - Thanks to all contributors who have helped improve this tool
+
+## 配置参数
+
+可以通过以下方式配置 API 密钥：
+
+1. 命令行参数:
+   ```bash
+   mcphost --openai-api-key=<your-openai-key> --anthropic-api-key=<your-anthropic-key>
+   ```
+
+2. 环境变量:
+   ```bash
+   export OPENAI_API_KEY=<your-openai-key>
+   export ANTHROPIC_API_KEY=<your-anthropic-key>
+   ```

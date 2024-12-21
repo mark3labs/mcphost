@@ -16,10 +16,13 @@ type Provider struct {
 	model  string
 }
 
-func NewProvider(apiKey string) *Provider {
+func NewProvider(apiKey string, baseURL string, model string) *Provider {
+	if model == "" {
+		model = "claude-3-5-sonnet-20240620" // 默认模型
+	}
 	return &Provider{
-		client: NewClient(apiKey),
-		model:  "claude-3-5-sonnet-20240620",
+		client: NewClient(apiKey, baseURL),
+		model:  model,
 	}
 }
 
