@@ -112,11 +112,15 @@ mcphost -m openai:gpt-4
 ```
 
 ### Flags
+- `--anthropic-url string`: Base URL for Anthropic API (defaults to api.anthropic.com)
+- `--anthropic-api-key string`: Anthropic API key (can also be set via ANTHROPIC_API_KEY environment variable)
 - `--config string`: Config file location (default is $HOME/mcp.json)
 - `--debug`: Enable debug logging
 - `--message-window int`: Number of messages to keep in context (default: 10)
 - `-m, --model string`: Model to use (format: provider:model) (default "anthropic:claude-3-5-sonnet-latest")
 - `--openai-url string`: Base URL for OpenAI API (defaults to api.openai.com)
+- `--openai-api-key string`: OpenAI API key (can also be set via OPENAI_API_KEY environment variable)
+
 
 ### Interactive Commands
 
