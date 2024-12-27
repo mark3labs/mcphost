@@ -43,15 +43,19 @@ func (p *Provider) CreateMessage(
 	messages []llm.Message,
 	tools []llm.Tool,
 ) (llm.Message, error) {
+	log.Debug("creating message",
+		"prompt", prompt,
+		"num_messages", len(messages),
+		"num_tools", len(tools))
+
 	openaiMessages := make([]MessageParam, 0, len(messages))
 
 	// Convert previous messages
 	for _, msg := range messages {
-		log.Debug(
-			"Converting message",
+		log.Debug("converting message",
 			"role", msg.GetRole(),
 			"content", msg.GetContent(),
-		)
+			"is_tool_response", msg.IsToolResponse())
 
 		param := MessageParam{
 			Role: msg.GetRole(),
@@ -91,11 +95,9 @@ func (p *Provider) CreateMessage(
 
 		// Handle function/tool responses
 		if msg.IsToolResponse() {
-			log.Debug(
-				"Processing tool response",
+			log.Debug("processing tool response",
 				"tool_call_id", msg.GetToolResponseID(),
-				"content", msg.GetContent(),
-			)
+				"raw_message", msg)
 
 			// Extract content from tool response
 			var contentStr string
@@ -138,7 +140,9 @@ func (p *Provider) CreateMessage(
 	}
 
 	// Log the final message array
-	log.Debug("Final OpenAI messages", "messages", openaiMessages)
+	log.Debug("sending messages to OpenAI",
+		"messages", openaiMessages,
+		"num_tools", len(tools))
 
 	// Add the new prompt if provided
 	if prompt != "" {
@@ -193,13 +197,10 @@ func (p *Provider) CreateToolResponse(
 	toolCallID string,
 	content interface{},
 ) (llm.Message, error) {
-	log.Debug(
-		"Creating tool response",
-		"tool_call_id",
-		toolCallID,
-		"raw_content",
-		content,
-	)
+	log.Debug("creating tool response",
+		"tool_call_id", toolCallID,
+		"content_type", fmt.Sprintf("%T", content),
+		"content", content)
 
 	// Convert content to string representation
 	var contentStr string
@@ -260,8 +261,6 @@ func (p *Provider) CreateToolResponse(
 	if contentStr == "" {
 		contentStr = "No content returned from tool"
 	}
-
-	log.Debug("Tool response content string", "content", contentStr)
 
 	// Create a new message with the tool response
 	msg := &Message{

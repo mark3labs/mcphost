@@ -32,9 +32,19 @@ func (p *Provider) CreateMessage(
 	messages []llm.Message,
 	tools []llm.Tool,
 ) (llm.Message, error) {
+	log.Debug("creating message",
+		"prompt", prompt,
+		"num_messages", len(messages),
+		"num_tools", len(tools))
+
 	anthropicMessages := make([]MessageParam, 0, len(messages))
 
 	for _, msg := range messages {
+		log.Debug("converting message",
+			"role", msg.GetRole(),
+			"content", msg.GetContent(),
+			"is_tool_response", msg.IsToolResponse())
+
 		content := []ContentBlock{}
 
 		// Add regular text content if present
@@ -58,6 +68,10 @@ func (p *Provider) CreateMessage(
 
 		// Handle tool responses
 		if msg.IsToolResponse() {
+			log.Debug("processing tool response",
+				"tool_call_id", msg.GetToolResponseID(),
+				"raw_message", msg)
+
 			if historyMsg, ok := msg.(*history.HistoryMessage); ok {
 				for _, block := range historyMsg.Content {
 					if block.Type == "tool_result" {
@@ -111,9 +125,9 @@ func (p *Provider) CreateMessage(
 		}
 	}
 
-	// Add debug logging for message structure
-	debugJSON, _ := json.MarshalIndent(anthropicMessages, "", "  ")
-	log.Debug("sending messages to Anthropic", "messages", string(debugJSON))
+	log.Debug("sending messages to Anthropic",
+		"messages", anthropicMessages,
+		"num_tools", len(tools))
 
 	// Make the API call
 	resp, err := p.client.CreateMessage(ctx, CreateRequest{
@@ -142,7 +156,8 @@ func (p *Provider) CreateToolResponse(
 	content interface{},
 ) (llm.Message, error) {
 	log.Debug("creating tool response",
-		"toolCallID", toolCallID,
+		"tool_call_id", toolCallID,
+		"content_type", fmt.Sprintf("%T", content),
 		"content", content)
 
 	var contentStr string
@@ -175,6 +190,5 @@ func (p *Provider) CreateToolResponse(
 		},
 	}
 
-	log.Debug("created tool response message", "message", msg)
 	return msg, nil
 }

@@ -40,31 +40,18 @@ func (p *Provider) CreateMessage(
 	messages []llm.Message,
 	tools []llm.Tool,
 ) (llm.Message, error) {
-	log.Debug(
-		"creating message",
-		"prompt",
-		prompt,
-		"num_messages",
-		len(messages),
-		"num_tools",
-		len(tools),
-	)
+	log.Debug("creating message",
+		"prompt", prompt,
+		"num_messages", len(messages),
+		"num_tools", len(tools))
 
 	// Convert generic messages to Ollama format
 	ollamaMessages := make([]api.Message, 0, len(messages)+1)
 
 	// Add existing messages
 	for _, msg := range messages {
-		log.Debug("processing message",
-			"role", msg.GetRole(),
-			"content", msg.GetContent(),
-			"is_tool_response", msg.IsToolResponse())
-
 		// Handle tool responses
 		if msg.IsToolResponse() {
-			log.Debug("processing tool response message",
-				"raw_message", msg)
-
 			var content string
 
 			// Handle HistoryMessage format
@@ -83,7 +70,6 @@ func (p *Provider) CreateMessage(
 			}
 
 			if content == "" {
-				log.Debug("skipping empty tool response")
 				continue
 			}
 
@@ -92,15 +78,11 @@ func (p *Provider) CreateMessage(
 				Content: content,
 			}
 			ollamaMessages = append(ollamaMessages, ollamaMsg)
-			log.Debug("added tool response message",
-				"role", ollamaMsg.Role,
-				"content", ollamaMsg.Content)
 			continue
 		}
 
 		// Skip completely empty messages (no content and no tool calls)
 		if msg.GetContent() == "" && len(msg.GetToolCalls()) == 0 {
-			log.Debug("skipping empty message")
 			continue
 		}
 
@@ -123,23 +105,15 @@ func (p *Provider) CreateMessage(
 							},
 						},
 					)
-					log.Debug("added tool call",
-						"name", call.GetName(),
-						"arguments", args)
 				}
 			}
 		}
 
 		ollamaMessages = append(ollamaMessages, ollamaMsg)
-		log.Debug("added message",
-			"role", ollamaMsg.Role,
-			"content", ollamaMsg.Content,
-			"num_tool_calls", len(ollamaMsg.ToolCalls))
 	}
 
 	// Add the new prompt if not empty
 	if prompt != "" {
-		log.Debug("adding prompt message", "prompt", prompt)
 		ollamaMessages = append(ollamaMessages, api.Message{
 			Role:    "user",
 			Content: prompt,
@@ -172,10 +146,14 @@ func (p *Provider) CreateMessage(
 	}
 
 	var response api.Message
-	log.Debug("sending chat request",
-		"model", p.model,
-		"num_messages", len(ollamaMessages),
-		"num_tools", len(ollamaTools))
+	log.Debug("creating message",
+		"prompt", prompt,
+		"num_messages", len(messages),
+		"num_tools", len(tools))
+
+	log.Debug("sending messages to Ollama", 
+		"messages", ollamaMessages,
+		"num_tools", len(tools))
 
 	err := p.client.Chat(ctx, &api.ChatRequest{
 		Model:    p.model,
@@ -185,10 +163,6 @@ func (p *Provider) CreateMessage(
 	}, func(r api.ChatResponse) error {
 		if r.Done {
 			response = r.Message
-			log.Debug("received final response",
-				"role", response.Role,
-				"content", response.Content,
-				"num_tool_calls", len(response.ToolCalls))
 		}
 		return nil
 	})
@@ -220,7 +194,7 @@ func (p *Provider) CreateToolResponse(
 	content interface{},
 ) (llm.Message, error) {
 	log.Debug("creating tool response",
-		"toolCallID", toolCallID,
+		"tool_call_id", toolCallID,
 		"content_type", fmt.Sprintf("%T", content),
 		"content", content)
 
@@ -267,8 +241,6 @@ func convertProperties(props map[string]interface{}) map[string]struct {
 	Description string   `json:"description"`
 	Enum        []string `json:"enum,omitempty"`
 } {
-	log.Debug("converting properties", "input_props", props)
-
 	result := make(map[string]struct {
 		Type        string   `json:"type"`
 		Description string   `json:"description"`
@@ -276,10 +248,6 @@ func convertProperties(props map[string]interface{}) map[string]struct {
 	})
 
 	for name, prop := range props {
-		log.Debug("processing property",
-			"name", name,
-			"type", fmt.Sprintf("%T", prop))
-
 		if propMap, ok := prop.(map[string]interface{}); ok {
 			prop := struct {
 				Type        string   `json:"type"`
@@ -292,10 +260,6 @@ func convertProperties(props map[string]interface{}) map[string]struct {
 
 			// Handle enum if present
 			if enumRaw, ok := propMap["enum"].([]interface{}); ok {
-				log.Debug("processing enum values",
-					"property", name,
-					"raw_enum", enumRaw)
-
 				for _, e := range enumRaw {
 					if str, ok := e.(string); ok {
 						prop.Enum = append(prop.Enum, str)
@@ -304,14 +268,9 @@ func convertProperties(props map[string]interface{}) map[string]struct {
 			}
 
 			result[name] = prop
-			log.Debug("converted property",
-				"name", name,
-				"result", prop)
 		}
 	}
 
-	log.Debug("finished converting properties",
-		"result", result)
 	return result
 }
 
