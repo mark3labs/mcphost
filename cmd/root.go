@@ -31,7 +31,7 @@ var (
 	messageWindow    int
 	modelFlag        string // New flag for model selection
 	openaiBaseURL    string // Base URL for OpenAI API
-	anthropicBaseURL string // 新增 anthropicBaseURL 变量
+	anthropicBaseURL string // Base URL for Anthropic API
 	openaiAPIKey     string
 	anthropicAPIKey  string
 )
@@ -83,7 +83,6 @@ func init() {
 	rootCmd.PersistentFlags().
 		BoolVar(&debugMode, "debug", false, "enable debug logging")
 
-	// Fix: 修改格式，确保每个标志都正确注册
 	flags := rootCmd.PersistentFlags()
 	flags.StringVar(&openaiBaseURL, "openai-url", "", "base URL for OpenAI API (defaults to api.openai.com)")
 	flags.StringVar(&anthropicBaseURL, "anthropic-url", "", "base URL for Anthropic API (defaults to api.anthropic.com)")
