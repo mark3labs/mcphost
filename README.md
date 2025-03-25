@@ -17,10 +17,12 @@ This architecture allows language models to:
 Currently supports:
 - Claude 3.5 Sonnet (claude-3-5-sonnet-20240620)
 - Any Ollama-compatible model with function calling support
+- Any OpenAI-compatible local or online model with function calling support
+
 
 ## Features ✨
 
-- Interactive conversations with either Claude 3.5 Sonnet or Ollama models
+- Interactive conversations with support models
 - Support for multiple concurrent MCP servers
 - Dynamic tool discovery and integration
 - Tool calling capabilities for both model types
@@ -52,6 +54,10 @@ ollama pull mistral
 ```bash
 ollama serve
 ```
+
+3. OpenAI compatible online Setup
+- Get your api server base url, api key and model name
+
 
 ## Installation 📦
 
@@ -99,7 +105,7 @@ MCPHost is a CLI tool that allows you to interact with various AI models through
 ### Available Models
 Models can be specified using the `--model` (`-m`) flag:
 - Anthropic Claude (default): `anthropic:claude-3-5-sonnet-latest`
-- OpenAI: `openai:gpt-4`
+- OpenAI or OpenAI-compatible: `openai:gpt-4`
 - Ollama models: `ollama:modelname`
 
 ### Examples
@@ -109,6 +115,11 @@ mcphost -m ollama:qwen2.5:3b
 
 # Use OpenAI's GPT-4
 mcphost -m openai:gpt-4
+
+# Use OpenAI-compatible model
+mcphost --model openai:<your-model-name> \
+--openai-url <your-base-url> \
+--openai-api-key <your-api-key>
 ```
 
 ### Flags
