@@ -19,6 +19,7 @@ import (
 	"github.com/mark3labs/mcphost/pkg/history"
 	"github.com/mark3labs/mcphost/pkg/llm"
 	"github.com/mark3labs/mcphost/pkg/llm/anthropic"
+	"github.com/mark3labs/mcphost/pkg/llm/google"
 	"github.com/mark3labs/mcphost/pkg/llm/ollama"
 	"github.com/mark3labs/mcphost/pkg/llm/openai"
 	"github.com/spf13/cobra"
@@ -34,6 +35,7 @@ var (
 	anthropicBaseURL string // Base URL for Anthropic API
 	openaiAPIKey     string
 	anthropicAPIKey  string
+	googleAPIKey     string
 )
 
 const (
@@ -88,6 +90,7 @@ func init() {
 	flags.StringVar(&anthropicBaseURL, "anthropic-url", "", "base URL for Anthropic API (defaults to api.anthropic.com)")
 	flags.StringVar(&openaiAPIKey, "openai-api-key", "", "OpenAI API key")
 	flags.StringVar(&anthropicAPIKey, "anthropic-api-key", "", "Anthropic API key")
+	flags.StringVar(&googleAPIKey, "google-api-key", "", "Google (Gemini) API key")
 }
 
 // Add new function to create provider
@@ -132,6 +135,16 @@ func createProvider(modelString string) (llm.Provider, error) {
 			)
 		}
 		return openai.NewProvider(apiKey, openaiBaseURL, model), nil
+
+	case "google":
+		apiKey := googleAPIKey
+		if apiKey == "" {
+			apiKey = os.Getenv("GOOGLE_API_KEY")
+		}
+		if apiKey == "" {
+			apiKey = os.Getenv("GEMINI_API_KEY")
+		}
+		return google.NewProvider(context.TODO(), apiKey, model)
 
 	default:
 		return nil, fmt.Errorf("unsupported provider: %s", provider)
