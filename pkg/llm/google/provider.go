@@ -14,6 +14,7 @@ import (
 type Provider struct {
 	client *genai.Client
 	model  *genai.GenerativeModel
+	chat   *genai.ChatSession
 }
 
 func NewProvider(ctx context.Context, apiKey string, model string) (*Provider, error) {
@@ -21,37 +22,46 @@ func NewProvider(ctx context.Context, apiKey string, model string) (*Provider, e
 	if err != nil {
 		return nil, err
 	}
+	m := client.GenerativeModel(model)
 	return &Provider{
 		client: client,
-		model:  client.GenerativeModel(model),
+		model:  m,
+		chat:   m.StartChat(),
 	}, nil
 }
 
 func (p *Provider) CreateMessage(ctx context.Context, prompt string, messages []llm.Message, tools []llm.Tool) (llm.Message, error) {
-	var parts []genai.Part
+	var hist []*genai.Content
 	for _, msg := range messages {
-		if text := strings.TrimSpace(msg.GetContent()); text != "" {
-			parts = append(parts, genai.Text(text))
-		}
-
 		for _, call := range msg.GetToolCalls() {
-			parts = append(parts, genai.FunctionCall{
-				Name: call.GetName(),
-				Args: call.GetArguments(),
+			hist = append(hist, &genai.Content{
+				Role: msg.GetRole(),
+				Parts: []genai.Part{
+					genai.FunctionCall{
+						Name: call.GetName(),
+						Args: call.GetArguments(),
+					},
+				},
 			})
 		}
 
 		if msg.IsToolResponse() {
 			if historyMsg, ok := msg.(*history.HistoryMessage); ok {
 				for _, block := range historyMsg.Content {
-					parts = append(parts, genai.Text(block.Text))
+					hist = append(hist, &genai.Content{
+						Role:  msg.GetRole(),
+						Parts: []genai.Part{genai.Text(block.Text)},
+					})
 				}
 			}
 		}
-	}
 
-	if prompt != "" {
-		parts = append(parts, genai.Text(prompt))
+		if text := strings.TrimSpace(msg.GetContent()); text != "" && !msg.IsToolResponse() && len(msg.GetToolCalls()) == 0 {
+			hist = append(hist, &genai.Content{
+				Role:  msg.GetRole(),
+				Parts: []genai.Part{genai.Text(text)},
+			})
+		}
 	}
 
 	p.model.Tools = nil
@@ -67,7 +77,7 @@ func (p *Provider) CreateMessage(ctx context.Context, prompt string, messages []
 		})
 	}
 
-	resp, err := p.model.GenerateContent(ctx, parts...)
+	resp, err := p.chat.SendMessage(ctx, genai.Text(""))
 	if err != nil {
 		return nil, err
 	}
