@@ -77,6 +77,7 @@ func (p *Provider) CreateMessage(ctx context.Context, prompt string, messages []
 		})
 	}
 
+	p.chat.History = hist
 	resp, err := p.chat.SendMessage(ctx, genai.Text(""))
 	if err != nil {
 		return nil, err
