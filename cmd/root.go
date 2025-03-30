@@ -61,7 +61,7 @@ Available models can be specified using the --model flag:
 Example:
   mcphost -m ollama:qwen2.5:3b
   mcphost -m openai:gpt-4
-	mcphost -m google:gemini-2.0-flash`,
+  mcphost -m google:gemini-2.0-flash`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return runMCPHost(context.Background())
 	},
