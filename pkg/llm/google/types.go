@@ -1,6 +1,7 @@
 package google
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/google/generative-ai-go/genai"
@@ -9,6 +10,8 @@ import (
 
 type ToolCall struct {
 	genai.FunctionCall
+
+	toolCallID int
 }
 
 func (t *ToolCall) GetName() string {
@@ -20,11 +23,13 @@ func (t *ToolCall) GetArguments() map[string]any {
 }
 
 func (t *ToolCall) GetID() string {
-	return "TODO"
+	return fmt.Sprintf("Tool<%d>", t.toolCallID)
 }
 
 type Message struct {
 	*genai.Candidate
+
+	toolCallID int
 }
 
 func (m *Message) GetRole() string {
@@ -43,8 +48,8 @@ func (m *Message) GetContent() string {
 
 func (m *Message) GetToolCalls() []llm.ToolCall {
 	var calls []llm.ToolCall
-	for _, call := range m.Candidate.FunctionCalls() {
-		calls = append(calls, &ToolCall{call})
+	for i, call := range m.Candidate.FunctionCalls() {
+		calls = append(calls, &ToolCall{call, m.toolCallID + i})
 	}
 	return calls
 }
@@ -55,16 +60,13 @@ func (m *Message) IsToolResponse() bool {
 			return true
 		}
 	}
-
 	return false
 }
 
-// GetToolResponseID returns the ID of the tool call this message is responding to
 func (m *Message) GetToolResponseID() string {
-	return "TODO"
+	return fmt.Sprintf("Tool<%d>", m.toolCallID)
 }
 
-// GetUsage returns token usage statistics if available
 func (m *Message) GetUsage() (input int, output int) {
 	return 0, 0
 }

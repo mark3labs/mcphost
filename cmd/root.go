@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -55,12 +56,14 @@ Available models can be specified using the --model flag:
 - Anthropic Claude (default): anthropic:claude-3-5-sonnet-latest
 - OpenAI: openai:gpt-4
 - Ollama models: ollama:modelname
+- Google: google:modelname
 
 Example:
   mcphost -m ollama:qwen2.5:3b
-  mcphost -m openai:gpt-4`,
+  mcphost -m openai:gpt-4
+	mcphost -m google:gemini-2.0-flash`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return runMCPHost()
+		return runMCPHost(context.Background())
 	},
 }
 
@@ -94,7 +97,7 @@ func init() {
 }
 
 // Add new function to create provider
-func createProvider(modelString string) (llm.Provider, error) {
+func createProvider(ctx context.Context, modelString string) (llm.Provider, error) {
 	parts := strings.SplitN(modelString, ":", 2)
 	if len(parts) < 2 {
 		return nil, fmt.Errorf(
@@ -142,9 +145,10 @@ func createProvider(modelString string) (llm.Provider, error) {
 			apiKey = os.Getenv("GOOGLE_API_KEY")
 		}
 		if apiKey == "" {
+			// The project structure is provider specific, but Google calls this GEMINI_API_KEY in e.g. AI Studio. Support both.
 			apiKey = os.Getenv("GEMINI_API_KEY")
 		}
-		return google.NewProvider(context.TODO(), apiKey, model)
+		return google.NewProvider(ctx, apiKey, model)
 
 	default:
 		return nil, fmt.Errorf("unsupported provider: %s", provider)
@@ -232,6 +236,7 @@ func updateRenderer() error {
 
 // Method implementations for simpleMessage
 func runPrompt(
+	ctx context.Context,
 	provider llm.Provider,
 	mcpClients map[string]*mcpclient.StdioMCPClient,
 	tools []llm.Tool,
@@ -268,7 +273,7 @@ func runPrompt(
 	for {
 		action := func() {
 			message, err = provider.CreateMessage(
-				context.Background(),
+				ctx,
 				prompt,
 				llmMessages,
 				tools,
@@ -307,7 +312,7 @@ func runPrompt(
 	var messageContent []history.ContentBlock
 
 	// Handle the message response
-	if str, err := renderer.Render("\nAssistant: "); err == nil {
+	if str, err := renderer.Render("\nAssistant: "); message.GetContent() != "" && err == nil {
 		fmt.Print(str)
 	}
 
@@ -453,14 +458,14 @@ func runPrompt(
 			Content: toolResults,
 		})
 		// Make another call to get Claude's response to the tool results
-		return runPrompt(provider, mcpClients, tools, "", messages)
+		return runPrompt(ctx, provider, mcpClients, tools, "", messages)
 	}
 
 	fmt.Println() // Add spacing
 	return nil
 }
 
-func runMCPHost() error {
+func runMCPHost(ctx context.Context) error {
 	// Set up logging based on debug flag
 	if debugMode {
 		log.SetLevel(log.DebugLevel)
@@ -472,7 +477,7 @@ func runMCPHost() error {
 	}
 
 	// Create the provider based on the model flag
-	provider, err := createProvider(modelFlag)
+	provider, err := createProvider(ctx, modelFlag)
 	if err != nil {
 		return fmt.Errorf("error creating provider: %v", err)
 	}
@@ -510,7 +515,7 @@ func runMCPHost() error {
 
 	var allTools []llm.Tool
 	for serverName, mcpClient := range mcpClients {
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 		toolsResult, err := mcpClient.ListTools(ctx, mcp.ListToolsRequest{})
 		cancel()
 
@@ -544,28 +549,23 @@ func runMCPHost() error {
 
 	// Main interaction loop
 	for {
-		width := getTerminalWidth()
 		var prompt string
-		form := huh.NewForm(
-			huh.NewGroup(
-				huh.NewText().
-					Key("prompt").
-					Title("Enter your prompt (Type /help for commands, Ctrl+C to quit)").
-					Value(&prompt),
-			),
-		).WithWidth(width).WithTheme(huh.ThemeCharm())
+		err := huh.NewForm(huh.NewGroup(huh.NewText().
+			Title("Enter your prompt (Type /help for commands, Ctrl+C to quit)").
+			Value(&prompt)),
+		).WithWidth(getTerminalWidth()).
+			WithTheme(huh.ThemeCharm()).
+			Run()
 
-		err := form.Run()
 		if err != nil {
 			// Check if it's a user abort (Ctrl+C)
-			if err.Error() == "user aborted" {
+			if errors.Is(err, huh.ErrUserAborted) {
 				fmt.Println("\nGoodbye!")
 				return nil // Exit cleanly
 			}
 			return err // Return other errors normally
 		}
 
-		prompt = form.GetString("prompt")
 		if prompt == "" {
 			continue
 		}
@@ -587,7 +587,7 @@ func runMCPHost() error {
 		if len(messages) > 0 {
 			messages = pruneMessages(messages)
 		}
-		err = runPrompt(provider, mcpClients, allTools, prompt, &messages)
+		err = runPrompt(ctx, provider, mcpClients, allTools, prompt, &messages)
 		if err != nil {
 			return err
 		}
