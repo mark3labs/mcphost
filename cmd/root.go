@@ -34,6 +34,10 @@ var (
 	anthropicBaseURL string // Base URL for Anthropic API
 	openaiAPIKey     string
 	anthropicAPIKey  string
+	// Parameters for Ollama
+	temperature      float32 // Temperature for Ollama models
+	maxTokens        int     // Max tokens for Ollama models
+	numCtx           int     // Context size for Ollama models
 )
 
 const (
@@ -54,8 +58,14 @@ Available models can be specified using the --model flag:
 - OpenAI: openai:gpt-4
 - Ollama models: ollama:modelname
 
+For Ollama models, you can control generation parameters:
+- --temperature: Controls randomness (0.0-1.0, default 0.7)
+- --max-tokens: Maximum tokens in response (default uses model setting)
+- --num-ctx: Context window size (default uses model setting)
+
 Example:
   mcphost -m ollama:qwen2.5:3b
+  mcphost -m ollama:llama3 --temperature 0.5 --max-tokens 2048 --num-ctx 4096
   mcphost -m openai:gpt-4`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return runMCPHost()
@@ -78,6 +88,13 @@ func init() {
 	rootCmd.PersistentFlags().
 		StringVarP(&modelFlag, "model", "m", "anthropic:claude-3-5-sonnet-latest",
 			"model to use (format: provider:model, e.g. anthropic:claude-3-5-sonnet-latest or ollama:qwen2.5:3b)")
+	// Flags for Ollama parameters
+	rootCmd.PersistentFlags().
+		Float32Var(&temperature, "temperature", 0.7, "temperature setting for Ollama models (0.0-1.0)")
+	rootCmd.PersistentFlags().
+		IntVar(&maxTokens, "max-tokens", 0, "maximum tokens in response for Ollama models (0 for default)")
+	rootCmd.PersistentFlags().
+		IntVar(&numCtx, "num-ctx", 0, "context window size for Ollama models (0 for default)")
 
 	// Add debug flag
 	rootCmd.PersistentFlags().
@@ -118,7 +135,8 @@ func createProvider(modelString string) (llm.Provider, error) {
 		return anthropic.NewProvider(apiKey, anthropicBaseURL, model), nil
 
 	case "ollama":
-		return ollama.NewProvider(model)
+		// Pass temperature, maxTokens, and numCtx to the Ollama provider
+		return ollama.NewProvider(model, temperature, maxTokens, numCtx)
 
 	case "openai":
 		apiKey := openaiAPIKey

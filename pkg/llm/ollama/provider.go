@@ -18,19 +18,25 @@ func boolPtr(b bool) *bool {
 
 // Provider implements the Provider interface for Ollama
 type Provider struct {
-	client *api.Client
-	model  string
+	client      *api.Client
+	model       string
+	temperature float32
+	maxTokens   int
+	numCtx      int
 }
 
 // NewProvider creates a new Ollama provider
-func NewProvider(model string) (*Provider, error) {
+func NewProvider(model string, temperature float32, maxTokens int, numCtx int) (*Provider, error) {
 	client, err := api.ClientFromEnvironment()
 	if err != nil {
 		return nil, err
 	}
 	return &Provider{
-		client: client,
-		model:  model,
+		client:      client,
+		model:       model,
+		temperature: temperature,
+		maxTokens:   maxTokens,
+		numCtx:      numCtx,
 	}, nil
 }
 
@@ -43,7 +49,10 @@ func (p *Provider) CreateMessage(
 	log.Debug("creating message",
 		"prompt", prompt,
 		"num_messages", len(messages),
-		"num_tools", len(tools))
+		"num_tools", len(tools),
+		"temperature", p.temperature,
+		"max_tokens", p.maxTokens,
+		"num_ctx", p.numCtx)
 
 	// Convert generic messages to Ollama format
 	ollamaMessages := make([]api.Message, 0, len(messages)+1)
@@ -153,14 +162,36 @@ func (p *Provider) CreateMessage(
 
 	log.Debug("sending messages to Ollama", 
 		"messages", ollamaMessages,
-		"num_tools", len(tools))
+		"num_tools", len(tools),
+		"temperature", p.temperature,
+		"max_tokens", p.maxTokens,
+		"num_ctx", p.numCtx)
 
-	err := p.client.Chat(ctx, &api.ChatRequest{
+	// Create chat request with options for temperature, max_tokens, and num_ctx
+	chatRequest := &api.ChatRequest{
 		Model:    p.model,
 		Messages: ollamaMessages,
 		Tools:    ollamaTools,
 		Stream:   boolPtr(false),
-	}, func(r api.ChatResponse) error {
+		Options:  make(map[string]interface{}),
+	}
+	
+	// Only set temperature if it's provided (non-zero)
+	if p.temperature > 0 {
+		chatRequest.Options["temperature"] = p.temperature
+	}
+	
+	// Only set max tokens if it's provided (non-zero)
+	if p.maxTokens > 0 {
+		chatRequest.Options["num_predict"] = p.maxTokens
+	}
+	
+	// Only set context window size if it's provided (non-zero)
+	if p.numCtx > 0 {
+		chatRequest.Options["num_ctx"] = p.numCtx
+	}
+
+	err := p.client.Chat(ctx, chatRequest, func(r api.ChatResponse) error {
 		if r.Done {
 			response = r.Message
 		}

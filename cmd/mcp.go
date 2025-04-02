@@ -258,10 +258,18 @@ func handleHelpCommand() {
 		"- **Anthropic Claude**: `anthropic:claude-3-5-sonnet-latest`\n",
 	)
 	markdown.WriteString("- **Ollama Models**: `ollama:modelname`\n")
-	markdown.WriteString("\nExamples:\n")
+	
+	markdown.WriteString("\n## Ollama Parameters\n\n")
+	markdown.WriteString("For Ollama models, you can control generation parameters:\n\n")
+	markdown.WriteString("- **--temperature**: Controls randomness (0.0-1.0, default 0.7)\n")
+	markdown.WriteString("- **--max-tokens**: Maximum tokens in response (default uses model setting)\n")
+	markdown.WriteString("- **--num-ctx**: Context window size (default uses model setting)\n")
+	
+	markdown.WriteString("\n## Examples\n")
 	markdown.WriteString("```\n")
 	markdown.WriteString("mcphost -m anthropic:claude-3-5-sonnet-latest\n")
 	markdown.WriteString("mcphost -m ollama:qwen2.5:3b\n")
+	markdown.WriteString("mcphost -m ollama:llama3 --temperature 0.5 --max-tokens 2048 --num-ctx 4096\n")
 	markdown.WriteString("```\n")
 
 	rendered, err := renderer.Render(markdown.String())
