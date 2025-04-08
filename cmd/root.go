@@ -220,7 +220,7 @@ func updateRenderer() error {
 // Method implementations for simpleMessage
 func runPrompt(
 	provider llm.Provider,
-	mcpClients map[string]*mcpclient.StdioMCPClient,
+	mcpClients map[string]mcpclient.MCPClient,
 	tools []llm.Tool,
 	prompt string,
 	messages *[]history.HistoryMessage,
