@@ -1,0 +1,22 @@
+{
+    "mcpServers": {
+        "filesystem": {
+            "command": "npx",
+            "args": [
+                "-y",
+                "@modelcontextprotocol/server-filesystem",
+                "./"
+            ]
+        },
+        "weather": {
+            "command": "uv",
+            "args": [
+                "--directory",
+                "/Users/bytedance/code/MCP/my_host/weather",
+                "run",
+                "weather.py"
+            ]
+        }
+    }
+}
+

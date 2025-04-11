@@ -17,10 +17,12 @@ This architecture allows language models to:
 Currently supports:
 - Claude 3.5 Sonnet (claude-3-5-sonnet-20240620)
 - Any Ollama-compatible model with function calling support
+- Google Gemini models
+- Any OpenAI-compatible local or online model with function calling support
 
 ## Features ✨
 
-- Interactive conversations with either Claude 3.5 Sonnet or Ollama models
+- Interactive conversations with support models
 - Support for multiple concurrent MCP servers
 - Dynamic tool discovery and integration
 - Tool calling capabilities for both model types
@@ -33,6 +35,7 @@ Currently supports:
 - Go 1.23 or later
 - For Claude: An Anthropic API key
 - For Ollama: Local Ollama installation with desired models
+- For Google/Gemini: Google API key (see https://aistudio.google.com/app/apikey)
 - One or more MCP-compatible tool servers
 
 ## Environment Setup 🔧
@@ -54,6 +57,14 @@ ollama serve
 ```
 
 You can also configure the Ollama client using standard environment variables, such as `OLLAMA HOST` for the Ollama base URL.
+
+3. Google API Key (for Gemini):
+```bash
+export GOOGLE_API_KEY='your-api-key'
+```
+
+4. OpenAI compatible online Setup
+- Get your api server base url, api key and model name
 
 ## Installation 📦
 
@@ -101,8 +112,9 @@ MCPHost is a CLI tool that allows you to interact with various AI models through
 ### Available Models
 Models can be specified using the `--model` (`-m`) flag:
 - Anthropic Claude (default): `anthropic:claude-3-5-sonnet-latest`
-- OpenAI: `openai:gpt-4`
+- OpenAI or OpenAI-compatible: `openai:gpt-4`
 - Ollama models: `ollama:modelname`
+- Google: `google:gemini-2.0-flash`
 
 ### Examples
 ```bash
@@ -111,17 +123,23 @@ mcphost -m ollama:qwen2.5:3b
 
 # Use OpenAI's GPT-4
 mcphost -m openai:gpt-4
+
+# Use OpenAI-compatible model
+mcphost --model openai:<your-model-name> \
+--openai-url <your-base-url> \
+--openai-api-key <your-api-key>
 ```
 
 ### Flags
 - `--anthropic-url string`: Base URL for Anthropic API (defaults to api.anthropic.com)
 - `--anthropic-api-key string`: Anthropic API key (can also be set via ANTHROPIC_API_KEY environment variable)
-- `--config string`: Config file location (default is $HOME/mcp.json)
+- `--config string`: Config file location (default is $HOME/.mcp.json)
 - `--debug`: Enable debug logging
 - `--message-window int`: Number of messages to keep in context (default: 10)
 - `-m, --model string`: Model to use (format: provider:model) (default "anthropic:claude-3-5-sonnet-latest")
 - `--openai-url string`: Base URL for OpenAI API (defaults to api.openai.com)
 - `--openai-api-key string`: OpenAI API key (can also be set via OPENAI_API_KEY environment variable)
+- `--google-api-key string`: Google API key (can also be set via GOOGLE_API_KEY environment variable)
 
 
 ### Interactive Commands
