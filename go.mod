@@ -8,7 +8,7 @@ require (
 	github.com/charmbracelet/lipgloss v1.0.0
 	github.com/charmbracelet/log v0.4.0
 	github.com/google/generative-ai-go v0.19.0
-	github.com/mark3labs/mcp-go v0.8.2
+	github.com/mark3labs/mcp-go v0.20.0
 	github.com/ollama/ollama v0.5.1
 	github.com/spf13/cobra v1.8.1
 	golang.org/x/term v0.30.0
@@ -37,6 +37,7 @@ require (
 	github.com/gorilla/css v1.0.1 // indirect
 	github.com/microcosm-cc/bluemonday v1.0.27 // indirect
 	github.com/muesli/reflow v0.3.0 // indirect
+	github.com/yosida95/uritemplate/v3 v3.0.2 // indirect
 	github.com/yuin/goldmark v1.7.4 // indirect
 	github.com/yuin/goldmark-emoji v1.0.3 // indirect
 	go.opentelemetry.io/auto/sdk v1.1.0 // indirect

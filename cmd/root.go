@@ -431,10 +431,8 @@ func runPrompt(
 			var resultText string
 			// Handle array content directly since we know it's []interface{}
 			for _, item := range toolResult.Content {
-				if contentMap, ok := item.(map[string]interface{}); ok {
-					if text, ok := contentMap["text"]; ok {
-						resultText += fmt.Sprintf("%v ", text)
-					}
+				if contentMap, ok := item.(mcp.TextContent); ok {
+					resultText += fmt.Sprintf("%v ", contentMap.Text)
 				}
 			}
 

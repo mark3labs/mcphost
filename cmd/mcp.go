@@ -21,6 +21,11 @@ import (
 	"github.com/mark3labs/mcphost/pkg/llm"
 )
 
+const (
+	transportStdio = "stdio"
+	transportSSE   = "sse"
+)
+
 var (
 	// Tokyo Night theme colors
 	tokyoPurple = lipgloss.Color("99")  // #9d7cd8
@@ -60,13 +65,69 @@ var (
 )
 
 type MCPConfig struct {
-	MCPServers map[string]ServerConfig `json:"mcpServers"`
+	MCPServers map[string]ServerConfigWrapper `json:"mcpServers"`
 }
 
-type ServerConfig struct {
-	Command string            `json:"command"`
-	Args    []string          `json:"args"`
-	Env     map[string]string `json:"env,omitempty"`
+type ServerConfig interface {
+	GetType() string
+}
+
+type STDIOServerConfig struct {
+	Transport string            `json:"transport,omitempty"` // must be "stdio"
+	Command   string            `json:"command"`
+	Args      []string          `json:"args"`
+	Env       map[string]string `json:"env,omitempty"`
+}
+
+func (s STDIOServerConfig) GetType() string {
+	return transportStdio
+}
+
+type SSEServerConfig struct {
+	Transport   string `json:"transport"` // must be "sse"
+	Endpoint    string `json:"endpoint"`
+	BearerToken string `json:"bearertoken,omitempty"`
+	RetryDelay  int    `json:"retryDelay"`
+}
+
+func (s SSEServerConfig) GetType() string {
+	return transportSSE
+}
+
+type ServerConfigWrapper struct {
+	Config ServerConfig
+}
+
+func (w *ServerConfigWrapper) UnmarshalJSON(data []byte) error {
+	var typeField struct {
+		Transport string `json:"transport"`
+	}
+
+	if err := json.Unmarshal(data, &typeField); err != nil {
+		return err
+	}
+
+	switch typeField.Transport {
+	case transportSSE:
+		var sse SSEServerConfig
+		if err := json.Unmarshal(data, &sse); err != nil {
+			return err
+		}
+		w.Config = sse
+	case transportStdio:
+	default:
+		// Default to stdio if transport is not specified
+		var stdio STDIOServerConfig
+		if err := json.Unmarshal(data, &stdio); err != nil {
+			return err
+		}
+		w.Config = stdio
+	}
+
+	return nil
+}
+func (w ServerConfigWrapper) MarshalJSON() ([]byte, error) {
+	return json.Marshal(w.Config)
 }
 
 func mcpToolsToAnthropicTools(
@@ -108,7 +169,7 @@ func loadMCPConfig() (*MCPConfig, error) {
 	if _, err := os.Stat(configPath); os.IsNotExist(err) {
 		// Create default config
 		defaultConfig := MCPConfig{
-			MCPServers: make(map[string]ServerConfig),
+			MCPServers: make(map[string]ServerConfigWrapper),
 		}
 
 		// Create the file with default config
@@ -149,31 +210,37 @@ func createMCPClients(
 	clients := make(map[string]mcpclient.MCPClient)
 
 	for name, server := range config.MCPServers {
-		var env []string
-		for k, v := range server.Env {
-			env = append(env, fmt.Sprintf("%s=%s", k, v))
-		}
 		var client mcpclient.MCPClient
 		var err error
 
-		if server.Command == "sse_server" {
-			if len(server.Args) == 0 {
-				return nil, fmt.Errorf(
-					"no arguments provided for sse command",
-				)
+		if server.Config.GetType() == transportSSE {
+			sseConfig := server.Config.(SSEServerConfig)
+
+			options := []mcpclient.ClientOption{}
+
+			if sseConfig.BearerToken != "" {
+				options = append(options, mcpclient.WithHeaders(map[string]string{
+					"Authorization": "Bearer " + sseConfig.BearerToken,
+				}))
 			}
 
 			client, err = mcpclient.NewSSEMCPClient(
-				server.Args[0],
+				sseConfig.Endpoint,
+				options...,
 			)
 			if err == nil {
 				err = client.(*mcpclient.SSEMCPClient).Start(context.Background())
 			}
 		} else {
+			stdioConfig := server.Config.(STDIOServerConfig)
+			var env []string
+			for k, v := range stdioConfig.Env {
+				env = append(env, fmt.Sprintf("%s=%s", k, v))
+			}
 			client, err = mcpclient.NewStdioMCPClient(
-				server.Command,
+				stdioConfig.Command,
 				env,
-				server.Args...)
+				stdioConfig.Args...)
 		}
 		if err != nil {
 			for _, c := range clients {
@@ -310,15 +377,31 @@ func handleServersCommand(config *MCPConfig) {
 		} else {
 			for name, server := range config.MCPServers {
 				markdown.WriteString(fmt.Sprintf("# %s\n\n", name))
-				markdown.WriteString("*Command*\n")
-				markdown.WriteString(fmt.Sprintf("`%s`\n\n", server.Command))
 
-				markdown.WriteString("*Arguments*\n")
-				if len(server.Args) > 0 {
-					markdown.WriteString(fmt.Sprintf("`%s`\n", strings.Join(server.Args, " ")))
+				if server.Config.GetType() == transportSSE {
+					sseConfig := server.Config.(SSEServerConfig)
+					markdown.WriteString("*Endpoint*\n")
+					markdown.WriteString(fmt.Sprintf("`%s`\n\n", sseConfig.Endpoint))
+					markdown.WriteString("*Bearer Token*\n")
+					if sseConfig.BearerToken != "" {
+						markdown.WriteString("`[REDACTED]`\n\n")
+					} else {
+						markdown.WriteString("*None*\n")
+					}
+
 				} else {
-					markdown.WriteString("*None*\n")
+					stdioConfig := server.Config.(STDIOServerConfig)
+					markdown.WriteString("*Command*\n")
+					markdown.WriteString(fmt.Sprintf("`%s`\n\n", stdioConfig.Command))
+
+					markdown.WriteString("*Arguments*\n")
+					if len(stdioConfig.Args) > 0 {
+						markdown.WriteString(fmt.Sprintf("`%s`\n", strings.Join(stdioConfig.Args, " ")))
+					} else {
+						markdown.WriteString("*None*\n")
+					}
 				}
+
 				markdown.WriteString("\n") // Add spacing between servers
 			}
 		}
