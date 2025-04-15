@@ -552,7 +552,8 @@ func runMCPHost(ctx context.Context) error {
 		var prompt string
 		err := huh.NewForm(huh.NewGroup(huh.NewText().
 			Title("Enter your prompt (Type /help for commands, Ctrl+C to quit)").
-			Value(&prompt)),
+			Value(&prompt).
+			CharLimit(5000)),
 		).WithWidth(getTerminalWidth()).
 			WithTheme(huh.ThemeCharm()).
 			Run()
