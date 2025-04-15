@@ -73,10 +73,9 @@ type ServerConfig interface {
 }
 
 type STDIOServerConfig struct {
-	Transport string            `json:"transport,omitempty"` // must be "stdio"
-	Command   string            `json:"command"`
-	Args      []string          `json:"args"`
-	Env       map[string]string `json:"env,omitempty"`
+	Command string            `json:"command"`
+	Args    []string          `json:"args"`
+	Env     map[string]string `json:"env,omitempty"`
 }
 
 func (s STDIOServerConfig) GetType() string {
@@ -84,10 +83,8 @@ func (s STDIOServerConfig) GetType() string {
 }
 
 type SSEServerConfig struct {
-	Transport   string `json:"transport"` // must be "sse"
-	Endpoint    string `json:"endpoint"`
-	BearerToken string `json:"bearertoken,omitempty"`
-	RetryDelay  int    `json:"retryDelay"`
+	Url     string   `json:"url"`
+	Headers []string `json:"headers,omitempty"`
 }
 
 func (s SSEServerConfig) GetType() string {
@@ -100,23 +97,21 @@ type ServerConfigWrapper struct {
 
 func (w *ServerConfigWrapper) UnmarshalJSON(data []byte) error {
 	var typeField struct {
-		Transport string `json:"transport"`
+		Url string `json:"url"`
 	}
 
 	if err := json.Unmarshal(data, &typeField); err != nil {
 		return err
 	}
-
-	switch typeField.Transport {
-	case transportSSE:
+	if typeField.Url != "" {
+		// If the URL field is present, treat it as an SSE server
 		var sse SSEServerConfig
 		if err := json.Unmarshal(data, &sse); err != nil {
 			return err
 		}
 		w.Config = sse
-	case transportStdio:
-	default:
-		// Default to stdio if transport is not specified
+	} else {
+		// Otherwise, treat it as a STDIOServerConfig
 		var stdio STDIOServerConfig
 		if err := json.Unmarshal(data, &stdio); err != nil {
 			return err
@@ -218,14 +213,22 @@ func createMCPClients(
 
 			options := []mcpclient.ClientOption{}
 
-			if sseConfig.BearerToken != "" {
-				options = append(options, mcpclient.WithHeaders(map[string]string{
-					"Authorization": "Bearer " + sseConfig.BearerToken,
-				}))
+			if sseConfig.Headers != nil {
+				// Parse headers from the config
+				headers := make(map[string]string)
+				for _, header := range sseConfig.Headers {
+					parts := strings.SplitN(header, ":", 2)
+					if len(parts) == 2 {
+						key := strings.TrimSpace(parts[0])
+						value := strings.TrimSpace(parts[1])
+						headers[key] = value
+					}
+				}
+				options = append(options, mcpclient.WithHeaders(headers))
 			}
 
 			client, err = mcpclient.NewSSEMCPClient(
-				sseConfig.Endpoint,
+				sseConfig.Url,
 				options...,
 			)
 			if err == nil {
@@ -380,11 +383,17 @@ func handleServersCommand(config *MCPConfig) {
 
 				if server.Config.GetType() == transportSSE {
 					sseConfig := server.Config.(SSEServerConfig)
-					markdown.WriteString("*Endpoint*\n")
-					markdown.WriteString(fmt.Sprintf("`%s`\n\n", sseConfig.Endpoint))
-					markdown.WriteString("*Bearer Token*\n")
-					if sseConfig.BearerToken != "" {
-						markdown.WriteString("`[REDACTED]`\n\n")
+					markdown.WriteString("*Url*\n")
+					markdown.WriteString(fmt.Sprintf("`%s`\n\n", sseConfig.Url))
+					markdown.WriteString("*headers*\n")
+					if sseConfig.Headers != nil {
+						for _, header := range sseConfig.Headers {
+							parts := strings.SplitN(header, ":", 2)
+							if len(parts) == 2 {
+								key := strings.TrimSpace(parts[0])
+								markdown.WriteString("`" + key + ": [REDACTED]`\n")
+							}
+						}
 					} else {
 						markdown.WriteString("*None*\n")
 					}
