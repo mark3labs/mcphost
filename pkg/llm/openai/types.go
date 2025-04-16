@@ -11,7 +11,7 @@ type CreateRequest struct {
 type MessageParam struct {
 	Role             string        `json:"role"`
 	Content          *string       `json:"content"`
-	ReasoningContent *string       `json:"reasoning_content"`
+	ReasoningContent *string       `json:"reasoning_content,omitempty"`
 	FunctionCall     *FunctionCall `json:"function_call,omitempty"`
 	ToolCalls        []ToolCall    `json:"tool_calls,omitempty"`
 	Name             string        `json:"name,omitempty"`
