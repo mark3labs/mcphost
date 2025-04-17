@@ -80,7 +80,7 @@ func init() {
 	rootCmd.PersistentFlags().
 		StringVar(&configFile, "config", "", "config file (default is $HOME/.mcp.json)")
 	rootCmd.PersistentFlags().
-		StringVar(&systemPrompt, "system-prompt", "", "system prompt")
+		StringVar(&systemPrompt, "system-prompt", "", "system prompt json file")
 	rootCmd.PersistentFlags().
 		IntVar(&messageWindow, "message-window", 10, "number of messages to keep in context")
 	rootCmd.PersistentFlags().
