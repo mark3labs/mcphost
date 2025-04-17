@@ -25,7 +25,9 @@ func NewProvider(ctx context.Context, apiKey, model, systemPrompt string) (*Prov
 		return nil, err
 	}
 	m := client.GenerativeModel(model)
-	m.SystemInstruction = genai.NewUserContent(genai.Text(systemPrompt))
+	if systemPrompt != "" {
+		m.SystemInstruction = genai.NewUserContent(genai.Text(systemPrompt))
+	}
 	return &Provider{
 		client: client,
 		model:  m,
