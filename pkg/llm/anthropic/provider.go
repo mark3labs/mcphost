@@ -12,17 +12,19 @@ import (
 )
 
 type Provider struct {
-	client *Client
-	model  string
+	client       *Client
+	model        string
+	systemPrompt string
 }
 
-func NewProvider(apiKey string, baseURL string, model string) *Provider {
+func NewProvider(apiKey, baseURL, model, systemPrompt string) *Provider {
 	if model == "" {
 		model = "claude-3-5-sonnet-20240620" // 默认模型
 	}
 	return &Provider{
-		client: NewClient(apiKey, baseURL),
-		model:  model,
+		client:       NewClient(apiKey, baseURL),
+		model:        model,
+		systemPrompt: systemPrompt,
 	}
 }
 
@@ -135,6 +137,7 @@ func (p *Provider) CreateMessage(
 		Messages:  anthropicMessages,
 		MaxTokens: 4096,
 		Tools:     anthropicTools,
+		System:    p.systemPrompt,
 	})
 	if err != nil {
 		return nil, err

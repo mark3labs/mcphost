@@ -124,7 +124,7 @@ func createProvider(ctx context.Context, modelString, systemPrompt string) (llm.
 				"Anthropic API key not provided. Use --anthropic-api-key flag or ANTHROPIC_API_KEY environment variable",
 			)
 		}
-		return anthropic.NewProvider(apiKey, anthropicBaseURL, model), nil
+		return anthropic.NewProvider(apiKey, anthropicBaseURL, model, systemPrompt), nil
 
 	case "ollama":
 		return ollama.NewProvider(model, systemPrompt)
