@@ -30,7 +30,7 @@ import (
 var (
 	renderer         *glamour.TermRenderer
 	configFile       string
-	systemPrompt     string
+	systemPromptFile string
 	messageWindow    int
 	modelFlag        string // New flag for model selection
 	openaiBaseURL    string // Base URL for OpenAI API
@@ -80,7 +80,7 @@ func init() {
 	rootCmd.PersistentFlags().
 		StringVar(&configFile, "config", "", "config file (default is $HOME/.mcp.json)")
 	rootCmd.PersistentFlags().
-		StringVar(&systemPrompt, "system-prompt", "", "system prompt json file")
+		StringVar(&systemPromptFile, "system-prompt", "", "system prompt json file")
 	rootCmd.PersistentFlags().
 		IntVar(&messageWindow, "message-window", 10, "number of messages to keep in context")
 	rootCmd.PersistentFlags().
@@ -477,7 +477,7 @@ func runMCPHost(ctx context.Context) error {
 		log.SetReportCaller(false)
 	}
 
-	systemPrompt, err := loadSystemPrompt(systemPrompt)
+	systemPrompt, err := loadSystemPrompt(systemPromptFile)
 	if err != nil {
 		return fmt.Errorf("error loading system prompt: %v", err)
 	}
