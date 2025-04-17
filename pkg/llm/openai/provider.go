@@ -12,8 +12,9 @@ import (
 )
 
 type Provider struct {
-	client *Client
-	model  string
+	client       *Client
+	model        string
+	systemPrompt string
 }
 
 func convertSchema(schema llm.Schema) map[string]interface{} {
@@ -30,10 +31,11 @@ func convertSchema(schema llm.Schema) map[string]interface{} {
 	}
 }
 
-func NewProvider(apiKey string, baseURL string, model string) *Provider {
+func NewProvider(apiKey, baseURL, model, systemPrompt string) *Provider {
 	return &Provider{
-		client: NewClient(apiKey, baseURL),
-		model:  model,
+		client:       NewClient(apiKey, baseURL),
+		model:        model,
+		systemPrompt: systemPrompt,
 	}
 }
 
@@ -49,6 +51,14 @@ func (p *Provider) CreateMessage(
 		"num_tools", len(tools))
 
 	openaiMessages := make([]MessageParam, 0, len(messages))
+
+	// Add system prompt if provided
+	if p.systemPrompt != "" {
+		openaiMessages = append(openaiMessages, MessageParam{
+			Role:    "system",
+			Content: &p.systemPrompt,
+		})
+	}
 
 	// Convert previous messages
 	for _, msg := range messages {

@@ -30,6 +30,7 @@ import (
 var (
 	renderer         *glamour.TermRenderer
 	configFile       string
+	systemPromptFile string
 	messageWindow    int
 	modelFlag        string // New flag for model selection
 	openaiBaseURL    string // Base URL for OpenAI API
@@ -79,6 +80,8 @@ func init() {
 	rootCmd.PersistentFlags().
 		StringVar(&configFile, "config", "", "config file (default is $HOME/.mcp.json)")
 	rootCmd.PersistentFlags().
+		StringVar(&systemPromptFile, "system-prompt", "", "system prompt json file")
+	rootCmd.PersistentFlags().
 		IntVar(&messageWindow, "message-window", 10, "number of messages to keep in context")
 	rootCmd.PersistentFlags().
 		StringVarP(&modelFlag, "model", "m", "anthropic:claude-3-5-sonnet-latest",
@@ -97,7 +100,7 @@ func init() {
 }
 
 // Add new function to create provider
-func createProvider(ctx context.Context, modelString string) (llm.Provider, error) {
+func createProvider(ctx context.Context, modelString, systemPrompt string) (llm.Provider, error) {
 	parts := strings.SplitN(modelString, ":", 2)
 	if len(parts) < 2 {
 		return nil, fmt.Errorf(
@@ -121,10 +124,10 @@ func createProvider(ctx context.Context, modelString string) (llm.Provider, erro
 				"Anthropic API key not provided. Use --anthropic-api-key flag or ANTHROPIC_API_KEY environment variable",
 			)
 		}
-		return anthropic.NewProvider(apiKey, anthropicBaseURL, model), nil
+		return anthropic.NewProvider(apiKey, anthropicBaseURL, model, systemPrompt), nil
 
 	case "ollama":
-		return ollama.NewProvider(model)
+		return ollama.NewProvider(model, systemPrompt)
 
 	case "openai":
 		apiKey := openaiAPIKey
@@ -137,7 +140,7 @@ func createProvider(ctx context.Context, modelString string) (llm.Provider, erro
 				"OpenAI API key not provided. Use --openai-api-key flag or OPENAI_API_KEY environment variable",
 			)
 		}
-		return openai.NewProvider(apiKey, openaiBaseURL, model), nil
+		return openai.NewProvider(apiKey, openaiBaseURL, model, systemPrompt), nil
 
 	case "google":
 		apiKey := googleAPIKey
@@ -148,7 +151,7 @@ func createProvider(ctx context.Context, modelString string) (llm.Provider, erro
 			// The project structure is provider specific, but Google calls this GEMINI_API_KEY in e.g. AI Studio. Support both.
 			apiKey = os.Getenv("GEMINI_API_KEY")
 		}
-		return google.NewProvider(ctx, apiKey, model)
+		return google.NewProvider(ctx, apiKey, model, systemPrompt)
 
 	default:
 		return nil, fmt.Errorf("unsupported provider: %s", provider)
@@ -474,8 +477,13 @@ func runMCPHost(ctx context.Context) error {
 		log.SetReportCaller(false)
 	}
 
+	systemPrompt, err := loadSystemPrompt(systemPromptFile)
+	if err != nil {
+		return fmt.Errorf("error loading system prompt: %v", err)
+	}
+
 	// Create the provider based on the model flag
-	provider, err := createProvider(ctx, modelFlag)
+	provider, err := createProvider(ctx, modelFlag, systemPrompt)
 	if err != nil {
 		return fmt.Errorf("error creating provider: %v", err)
 	}
@@ -591,4 +599,26 @@ func runMCPHost(ctx context.Context) error {
 			return err
 		}
 	}
+}
+
+// loadSystemPrompt loads the system prompt from a JSON file
+func loadSystemPrompt(filePath string) (string, error) {
+	if filePath == "" {
+		return "", nil
+	}
+
+	data, err := os.ReadFile(filePath)
+	if err != nil {
+		return "", fmt.Errorf("error reading config file: %v", err)
+	}
+
+	// Parse only the systemPrompt field
+	var config struct {
+		SystemPrompt string `json:"systemPrompt"`
+	}
+	if err := json.Unmarshal(data, &config); err != nil {
+		return "", fmt.Errorf("error parsing config file: %v", err)
+	}
+
+	return config.SystemPrompt, nil
 }

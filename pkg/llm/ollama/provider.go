@@ -18,19 +18,21 @@ func boolPtr(b bool) *bool {
 
 // Provider implements the Provider interface for Ollama
 type Provider struct {
-	client *api.Client
-	model  string
+	client       *api.Client
+	model        string
+	systemPrompt string
 }
 
 // NewProvider creates a new Ollama provider
-func NewProvider(model string) (*Provider, error) {
+func NewProvider(model string, systemPrompt string) (*Provider, error) {
 	client, err := api.ClientFromEnvironment()
 	if err != nil {
 		return nil, err
 	}
 	return &Provider{
-		client: client,
-		model:  model,
+		client:       client,
+		model:        model,
+		systemPrompt: systemPrompt,
 	}, nil
 }
 
@@ -47,6 +49,14 @@ func (p *Provider) CreateMessage(
 
 	// Convert generic messages to Ollama format
 	ollamaMessages := make([]api.Message, 0, len(messages)+1)
+
+	// Add system prompt if it exists
+	if p.systemPrompt != "" {
+		ollamaMessages = append(ollamaMessages, api.Message{
+			Role:    "system",
+			Content: p.systemPrompt,
+		})
+	}
 
 	// Add existing messages
 	for _, msg := range messages {
@@ -151,7 +161,7 @@ func (p *Provider) CreateMessage(
 		"num_messages", len(messages),
 		"num_tools", len(tools))
 
-	log.Debug("sending messages to Ollama", 
+	log.Debug("sending messages to Ollama",
 		"messages", ollamaMessages,
 		"num_tools", len(tools))
 

@@ -13,6 +13,7 @@ type CreateRequest struct {
 	Model     string         `json:"model"`
 	Messages  []MessageParam `json:"messages"`
 	MaxTokens int            `json:"max_tokens"`
+	System    string         `json:"system,omitempty"`
 	Tools     []Tool         `json:"tools,omitempty"`
 }
 
