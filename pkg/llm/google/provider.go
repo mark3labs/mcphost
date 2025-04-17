@@ -25,6 +25,7 @@ func NewProvider(ctx context.Context, apiKey, model, systemPrompt string) (*Prov
 		return nil, err
 	}
 	m := client.GenerativeModel(model)
+	// If systemPrompt is provided, set the system prompt for the model.
 	if systemPrompt != "" {
 		m.SystemInstruction = genai.NewUserContent(genai.Text(systemPrompt))
 	}

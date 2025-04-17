@@ -612,7 +612,7 @@ func loadSystemPrompt(filePath string) (string, error) {
 		return "", fmt.Errorf("error reading config file: %v", err)
 	}
 
-	// Parse only the system_message field
+	// Parse only the systemPrompt field
 	var config struct {
 		SystemPrompt string `json:"systemPrompt"`
 	}

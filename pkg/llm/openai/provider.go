@@ -51,6 +51,8 @@ func (p *Provider) CreateMessage(
 		"num_tools", len(tools))
 
 	openaiMessages := make([]MessageParam, 0, len(messages))
+
+	// Add system prompt if provided
 	if p.systemPrompt != "" {
 		openaiMessages = append(openaiMessages, MessageParam{
 			Role:    "system",
