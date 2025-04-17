@@ -10,3 +10,7 @@ build/
 scripts/
 dist/
 contribute/output/
+
+.system-message.json
+
+home-audio

@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -37,6 +38,8 @@ var (
 	openaiAPIKey     string
 	anthropicAPIKey  string
 	googleAPIKey     string
+
+	systemMessageFile string
 )
 
 const (
@@ -83,6 +86,8 @@ func init() {
 	rootCmd.PersistentFlags().
 		StringVarP(&modelFlag, "model", "m", "anthropic:claude-3-5-sonnet-latest",
 			"model to use (format: provider:model, e.g. anthropic:claude-3-5-sonnet-latest or ollama:qwen2.5:3b)")
+	rootCmd.PersistentFlags().
+		StringVar(&systemMessageFile, "system-message", "", "system message file (default is $HOME/.system-message.json)")
 
 	// Add debug flag
 	rootCmd.PersistentFlags().
@@ -94,6 +99,39 @@ func init() {
 	flags.StringVar(&openaiAPIKey, "openai-api-key", "", "OpenAI API key")
 	flags.StringVar(&anthropicAPIKey, "anthropic-api-key", "", "Anthropic API key")
 	flags.StringVar(&googleAPIKey, "google-api-key", "", "Google (Gemini) API key")
+}
+
+// loadSystemMessage loads the system message from a JSON file
+func loadSystemMessage() (string, error) {
+	// If config file is not specified, use default location
+	systemMsgPath := systemMessageFile
+	if systemMsgPath == "" {
+		home, err := os.UserHomeDir()
+		if err != nil {
+			return "", fmt.Errorf("error getting home directory: %v", err)
+		}
+		systemMsgPath = filepath.Join(home, ".system-message.json")
+	}
+
+	// Read config file if it exists
+	if _, err := os.Stat(systemMsgPath); err != nil {
+		return "", nil // File doesn't exist, return empty string
+	}
+
+	data, err := os.ReadFile(systemMsgPath)
+	if err != nil {
+		return "", fmt.Errorf("error reading config file: %v", err)
+	}
+
+	// Parse only the system_message field
+	var config struct {
+		SystemMessage string `json:"system_message"`
+	}
+	if err := json.Unmarshal(data, &config); err != nil {
+		return "", fmt.Errorf("error parsing config file: %v", err)
+	}
+
+	return config.SystemMessage, nil
 }
 
 // Add new function to create provider
@@ -137,7 +175,16 @@ func createProvider(ctx context.Context, modelString string) (llm.Provider, erro
 				"OpenAI API key not provided. Use --openai-api-key flag or OPENAI_API_KEY environment variable",
 			)
 		}
-		return openai.NewProvider(apiKey, openaiBaseURL, model), nil
+		p := openai.NewProvider(apiKey, openaiBaseURL, model)
+
+		// Load system message from config file
+		systemMessage, err := loadSystemMessage()
+		if err != nil {
+			log.Warn("Failed to load system message from config", "error", err)
+		} else if systemMessage != "" {
+			p.SetSystemMessage(systemMessage)
+		}
+		return p, nil
 
 	case "google":
 		apiKey := googleAPIKey
@@ -264,7 +311,6 @@ func runPrompt(
 	retries := 0
 
 	// Convert MessageParam to llm.Message for provider
-	// Messages already implement llm.Message interface
 	llmMessages := make([]llm.Message, len(*messages))
 	for i := range *messages {
 		llmMessages[i] = &(*messages)[i]
@@ -282,18 +328,15 @@ func runPrompt(
 		_ = spinner.New().Title("Thinking...").Action(action).Run()
 
 		if err != nil {
-			// Check if it's an overloaded error
 			if strings.Contains(err.Error(), "overloaded_error") {
 				if retries >= maxRetries {
 					return fmt.Errorf(
 						"claude is currently overloaded. please wait a few minutes and try again",
 					)
 				}
-
-				log.Warn("Claude is overloaded, backing off...",
+				log.Info("Claude is overloaded, retrying...",
 					"attempt", retries+1,
 					"backoff", backoff.String())
-
 				time.Sleep(backoff)
 				backoff *= 2
 				if backoff > maxBackoff {
@@ -302,10 +345,8 @@ func runPrompt(
 				retries++
 				continue
 			}
-			// If it's not an overloaded error, return the error immediately
 			return err
 		}
-		// If we got here, the request succeeded
 		break
 	}
 
@@ -315,9 +356,6 @@ func runPrompt(
 	if str, err := renderer.Render("\nAssistant: "); message.GetContent() != "" && err == nil {
 		fmt.Print(str)
 	}
-
-	toolResults := []history.ContentBlock{}
-	messageContent = []history.ContentBlock{}
 
 	// Add text content
 	if message.GetContent() != "" {
@@ -338,126 +376,133 @@ func runPrompt(
 	}
 
 	// Handle tool calls
-	for _, toolCall := range message.GetToolCalls() {
-		log.Info("🔧 Using tool", "name", toolCall.GetName())
+	toolCalls := message.GetToolCalls()
+	if len(toolCalls) > 0 {
+		log.Info("Processing tool calls", "count", len(toolCalls))
 
-		input, _ := json.Marshal(toolCall.GetArguments())
-		messageContent = append(messageContent, history.ContentBlock{
-			Type:  "tool_use",
-			ID:    toolCall.GetID(),
-			Name:  toolCall.GetName(),
-			Input: input,
-		})
-
-		// Log usage statistics if available
-		inputTokens, outputTokens := message.GetUsage()
-		if inputTokens > 0 || outputTokens > 0 {
-			log.Info("Usage statistics",
-				"input_tokens", inputTokens,
-				"output_tokens", outputTokens,
-				"total_tokens", inputTokens+outputTokens)
+		// Create assistant message with tool calls
+		assistantMsg := history.HistoryMessage{
+			Role:    message.GetRole(),
+			Content: messageContent,
 		}
 
-		parts := strings.Split(toolCall.GetName(), "__")
-		if len(parts) != 2 {
-			fmt.Printf(
-				"Error: Invalid tool name format: %s\n",
-				toolCall.GetName(),
-			)
-			continue
-		}
+		// Process each tool call and its response
+		for _, toolCall := range toolCalls {
+			log.Info("Using tool", "name", toolCall.GetName(), "id", toolCall.GetID())
 
-		serverName, toolName := parts[0], parts[1]
-		mcpClient, ok := mcpClients[serverName]
-		if !ok {
-			fmt.Printf("Error: Server not found: %s\n", serverName)
-			continue
-		}
-
-		var toolArgs map[string]interface{}
-		if err := json.Unmarshal(input, &toolArgs); err != nil {
-			fmt.Printf("Error parsing tool arguments: %v\n", err)
-			continue
-		}
-
-		var toolResultPtr *mcp.CallToolResult
-		action := func() {
-			req := mcp.CallToolRequest{}
-			req.Params.Name = toolName
-			req.Params.Arguments = toolArgs
-			toolResultPtr, err = mcpClient.CallTool(
-				context.Background(),
-				req,
-			)
-		}
-		_ = spinner.New().
-			Title(fmt.Sprintf("Running tool %s...", toolName)).
-			Action(action).
-			Run()
-
-		if err != nil {
-			errMsg := fmt.Sprintf(
-				"Error calling tool %s: %v",
-				toolName,
-				err,
-			)
-			fmt.Printf("\n%s\n", errorStyle.Render(errMsg))
-
-			// Add error message as tool result
-			toolResults = append(toolResults, history.ContentBlock{
-				Type:      "tool_result",
-				ToolUseID: toolCall.GetID(),
-				Content: []history.ContentBlock{{
-					Type: "text",
-					Text: errMsg,
-				}},
-			})
-			continue
-		}
-
-		toolResult := *toolResultPtr
-
-		if toolResult.Content != nil {
-			log.Debug("raw tool result content", "content", toolResult.Content)
-
-			// Create the tool result block
-			resultBlock := history.ContentBlock{
-				Type:      "tool_result",
-				ToolUseID: toolCall.GetID(),
-				Content:   toolResult.Content,
+			input, _ := json.Marshal(toolCall.GetArguments())
+			toolUseBlock := history.ContentBlock{
+				Type:  "tool_use",
+				ID:    toolCall.GetID(),
+				Name:  toolCall.GetName(),
+				Input: input,
 			}
 
-			// Extract text content
-			var resultText string
-			// Handle array content directly since we know it's []interface{}
-			for _, item := range toolResult.Content {
-				if contentMap, ok := item.(mcp.TextContent); ok {
-					resultText += fmt.Sprintf("%v ", contentMap.Text)
+			// Add tool use block to assistant message
+			assistantMsg.Content = append(assistantMsg.Content, toolUseBlock)
+
+			parts := strings.Split(toolCall.GetName(), "__")
+			if len(parts) != 2 {
+				log.Error("Invalid tool name format", "name", toolCall.GetName())
+				continue
+			}
+
+			serverName, toolName := parts[0], parts[1]
+			mcpClient, ok := mcpClients[serverName]
+			if !ok {
+				log.Error("Server not found", "name", serverName)
+				continue
+			}
+
+			var toolArgs map[string]interface{}
+			if err := json.Unmarshal(input, &toolArgs); err != nil {
+				log.Error("Error parsing tool arguments", "error", err)
+				continue
+			}
+
+			var toolResultPtr *mcp.CallToolResult
+			action := func() {
+				req := mcp.CallToolRequest{}
+				req.Params.Name = toolName
+				req.Params.Arguments = toolArgs
+				toolResultPtr, err = mcpClient.CallTool(
+					context.Background(),
+					req,
+				)
+			}
+			_ = spinner.New().
+				Title(fmt.Sprintf("Running tool %s...", toolName)).
+				Action(action).
+				Run()
+
+			if err != nil {
+				errMsg := fmt.Sprintf(
+					"Error calling tool %s: %v",
+					toolName,
+					err,
+				)
+				log.Error("Tool call failed", "name", toolName, "error", err)
+				fmt.Printf("\n%s\n", errorStyle.Render(errMsg))
+
+				// Add error as tool result
+				*messages = append(*messages, assistantMsg)
+				*messages = append(*messages, history.HistoryMessage{
+					Role: "user",
+					Content: []history.ContentBlock{{
+						Type:      "tool_result",
+						ToolUseID: toolCall.GetID(),
+						Content: []history.ContentBlock{{
+							Type: "text",
+							Text: errMsg,
+						}},
+					}},
+				})
+				continue
+			}
+
+			toolResult := *toolResultPtr
+			if toolResult.Content != nil {
+				resultBlock := history.ContentBlock{
+					Type:      "tool_result",
+					ToolUseID: toolCall.GetID(),
+					Content:   toolResult.Content,
+				}
+
+				var resultText string
+				for _, item := range toolResult.Content {
+					if contentMap, ok := item.(mcp.TextContent); ok {
+						resultText += fmt.Sprintf("%v ", contentMap.Text)
+					}
+				}
+
+				resultBlock.Text = strings.TrimSpace(resultText)
+				log.Info("Tool result received", "name", toolName, "id", toolCall.GetID())
+
+				// Add assistant message with tool call and its result
+				*messages = append(*messages, assistantMsg)
+				*messages = append(*messages, history.HistoryMessage{
+					Role:    "user",
+					Content: []history.ContentBlock{resultBlock},
+				})
+
+				// Reset assistantMsg for next tool call
+				assistantMsg = history.HistoryMessage{
+					Role:    message.GetRole(),
+					Content: messageContent,
 				}
 			}
-
-			resultBlock.Text = strings.TrimSpace(resultText)
-			log.Debug("created tool result block",
-				"block", resultBlock,
-				"tool_id", toolCall.GetID())
-
-			toolResults = append(toolResults, resultBlock)
 		}
+
+		log.Info("Processing tool results response")
+		// Process the final response to tool results
+		return runPrompt(ctx, provider, mcpClients, tools, "", messages)
 	}
 
+	// If no tool calls, just add the message
 	*messages = append(*messages, history.HistoryMessage{
 		Role:    message.GetRole(),
 		Content: messageContent,
 	})
-
-	if len(toolResults) > 0 {
-		*messages = append(*messages, history.HistoryMessage{
-			Role:    "user",
-			Content: toolResults,
-		})
-		// Make another call to get Claude's response to the tool results
-		return runPrompt(ctx, provider, mcpClients, tools, "", messages)
-	}
 
 	fmt.Println() // Add spacing
 	return nil

@@ -151,7 +151,7 @@ func (p *Provider) CreateMessage(
 		"num_messages", len(messages),
 		"num_tools", len(tools))
 
-	log.Debug("sending messages to Ollama", 
+	log.Debug("sending messages to Ollama",
 		"messages", ollamaMessages,
 		"num_tools", len(tools))
 
