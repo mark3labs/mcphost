@@ -30,6 +30,7 @@ import (
 var (
 	renderer         *glamour.TermRenderer
 	configFile       string
+	systemPrompt     string
 	messageWindow    int
 	modelFlag        string // New flag for model selection
 	openaiBaseURL    string // Base URL for OpenAI API
@@ -79,6 +80,8 @@ func init() {
 	rootCmd.PersistentFlags().
 		StringVar(&configFile, "config", "", "config file (default is $HOME/.mcp.json)")
 	rootCmd.PersistentFlags().
+		StringVar(&systemPrompt, "system-prompt", "", "system prompt")
+	rootCmd.PersistentFlags().
 		IntVar(&messageWindow, "message-window", 10, "number of messages to keep in context")
 	rootCmd.PersistentFlags().
 		StringVarP(&modelFlag, "model", "m", "anthropic:claude-3-5-sonnet-latest",
@@ -97,7 +100,7 @@ func init() {
 }
 
 // Add new function to create provider
-func createProvider(ctx context.Context, modelString string) (llm.Provider, error) {
+func createProvider(ctx context.Context, modelString, systemPrompt string) (llm.Provider, error) {
 	parts := strings.SplitN(modelString, ":", 2)
 	if len(parts) < 2 {
 		return nil, fmt.Errorf(
@@ -124,7 +127,7 @@ func createProvider(ctx context.Context, modelString string) (llm.Provider, erro
 		return anthropic.NewProvider(apiKey, anthropicBaseURL, model), nil
 
 	case "ollama":
-		return ollama.NewProvider(model)
+		return ollama.NewProvider(model, systemPrompt)
 
 	case "openai":
 		apiKey := openaiAPIKey
@@ -474,8 +477,13 @@ func runMCPHost(ctx context.Context) error {
 		log.SetReportCaller(false)
 	}
 
+	systemPrompt, err := loadSystemPrompt(systemPrompt)
+	if err != nil {
+		return fmt.Errorf("error loading system prompt: %v", err)
+	}
+
 	// Create the provider based on the model flag
-	provider, err := createProvider(ctx, modelFlag)
+	provider, err := createProvider(ctx, modelFlag, systemPrompt)
 	if err != nil {
 		return fmt.Errorf("error creating provider: %v", err)
 	}
@@ -591,4 +599,26 @@ func runMCPHost(ctx context.Context) error {
 			return err
 		}
 	}
+}
+
+// loadSystemPrompt loads the system prompt from a JSON file
+func loadSystemPrompt(filePath string) (string, error) {
+	if filePath == "" {
+		return "", nil
+	}
+
+	data, err := os.ReadFile(filePath)
+	if err != nil {
+		return "", fmt.Errorf("error reading config file: %v", err)
+	}
+
+	// Parse only the system_message field
+	var config struct {
+		SystemPrompt string `json:"systemPrompt"`
+	}
+	if err := json.Unmarshal(data, &config); err != nil {
+		return "", fmt.Errorf("error parsing config file: %v", err)
+	}
+
+	return config.SystemPrompt, nil
 }
