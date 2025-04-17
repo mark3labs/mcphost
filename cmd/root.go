@@ -140,7 +140,7 @@ func createProvider(ctx context.Context, modelString, systemPrompt string) (llm.
 				"OpenAI API key not provided. Use --openai-api-key flag or OPENAI_API_KEY environment variable",
 			)
 		}
-		return openai.NewProvider(apiKey, openaiBaseURL, model), nil
+		return openai.NewProvider(apiKey, openaiBaseURL, model, systemPrompt), nil
 
 	case "google":
 		apiKey := googleAPIKey
