@@ -19,12 +19,13 @@ type Provider struct {
 	toolCallID int
 }
 
-func NewProvider(ctx context.Context, apiKey string, model string) (*Provider, error) {
+func NewProvider(ctx context.Context, apiKey, model, systemPrompt string) (*Provider, error) {
 	client, err := genai.NewClient(ctx, option.WithAPIKey(apiKey))
 	if err != nil {
 		return nil, err
 	}
 	m := client.GenerativeModel(model)
+	m.SystemInstruction = genai.NewUserContent(genai.Text(systemPrompt))
 	return &Provider{
 		client: client,
 		model:  m,

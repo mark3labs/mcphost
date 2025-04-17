@@ -151,7 +151,7 @@ func createProvider(ctx context.Context, modelString, systemPrompt string) (llm.
 			// The project structure is provider specific, but Google calls this GEMINI_API_KEY in e.g. AI Studio. Support both.
 			apiKey = os.Getenv("GEMINI_API_KEY")
 		}
-		return google.NewProvider(ctx, apiKey, model)
+		return google.NewProvider(ctx, apiKey, model, systemPrompt)
 
 	default:
 		return nil, fmt.Errorf("unsupported provider: %s", provider)
