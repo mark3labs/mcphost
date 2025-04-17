@@ -76,6 +76,7 @@ go install github.com/mark3labs/mcphost@latest
 
 ## Configuration ⚙️
 
+### MCP-server
 MCPHost will automatically create a configuration file at `~/.mcp.json` if it doesn't exist. You can also specify a custom location using the `--config` flag:
 
 ```json
@@ -107,6 +108,23 @@ Each MCP server entry requires:
   - For SQLite server: `mcp-server-sqlite` with database path
   - For filesystem server: `@modelcontextprotocol/server-filesystem` with directory path
 
+
+### System-Prompt
+
+You can specify a custom system prompt using the `--system-prompt` flag. The system prompt should be a JSON file containing the instructions and context you want to provide to the model. For example:
+
+```json
+{
+    "systemPrompt": "You're a cat. Name is Neko"
+}
+```
+
+Usage:
+```bash
+mcphost --system-prompt ./my-system-prompt.json
+```
+
+
 ## Usage 🚀
 
 MCPHost is a CLI tool that allows you to interact with various AI models through a unified interface. It supports various tools through MCP servers.
@@ -136,6 +154,7 @@ mcphost --model openai:<your-model-name> \
 - `--anthropic-url string`: Base URL for Anthropic API (defaults to api.anthropic.com)
 - `--anthropic-api-key string`: Anthropic API key (can also be set via ANTHROPIC_API_KEY environment variable)
 - `--config string`: Config file location (default is $HOME/.mcp.json)
+- `--system-prompt string`: system-prompt file location
 - `--debug`: Enable debug logging
 - `--message-window int`: Number of messages to keep in context (default: 10)
 - `-m, --model string`: Model to use (format: provider:model) (default "anthropic:claude-3-5-sonnet-latest")
