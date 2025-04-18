@@ -146,7 +146,11 @@ func translateToGoogleSchema(schema llm.Schema) *genai.Schema {
 }
 
 func propertyToGoogleSchema(properties map[string]any) *genai.Schema {
-	s := &genai.Schema{Type: toType(properties["type"].(string))}
+	typ, ok := properties["type"].(string)
+	if !ok {
+		return nil
+	}
+	s := &genai.Schema{Type: toType(typ)}
 	if desc, ok := properties["description"].(string); ok {
 		s.Description = desc
 	}
