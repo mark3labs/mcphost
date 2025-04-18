@@ -166,6 +166,10 @@ func toType(typ string) genai.Type {
 	switch typ {
 	case "string":
 		return genai.TypeString
+	case "number":
+		return genai.TypeNumber
+	case "integer":
+		return genai.TypeInteger
 	case "boolean":
 		return genai.TypeBoolean
 	case "object":
