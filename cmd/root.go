@@ -451,10 +451,12 @@ func runPrompt(
 	})
 
 	if len(toolResults) > 0 {
-		*messages = append(*messages, history.HistoryMessage{
-			Role:    "user",
-			Content: toolResults,
-		})
+		for _, toolResult := range toolResults {
+			*messages = append(*messages, history.HistoryMessage{
+				Role:    "tool",
+				Content: []history.ContentBlock{toolResult},
+			})
+		}
 		// Make another call to get Claude's response to the tool results
 		return runPrompt(ctx, provider, mcpClients, tools, "", messages)
 	}
