@@ -464,11 +464,11 @@ func runPrompt(
 	})
 
 	if len(toolResults) > 0 {
+		role := "tool"
+		if providerType == llmProviderTypeAnthropic {
+			role = "user"
+		}
 		for _, toolResult := range toolResults {
-			role := "tool"
-			if providerType == llmProviderTypeAnthropic {
-				role = "user"
-			}
 			*messages = append(*messages, history.HistoryMessage{
 				Role:    role,
 				Content: []history.ContentBlock{toolResult},
