@@ -237,6 +237,15 @@ func updateRenderer() error {
 	return err
 }
 
+type llmProviderType int
+
+const (
+	llmProviderTypeAnthropic = iota
+	llmProviderTypeOllama
+	llmProviderTypeOpenAI
+	llmProviderTypeGoogle
+)
+
 // Method implementations for simpleMessage
 func runPrompt(
 	ctx context.Context,
@@ -245,6 +254,7 @@ func runPrompt(
 	tools []llm.Tool,
 	prompt string,
 	messages *[]history.HistoryMessage,
+	providerType llmProviderType,
 ) error {
 	// Display the user's prompt if it's not empty (i.e., not a tool response)
 	if prompt != "" {
@@ -455,13 +465,17 @@ func runPrompt(
 
 	if len(toolResults) > 0 {
 		for _, toolResult := range toolResults {
+			role := "tool"
+			if providerType == llmProviderTypeAnthropic {
+				role = "user"
+			}
 			*messages = append(*messages, history.HistoryMessage{
-				Role:    "tool",
+				Role:    role,
 				Content: []history.ContentBlock{toolResult},
 			})
 		}
 		// Make another call to get Claude's response to the tool results
-		return runPrompt(ctx, provider, mcpClients, tools, "", messages)
+		return runPrompt(ctx, provider, mcpClients, tools, "", messages, providerType)
 	}
 
 	fmt.Println() // Add spacing
@@ -488,6 +502,18 @@ func runMCPHost(ctx context.Context) error {
 	provider, err := createProvider(ctx, modelFlag, systemPrompt)
 	if err != nil {
 		return fmt.Errorf("error creating provider: %v", err)
+	}
+
+	var providerType llmProviderType
+	switch provider.(type) {
+	case *anthropic.Provider:
+		providerType = llmProviderTypeAnthropic
+	case *ollama.Provider:
+		providerType = llmProviderTypeOllama
+	case *openai.Provider:
+		providerType = llmProviderTypeOpenAI
+	case *google.Provider:
+		providerType = llmProviderTypeGoogle
 	}
 
 	// Split the model flag and get just the model name
@@ -596,7 +622,7 @@ func runMCPHost(ctx context.Context) error {
 		if len(messages) > 0 {
 			messages = pruneMessages(messages)
 		}
-		err = runPrompt(ctx, provider, mcpClients, allTools, prompt, &messages)
+		err = runPrompt(ctx, provider, mcpClients, allTools, prompt, &messages, providerType)
 		if err != nil {
 			return err
 		}
