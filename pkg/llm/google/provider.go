@@ -41,7 +41,7 @@ func (p *Provider) CreateMessage(ctx context.Context, prompt string, messages []
 	for _, msg := range messages {
 		for _, call := range msg.GetToolCalls() {
 			hist = append(hist, &genai.Content{
-				Role: msg.GetRole(),
+				Role: mappingRole(msg.GetRole()),
 				Parts: []genai.Part{
 					genai.FunctionCall{
 						Name: call.GetName(),
@@ -56,7 +56,7 @@ func (p *Provider) CreateMessage(ctx context.Context, prompt string, messages []
 				for _, block := range historyMsg.Content {
 					if block.Type == "tool_result" {
 						hist = append(hist, &genai.Content{
-							Role:  msg.GetRole(),
+							Role:  mappingRole(msg.GetRole()),
 							Parts: []genai.Part{genai.Text(block.Text)},
 						})
 					}
@@ -66,7 +66,7 @@ func (p *Provider) CreateMessage(ctx context.Context, prompt string, messages []
 
 		if text := strings.TrimSpace(msg.GetContent()); text != "" {
 			hist = append(hist, &genai.Content{
-				Role:  msg.GetRole(),
+				Role:  mappingRole(msg.GetRole()),
 				Parts: []genai.Part{genai.Text(text)},
 			})
 		}
@@ -190,5 +190,27 @@ func toType(typ string) genai.Type {
 		return genai.TypeArray
 	default:
 		return genai.TypeUnspecified
+	}
+}
+
+const (
+	roleUser      = "user"
+	roleAssistant = "assistant"
+	roleSystem    = "system"
+	roleTool      = "tool"
+)
+
+func mappingRole(role string) string {
+	switch role {
+	case roleUser:
+		return roleUser
+	case roleAssistant:
+		return roleAssistant
+	case roleSystem:
+		return roleSystem
+	case roleTool:
+		return roleUser
+	default:
+		return roleUser
 	}
 }

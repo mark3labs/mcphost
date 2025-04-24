@@ -97,7 +97,7 @@ func (p *Provider) CreateMessage(
 		// Always append the message, even if content is empty
 		// This maintains conversation flow
 		anthropicMessages = append(anthropicMessages, MessageParam{
-			Role:    msg.GetRole(),
+			Role:    mappingRole(msg.GetRole()),
 			Content: content,
 		})
 	}
@@ -194,4 +194,26 @@ func (p *Provider) CreateToolResponse(
 	}
 
 	return msg, nil
+}
+
+const (
+	roleUser      = "user"
+	roleAssistant = "assistant"
+	roleSystem    = "system"
+	roleTool      = "tool"
+)
+
+func mappingRole(role string) string {
+	switch role {
+	case roleUser:
+		return roleUser
+	case roleAssistant:
+		return roleAssistant
+	case roleSystem:
+		return roleSystem
+	case roleTool:
+		return roleUser
+	default:
+		return roleUser
+	}
 }
