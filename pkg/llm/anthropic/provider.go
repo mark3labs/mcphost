@@ -199,21 +199,17 @@ func (p *Provider) CreateToolResponse(
 const (
 	roleUser      = "user"
 	roleAssistant = "assistant"
-	roleSystem    = "system"
-	roleTool      = "tool"
 )
 
+var roleMap = map[string]string{
+	roleUser:      roleUser,
+	roleAssistant: roleAssistant,
+}
+
 func mappingRole(role string) string {
-	switch role {
-	case roleUser:
-		return roleUser
-	case roleAssistant:
-		return roleAssistant
-	case roleSystem:
-		return roleSystem
-	case roleTool:
-		return roleUser
-	default:
+	v, ok := roleMap[role]
+	if !ok {
 		return roleUser
 	}
+	return v
 }

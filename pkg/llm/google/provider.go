@@ -194,23 +194,19 @@ func toType(typ string) genai.Type {
 }
 
 const (
-	roleUser      = "user"
-	roleAssistant = "assistant"
-	roleSystem    = "system"
-	roleTool      = "tool"
+	roleUser  = "user"
+	roleModel = "model"
 )
 
+var roleMap = map[string]string{
+	roleUser:  roleUser,
+	roleModel: roleModel,
+}
+
 func mappingRole(role string) string {
-	switch role {
-	case roleUser:
-		return roleUser
-	case roleAssistant:
-		return roleAssistant
-	case roleSystem:
-		return roleSystem
-	case roleTool:
-		return roleUser
-	default:
+	v, ok := roleMap[role]
+	if !ok {
 		return roleUser
 	}
+	return v
 }
