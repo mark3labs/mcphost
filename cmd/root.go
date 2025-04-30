@@ -3,15 +3,14 @@ package cmd
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
+	"net/http"
 	"os"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/charmbracelet/glamour/styles"
-	"github.com/charmbracelet/huh"
-	"github.com/charmbracelet/huh/spinner"
 	"github.com/charmbracelet/log"
 
 	"github.com/charmbracelet/glamour"
@@ -37,6 +36,7 @@ var (
 	openaiAPIKey     string
 	anthropicAPIKey  string
 	googleAPIKey     string
+	serverPort       string // HTTP server port
 )
 
 const (
@@ -83,6 +83,8 @@ func init() {
 	rootCmd.PersistentFlags().
 		StringVarP(&modelFlag, "model", "m", "anthropic:claude-3-5-sonnet-latest",
 			"model to use (format: provider:model, e.g. anthropic:claude-3-5-sonnet-latest or ollama:qwen2.5:3b)")
+	rootCmd.PersistentFlags().
+		StringVarP(&serverPort, "port", "p", "9090", "port for the HTTP server")
 
 	// Add debug flag
 	rootCmd.PersistentFlags().
@@ -234,7 +236,24 @@ func updateRenderer() error {
 	return err
 }
 
-// Method implementations for simpleMessage
+// MessageResponse represents the response structure for API clients
+type MessageResponse struct {
+	ID          string                   `json:"id"`
+	Content     string                   `json:"content"`
+	Role        string                   `json:"role"`
+	ToolCalls   []map[string]interface{} `json:"tool_calls,omitempty"`
+	ToolResults []map[string]interface{} `json:"tool_results,omitempty"`
+	Usage       map[string]int           `json:"usage,omitempty"`
+	Error       string                   `json:"error,omitempty"`
+}
+
+// ChatRequest represents the incoming chat message request
+type ChatRequest struct {
+	Message   string `json:"message"`
+	SessionID string `json:"session_id,omitempty"`
+}
+
+// Method implementations for API
 func runPrompt(
 	ctx context.Context,
 	provider llm.Provider,
@@ -242,10 +261,11 @@ func runPrompt(
 	tools []llm.Tool,
 	prompt string,
 	messages *[]history.HistoryMessage,
-) error {
-	// Display the user's prompt if it's not empty (i.e., not a tool response)
+) ([]MessageResponse, error) {
+	var responses []MessageResponse
+
+	// Add the user's prompt to messages if it's not empty
 	if prompt != "" {
-		fmt.Printf("\n%s\n", promptStyle.Render("You: "+prompt))
 		*messages = append(
 			*messages,
 			history.HistoryMessage{
@@ -271,26 +291,23 @@ func runPrompt(
 	}
 
 	for {
-		action := func() {
-			message, err = provider.CreateMessage(
-				ctx,
-				prompt,
-				llmMessages,
-				tools,
-			)
-		}
-		_ = spinner.New().Title("Thinking...").Action(action).Run()
+		message, err = provider.CreateMessage(
+			ctx,
+			prompt,
+			llmMessages,
+			tools,
+		)
 
 		if err != nil {
 			// Check if it's an overloaded error
 			if strings.Contains(err.Error(), "overloaded_error") {
 				if retries >= maxRetries {
-					return fmt.Errorf(
-						"claude is currently overloaded. please wait a few minutes and try again",
+					return nil, fmt.Errorf(
+						"model is currently overloaded. please wait a few minutes and try again",
 					)
 				}
 
-				log.Warn("Claude is overloaded, backing off...",
+				log.Warn("Model API is overloaded, backing off...",
 					"attempt", retries+1,
 					"backoff", backoff.String())
 
@@ -303,34 +320,30 @@ func runPrompt(
 				continue
 			}
 			// If it's not an overloaded error, return the error immediately
-			return err
+			return nil, err
 		}
 		// If we got here, the request succeeded
 		break
 	}
 
 	var messageContent []history.ContentBlock
+	var toolResults []history.ContentBlock
 
-	// Handle the message response
-	if str, err := renderer.Render("\nAssistant: "); message.GetContent() != "" && err == nil {
-		fmt.Print(str)
+	// Create response object
+	inputTokens, outputTokens := message.GetUsage()
+	response := MessageResponse{
+		ID:      fmt.Sprintf("msg_%d", time.Now().UnixNano()),
+		Content: message.GetContent(),
+		Role:    message.GetRole(),
+		Usage: map[string]int{
+			"input_tokens":  inputTokens,
+			"output_tokens": outputTokens,
+			"total_tokens":  inputTokens + outputTokens,
+		},
 	}
-
-	toolResults := []history.ContentBlock{}
-	messageContent = []history.ContentBlock{}
 
 	// Add text content
 	if message.GetContent() != "" {
-		if err := updateRenderer(); err != nil {
-			return fmt.Errorf("error updating renderer: %v", err)
-		}
-		str, err := renderer.Render(message.GetContent() + "\n")
-		if err != nil {
-			log.Error("Failed to render response", "error", err)
-			fmt.Print(message.GetContent() + "\n")
-		} else {
-			fmt.Print(str)
-		}
 		messageContent = append(messageContent, history.ContentBlock{
 			Type: "text",
 			Text: message.GetContent(),
@@ -349,61 +362,19 @@ func runPrompt(
 			Input: input,
 		})
 
-		// Log usage statistics if available
-		inputTokens, outputTokens := message.GetUsage()
-		if inputTokens > 0 || outputTokens > 0 {
-			log.Info("Usage statistics",
-				"input_tokens", inputTokens,
-				"output_tokens", outputTokens,
-				"total_tokens", inputTokens+outputTokens)
+		// Add tool call to response
+		toolCallMap := map[string]interface{}{
+			"id":        toolCall.GetID(),
+			"name":      toolCall.GetName(),
+			"arguments": toolCall.GetArguments(),
 		}
+		response.ToolCalls = append(response.ToolCalls, toolCallMap)
 
 		parts := strings.Split(toolCall.GetName(), "__")
 		if len(parts) != 2 {
-			fmt.Printf(
-				"Error: Invalid tool name format: %s\n",
-				toolCall.GetName(),
-			)
-			continue
-		}
+			errMsg := fmt.Sprintf("Invalid tool name format: %s", toolCall.GetName())
+			log.Error(errMsg)
 
-		serverName, toolName := parts[0], parts[1]
-		mcpClient, ok := mcpClients[serverName]
-		if !ok {
-			fmt.Printf("Error: Server not found: %s\n", serverName)
-			continue
-		}
-
-		var toolArgs map[string]interface{}
-		if err := json.Unmarshal(input, &toolArgs); err != nil {
-			fmt.Printf("Error parsing tool arguments: %v\n", err)
-			continue
-		}
-
-		var toolResultPtr *mcp.CallToolResult
-		action := func() {
-			req := mcp.CallToolRequest{}
-			req.Params.Name = toolName
-			req.Params.Arguments = toolArgs
-			toolResultPtr, err = mcpClient.CallTool(
-				context.Background(),
-				req,
-			)
-		}
-		_ = spinner.New().
-			Title(fmt.Sprintf("Running tool %s...", toolName)).
-			Action(action).
-			Run()
-
-		if err != nil {
-			errMsg := fmt.Sprintf(
-				"Error calling tool %s: %v",
-				toolName,
-				err,
-			)
-			fmt.Printf("\n%s\n", errorStyle.Render(errMsg))
-
-			// Add error message as tool result
 			toolResults = append(toolResults, history.ContentBlock{
 				Type:      "tool_result",
 				ToolUseID: toolCall.GetID(),
@@ -411,6 +382,86 @@ func runPrompt(
 					Type: "text",
 					Text: errMsg,
 				}},
+			})
+
+			response.ToolResults = append(response.ToolResults, map[string]interface{}{
+				"tool_call_id": toolCall.GetID(),
+				"content":      errMsg,
+				"error":        true,
+			})
+			continue
+		}
+
+		serverName, toolName := parts[0], parts[1]
+		mcpClient, ok := mcpClients[serverName]
+		if !ok {
+			errMsg := fmt.Sprintf("Server not found: %s", serverName)
+			log.Error(errMsg)
+
+			toolResults = append(toolResults, history.ContentBlock{
+				Type:      "tool_result",
+				ToolUseID: toolCall.GetID(),
+				Content: []history.ContentBlock{{
+					Type: "text",
+					Text: errMsg,
+				}},
+			})
+
+			response.ToolResults = append(response.ToolResults, map[string]interface{}{
+				"tool_call_id": toolCall.GetID(),
+				"content":      errMsg,
+				"error":        true,
+			})
+			continue
+		}
+
+		var toolArgs map[string]interface{}
+		if err := json.Unmarshal(input, &toolArgs); err != nil {
+			errMsg := fmt.Sprintf("Error parsing tool arguments: %v", err)
+			log.Error(errMsg)
+
+			toolResults = append(toolResults, history.ContentBlock{
+				Type:      "tool_result",
+				ToolUseID: toolCall.GetID(),
+				Content: []history.ContentBlock{{
+					Type: "text",
+					Text: errMsg,
+				}},
+			})
+
+			response.ToolResults = append(response.ToolResults, map[string]interface{}{
+				"tool_call_id": toolCall.GetID(),
+				"content":      errMsg,
+				"error":        true,
+			})
+			continue
+		}
+
+		toolArgs["skp-authorization"] = fmt.Sprintf("Bearer %s", "token-some"+os.Getenv("MCP_AUTH_TOKEN"))
+		req := mcp.CallToolRequest{}
+		req.Params.Name = toolName
+		req.Params.Arguments = toolArgs
+		// add auth token to the request
+		authCtx := context.WithValue(ctx, "mcp.AuthTokenKey", os.Getenv("MCP_AUTH_TOKEN"))
+		toolResultPtr, err := mcpClient.CallTool(authCtx, req)
+
+		if err != nil {
+			errMsg := fmt.Sprintf("Error calling tool %s: %v", toolName, err)
+			log.Error(errMsg)
+
+			toolResults = append(toolResults, history.ContentBlock{
+				Type:      "tool_result",
+				ToolUseID: toolCall.GetID(),
+				Content: []history.ContentBlock{{
+					Type: "text",
+					Text: errMsg,
+				}},
+			})
+
+			response.ToolResults = append(response.ToolResults, map[string]interface{}{
+				"tool_call_id": toolCall.GetID(),
+				"content":      errMsg,
+				"error":        true,
 			})
 			continue
 		}
@@ -442,25 +493,77 @@ func runPrompt(
 				"tool_id", toolCall.GetID())
 
 			toolResults = append(toolResults, resultBlock)
+
+			// Add result to response
+			response.ToolResults = append(response.ToolResults, map[string]interface{}{
+				"tool_call_id": toolCall.GetID(),
+				"content":      resultBlock.Text,
+				"raw_content":  toolResult.Content,
+				"error":        false,
+			})
 		}
 	}
 
+	// Add the assistant message to history
 	*messages = append(*messages, history.HistoryMessage{
 		Role:    message.GetRole(),
 		Content: messageContent,
 	})
 
+	// Add initial response to responses array
+	responses = append(responses, response)
+
+	// If we have tool results, add them to messages and get a follow-up response
 	if len(toolResults) > 0 {
 		*messages = append(*messages, history.HistoryMessage{
 			Role:    "user",
 			Content: toolResults,
 		})
-		// Make another call to get Claude's response to the tool results
-		return runPrompt(ctx, provider, mcpClients, tools, "", messages)
+
+		// Get follow-up response to the tool results
+		followupResponses, err := runPrompt(ctx, provider, mcpClients, tools, "", messages)
+		if err != nil {
+			return responses, err
+		}
+
+		// Append follow-up responses
+		responses = append(responses, followupResponses...)
 	}
 
-	fmt.Println() // Add spacing
-	return nil
+	return responses, nil
+}
+
+// Sessions store
+type SessionStore struct {
+	mu       sync.RWMutex
+	sessions map[string][]history.HistoryMessage
+}
+
+func NewSessionStore() *SessionStore {
+	return &SessionStore{
+		sessions: make(map[string][]history.HistoryMessage),
+	}
+}
+
+func (s *SessionStore) GetMessages(sessionID string) []history.HistoryMessage {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	messages, ok := s.sessions[sessionID]
+	if !ok {
+		return []history.HistoryMessage{}
+	}
+	return messages
+}
+
+func (s *SessionStore) SetMessages(sessionID string, messages []history.HistoryMessage) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if messages == nil {
+		messages = []history.HistoryMessage{}
+	}
+	s.sessions[sessionID] = messages
 }
 
 func runMCPHost(ctx context.Context) error {
@@ -543,52 +646,101 @@ func runMCPHost(ctx context.Context) error {
 		return fmt.Errorf("error initializing renderer: %v", err)
 	}
 
-	messages := make([]history.HistoryMessage, 0)
+	// Create session store
+	sessionStore := NewSessionStore()
 
-	// Main interaction loop
-	for {
-		var prompt string
-		err := huh.NewForm(huh.NewGroup(huh.NewText().
-			Title("Enter your prompt (Type /help for commands, Ctrl+C to quit)").
-			Value(&prompt).
-			CharLimit(5000)),
-		).WithWidth(getTerminalWidth()).
-			WithTheme(huh.ThemeCharm()).
-			Run()
+	// Set up HTTP server
+	mux := http.NewServeMux()
 
+	// Define routes
+
+	// Health check endpoint
+	mux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{
+			"status": "ok",
+			"model":  modelFlag,
+		})
+	})
+
+	// Chat API endpoint
+	mux.HandleFunc("POST /api/chat", func(w http.ResponseWriter, r *http.Request) {
+		var req ChatRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(map[string]string{
+				"error": fmt.Sprintf("Invalid request: %v", err),
+			})
+			return
+		}
+
+		// Generate a session ID if not provided
+		sessionID := req.SessionID
+		if sessionID == "" {
+			sessionID = fmt.Sprintf("session_%d", time.Now().UnixNano())
+		}
+
+		// Get messages for this session
+		messages := sessionStore.GetMessages(sessionID)
+
+		// Process the message
+		responses, err := runPrompt(r.Context(), provider, mcpClients, allTools, req.Message, &messages)
 		if err != nil {
-			// Check if it's a user abort (Ctrl+C)
-			if errors.Is(err, huh.ErrUserAborted) {
-				fmt.Println("\nGoodbye!")
-				return nil // Exit cleanly
-			}
-			return err // Return other errors normally
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]string{
+				"error": fmt.Sprintf("Error processing message: %v", err),
+			})
+			return
 		}
 
-		if prompt == "" {
-			continue
-		}
-
-		// Handle slash commands
-		handled, err := handleSlashCommand(
-			prompt,
-			mcpConfig,
-			mcpClients,
-			messages,
-		)
-		if err != nil {
-			return err
-		}
-		if handled {
-			continue
-		}
-
+		// Prune and save the updated messages
 		if len(messages) > 0 {
 			messages = pruneMessages(messages)
 		}
-		err = runPrompt(ctx, provider, mcpClients, allTools, prompt, &messages)
-		if err != nil {
-			return err
+		sessionStore.SetMessages(sessionID, messages)
+
+		// Prepare response
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+
+		// Return response with session ID
+		response := map[string]interface{}{
+			"session_id": sessionID,
+			"responses":  responses,
 		}
-	}
+		json.NewEncoder(w).Encode(response)
+	})
+
+	// Tools info endpoint
+	mux.HandleFunc("GET /api/tools", func(w http.ResponseWriter, r *http.Request) {
+		tools := make(map[string][]map[string]interface{})
+
+		for serverName, mcpClient := range mcpClients {
+			ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
+			defer cancel()
+
+			toolsResult, err := mcpClient.ListTools(ctx, mcp.ListToolsRequest{})
+			if err != nil {
+				continue
+			}
+
+			serverTools := make([]map[string]interface{}, 0)
+			for _, tool := range toolsResult.Tools {
+				serverTools = append(serverTools, map[string]interface{}{
+					"name":         tool.Name,
+					"description":  tool.Description,
+					"input_schema": tool.InputSchema,
+				})
+			}
+			tools[serverName] = serverTools
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(tools)
+	})
+
+	// Start the HTTP server
+	log.Info("Starting HTTP server", "port", serverPort)
+	serverAddr := fmt.Sprintf(":%s", serverPort)
+	return http.ListenAndServe(serverAddr, mux)
 }
