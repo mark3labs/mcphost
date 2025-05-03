@@ -15,15 +15,18 @@ import (
 
 	"strings"
 
+	"github.com/mark3labs/mcp-go/client"
 	mcpclient "github.com/mark3labs/mcp-go/client"
+	"github.com/mark3labs/mcp-go/client/transport"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcphost/pkg/history"
 	"github.com/mark3labs/mcphost/pkg/llm"
 )
 
 const (
-	transportStdio = "stdio"
-	transportSSE   = "sse"
+	transportStdio          = "stdio"
+	transportSSE            = "sse"
+	transportStreamableHttp = "streamable"
 )
 
 var (
@@ -91,27 +94,42 @@ func (s SSEServerConfig) GetType() string {
 	return transportSSE
 }
 
+type StreambleHttpServerConfig struct {
+	Url     string   `json:"url"`
+	Headers []string `json:"headers,omitempty"`
+}
+
+func (s StreambleHttpServerConfig) GetType() string {
+	return transportStreamableHttp
+}
+
 type ServerConfigWrapper struct {
 	Config ServerConfig
 }
 
 func (w *ServerConfigWrapper) UnmarshalJSON(data []byte) error {
 	var typeField struct {
-		Url string `json:"url"`
+		Transport string `json:"transport"`
 	}
 
 	if err := json.Unmarshal(data, &typeField); err != nil {
 		return err
 	}
-	if typeField.Url != "" {
-		// If the URL field is present, treat it as an SSE server
+
+	switch typeField.Transport {
+	case transportSSE:
 		var sse SSEServerConfig
 		if err := json.Unmarshal(data, &sse); err != nil {
 			return err
 		}
 		w.Config = sse
-	} else {
-		// Otherwise, treat it as a STDIOServerConfig
+	case transportStreamableHttp:
+		var streamable StreambleHttpServerConfig
+		if err := json.Unmarshal(data, &streamable); err != nil {
+			return err
+		}
+		w.Config = streamable
+	case transportStdio:
 		var stdio STDIOServerConfig
 		if err := json.Unmarshal(data, &stdio); err != nil {
 			return err
@@ -121,6 +139,7 @@ func (w *ServerConfigWrapper) UnmarshalJSON(data []byte) error {
 
 	return nil
 }
+
 func (w ServerConfigWrapper) MarshalJSON() ([]byte, error) {
 	return json.Marshal(w.Config)
 }
@@ -205,13 +224,14 @@ func createMCPClients(
 	clients := make(map[string]mcpclient.MCPClient)
 
 	for name, server := range config.MCPServers {
-		var client mcpclient.MCPClient
+		var client *client.Client
 		var err error
 
-		if server.Config.GetType() == transportSSE {
+		switch server.Config.GetType() {
+		case transportSSE:
 			sseConfig := server.Config.(SSEServerConfig)
 
-			options := []mcpclient.ClientOption{}
+			options := []transport.ClientOption{}
 
 			if sseConfig.Headers != nil {
 				// Parse headers from the config
@@ -231,10 +251,37 @@ func createMCPClients(
 				sseConfig.Url,
 				options...,
 			)
+
 			if err == nil {
-				err = client.(*mcpclient.SSEMCPClient).Start(context.Background())
+				err = client.Start(context.Background())
 			}
-		} else {
+		case transportStreamableHttp:
+			streamableConfig := server.Config.(StreambleHttpServerConfig)
+
+			options := []transport.StreamableHTTPCOption{}
+
+			if streamableConfig.Headers != nil {
+				// Parse headers from the config
+				headers := make(map[string]string)
+
+				for _, header := range streamableConfig.Headers {
+					parts := strings.SplitN(header, ":", 2)
+					if len(parts) == 2 {
+						key := strings.TrimSpace(parts[0])
+						value := strings.TrimSpace(parts[1])
+						headers[key] = value
+					}
+				}
+
+				options = append(options, transport.WithHTTPHeaders(headers))
+			}
+
+			client, err = mcpclient.NewStreamableHttpClient(streamableConfig.Url, options...)
+
+			if err == nil {
+				err = client.Start(context.Background())
+			}
+		default:
 			stdioConfig := server.Config.(STDIOServerConfig)
 			var env []string
 			for k, v := range stdioConfig.Env {
@@ -245,6 +292,7 @@ func createMCPClients(
 				env,
 				stdioConfig.Args...)
 		}
+
 		if err != nil {
 			for _, c := range clients {
 				c.Close()
