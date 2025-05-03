@@ -1,8 +1,0 @@
-{
-    "mcpServers": {
-        "postgres_server": {
-            "transport": "streamable",
-            "url": "http://192.168.64.7:8000/0000000255ec743737960d93fb994835fb3dbba39d850755901e6e8ca8c1e348e7fd15ef/mcp"
-        }
-    }
-}
