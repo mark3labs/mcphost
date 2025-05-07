@@ -77,8 +77,10 @@ go install github.com/mark3labs/mcphost@latest
 ## Configuration ⚙️
 
 ### MCP-server
-MCPHost will automatically create a configuration file at `~/.mcp.json` if it doesn't exist. You can also specify a custom location using the `--config` flag:
+MCPHost will automatically create a configuration file at `~/.mcp.json` if it doesn't exist. You can also specify a custom location using the `--config` flag.
 
+#### STDIO
+The configuration for an STDIO MCP-server should be defined as the following:
 ```json
 {
   "mcpServers": {
@@ -102,12 +104,31 @@ MCPHost will automatically create a configuration file at `~/.mcp.json` if it do
 }
 ```
 
-Each MCP server entry requires:
+Each STDIO entry requires:
 - `command`: The command to run (e.g., `uvx`, `npx`) 
 - `args`: Array of arguments for the command:
   - For SQLite server: `mcp-server-sqlite` with database path
   - For filesystem server: `@modelcontextprotocol/server-filesystem` with directory path
 
+### Server Side Events (SSE) 
+
+For SSE the following config should be used:
+```json
+{
+  "mcpServers": {
+    "server_name": {
+      "url": "http://some_jhost:8000/sse",
+      "headers":[
+        "Authorization: Bearer my-token"
+       ]
+    }
+  }
+}
+```
+
+Each SSE entry requires:
+- `url`: The URL where the MCP server is accessible. 
+- `headers`: (Optional) Array of headers that will be attached to the requests
 
 ### System-Prompt
 
