@@ -2,14 +2,17 @@ package ollama
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"strings"
 
 	"github.com/charmbracelet/log"
+	"github.com/mark3labs/mcp-go/mcp"
+	"github.com/ollama/ollama/api"
+
 	"github.com/mark3labs/mcphost/pkg/history"
 	"github.com/mark3labs/mcphost/pkg/llm"
-	api "github.com/ollama/ollama/api"
 )
 
 func boolPtr(b bool) *bool {
@@ -63,10 +66,21 @@ func (p *Provider) CreateMessage(
 		// Handle tool responses
 		if msg.IsToolResponse() {
 			var content string
+			imageContent := make([]api.ImageData, 0)
 
 			// Handle HistoryMessage format
 			if historyMsg, ok := msg.(*history.HistoryMessage); ok {
 				for _, block := range historyMsg.Content {
+					for _, c := range block.Content.([]mcp.Content) {
+						if image, ok := c.(mcp.ImageContent); ok {
+							// ImageContent returned from tool is base64-encoded
+							imageDataRaw, err := base64.StdEncoding.DecodeString(image.Data)
+							if err != nil {
+								continue
+							}
+							imageContent = append(imageContent, api.ImageData(imageDataRaw))
+						}
+					}
 					if block.Type == "tool_result" {
 						content = block.Text
 						break
@@ -86,6 +100,7 @@ func (p *Provider) CreateMessage(
 			ollamaMsg := api.Message{
 				Role:    "tool",
 				Content: content,
+				Images:  imageContent,
 			}
 			ollamaMessages = append(ollamaMessages, ollamaMsg)
 			continue
