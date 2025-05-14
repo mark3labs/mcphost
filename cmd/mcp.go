@@ -129,7 +129,7 @@ func (w *ServerConfigWrapper) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		w.Config = streamable
-	case transportStdio:
+	default:
 		var stdio STDIOServerConfig
 		if err := json.Unmarshal(data, &stdio); err != nil {
 			return err
