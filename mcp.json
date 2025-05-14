@@ -1,8 +1,0 @@
-{
-    "mcpServers": {
-        "postgres_server": {
-            "transport": "streamable",
-            "url": "http://sentinel.unweil.me/0000000295fefa8b80db573c8f210ded5693b6097a689ea24667c3766ce024c85f54ecbd/mcp"
-        }
-    }
-}
