@@ -169,6 +169,9 @@ mcphost -m openai:gpt-4
 mcphost --model openai:<your-model-name> \
 --openai-url <your-base-url> \
 --openai-api-key <your-api-key>
+
+# Run as HTTP server mode on port 8080
+mcphost --server --port 8080
 ```
 
 ### Flags
@@ -182,7 +185,87 @@ mcphost --model openai:<your-model-name> \
 - `--openai-url string`: Base URL for OpenAI API (defaults to api.openai.com)
 - `--openai-api-key string`: OpenAI API key (can also be set via OPENAI_API_KEY environment variable)
 - `--google-api-key string`: Google API key (can also be set via GOOGLE_API_KEY environment variable)
+- `--server`: Run in HTTP server mode instead of interactive mode
+- `--port int`: HTTP server port (default: 8080, only used with --server)
 
+### Server Mode API Endpoints
+
+When running MCPHost in server mode, the following REST API endpoints are available:
+
+#### POST /chat
+Send a message to the AI. For new conversations, omit the `referenceId` field. For continuing a conversation, include the `conversationId` from the previous response as `referenceId`.
+
+Request body:
+```json
+{
+  "message": "Your message here",
+  "referenceId": "optional-conversation-id"
+}
+```
+
+Response:
+```json
+{
+  "conversationId": "conversation-uuid",
+  "message": {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": "AI response"
+      }
+    ]
+  }
+}
+```
+
+#### DELETE /conversation/{id}
+Close a conversation when you're done with it.
+
+Response: 204 No Content
+
+### Server Mode Examples with curl
+
+#### Start mcphost in server mode:
+```bash
+# Start the server with Claude model on port 8080
+mcphost --server --port 8080 --model anthropic:claude-3-5-sonnet-latest
+```
+
+#### Start a new conversation:
+```bash
+curl -X POST http://localhost:8080/chat \
+  -H "Content-Type: application/json" \
+  -d '{"message": "Hello, what can you help me with today?"}'
+```
+
+Example response:
+```json
+{
+  "conversationId": "b7e9b0f0-1c2d-3e4f-5a6b-7c8d9e0f1a2b",
+  "message": {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": "Hello! I'd be happy to help you today. I can assist with a variety of tasks such as answering questions, providing information, helping with problem-solving, or engaging in conversation on many different topics. Is there something specific you'd like to discuss or learn more about?"
+      }
+    ]
+  }
+}
+```
+
+#### Continue the conversation:
+```bash
+curl -X POST http://localhost:8080/chat \
+  -H "Content-Type: application/json" \
+  -d '{"message": "What are the main features of the MCP protocol?", "referenceId": "b7e9b0f0-1c2d-3e4f-5a6b-7c8d9e0f1a2b"}'
+```
+
+#### Close the conversation when finished:
+```bash
+curl -X DELETE http://localhost:8080/conversation/b7e9b0f0-1c2d-3e4f-5a6b-7c8d9e0f1a2b
+```
 
 ### Interactive Commands
 

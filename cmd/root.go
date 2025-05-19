@@ -38,6 +38,8 @@ var (
 	openaiAPIKey     string
 	anthropicAPIKey  string
 	googleAPIKey     string
+	serverMode       bool   // Flag pour activer le mode serveur HTTP
+	serverPort       int    // Port pour le serveur HTTP
 )
 
 const (
@@ -62,9 +64,16 @@ Available models can be specified using the --model flag:
 Example:
   mcphost -m ollama:qwen2.5:3b
   mcphost -m openai:gpt-4
-  mcphost -m google:gemini-2.0-flash`,
+  mcphost -m google:gemini-2.0-flash
+  
+MCPHost peut fonctionner en mode interactif (par défaut) ou en mode serveur HTTP:
+  mcphost --server --port 8080`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return runMCPHost(context.Background())
+		ctx := context.Background()
+		if serverMode {
+			return runServerMode(ctx)
+		}
+		return runMCPHost(ctx)
 	},
 }
 
@@ -90,6 +99,12 @@ func init() {
 	// Add debug flag
 	rootCmd.PersistentFlags().
 		BoolVar(&debugMode, "debug", false, "enable debug logging")
+		
+	// Add server mode flags
+	rootCmd.PersistentFlags().
+		BoolVar(&serverMode, "server", false, "run in HTTP server mode instead of interactive mode")
+	rootCmd.PersistentFlags().
+		IntVar(&serverPort, "port", 8080, "HTTP server port (only used with --server)")
 
 	flags := rootCmd.PersistentFlags()
 	flags.StringVar(&openaiBaseURL, "openai-url", "", "base URL for OpenAI API (defaults to api.openai.com)")
@@ -601,6 +616,99 @@ func runMCPHost(ctx context.Context) error {
 			return err
 		}
 	}
+}
+
+// runServerMode démarre mcphost en mode serveur HTTP
+func runServerMode(ctx context.Context) error {
+	// Configuration du log
+	if debugMode {
+		log.SetLevel(log.DebugLevel)
+		log.SetReportCaller(true)
+	} else {
+		log.SetLevel(log.InfoLevel)
+		log.SetReportCaller(false)
+	}
+
+	log.Info("Démarrage en mode serveur HTTP", "port", serverPort)
+
+	// Charger le système prompt
+	systemPrompt, err := loadSystemPrompt(systemPromptFile)
+	if err != nil {
+		return fmt.Errorf("erreur lors du chargement du prompt système: %v", err)
+	}
+
+	// Créer le fournisseur basé sur le modèle
+	provider, err := createProvider(ctx, modelFlag, systemPrompt)
+	if err != nil {
+		return fmt.Errorf("erreur lors de la création du fournisseur: %v", err)
+	}
+
+	// Afficher des informations sur le modèle sélectionné
+	parts := strings.SplitN(modelFlag, ":", 2)
+	log.Info("Modèle chargé",
+		"provider", provider.Name(),
+		"model", parts[1])
+
+	// Charger la configuration MCP
+	mcpConfig, err := loadMCPConfig()
+	if err != nil {
+		return fmt.Errorf("erreur lors du chargement de la configuration MCP: %v", err)
+	}
+
+	// Créer les clients MCP
+	mcpClients, err := createMCPClients(mcpConfig)
+	if err != nil {
+		return fmt.Errorf("erreur lors de la création des clients MCP: %v", err)
+	}
+
+	// Fermer les serveurs MCP à la fin
+	defer func() {
+		log.Info("Arrêt des serveurs MCP...")
+		for name, client := range mcpClients {
+			if err := client.Close(); err != nil {
+				log.Error("Échec de la fermeture du serveur", "name", name, "error", err)
+			} else {
+				log.Info("Serveur fermé", "name", name)
+			}
+		}
+	}()
+
+	// Afficher les serveurs connectés
+	for name := range mcpClients {
+		log.Info("Serveur connecté", "name", name)
+	}
+
+	// Charger les outils disponibles
+	var allTools []llm.Tool
+	for serverName, mcpClient := range mcpClients {
+		toolCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
+		toolsResult, err := mcpClient.ListTools(toolCtx, mcp.ListToolsRequest{})
+		cancel()
+
+		if err != nil {
+			log.Error(
+				"Erreur lors du chargement des outils",
+				"server",
+				serverName,
+				"error",
+				err,
+			)
+			continue
+		}
+
+		serverTools := mcpToolsToAnthropicTools(serverName, toolsResult.Tools)
+		allTools = append(allTools, serverTools...)
+		log.Info(
+			"Outils chargés",
+			"server",
+			serverName,
+			"count",
+			len(toolsResult.Tools),
+		)
+	}
+
+	// Démarrer le serveur HTTP
+	return RunServerMode(ctx, provider, allTools, serverPort, messageWindow)
 }
 
 // loadSystemPrompt loads the system prompt from a JSON file
