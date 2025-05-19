@@ -33,10 +33,8 @@ var (
 	systemPromptFile string
 	messageWindow    int
 	modelFlag        string // New flag for model selection
-	openaiBaseURL    string // Base URL for OpenAI API
-	anthropicBaseURL string // Base URL for Anthropic API
-	openaiAPIKey     string
-	anthropicAPIKey  string
+	llmBaseURL       string // URL générique pour n'importe quel LLM
+	apiKey           string // Clé API générique pour n'importe quel LLM
 	googleAPIKey     string
 	serverMode       bool   // Flag pour activer le mode serveur HTTP
 	serverPort       int    // Port pour le serveur HTTP
@@ -107,10 +105,11 @@ func init() {
 		IntVar(&serverPort, "port", 8080, "HTTP server port (only used with --server)")
 
 	flags := rootCmd.PersistentFlags()
-	flags.StringVar(&openaiBaseURL, "openai-url", "", "base URL for OpenAI API (defaults to api.openai.com)")
-	flags.StringVar(&anthropicBaseURL, "anthropic-url", "", "base URL for Anthropic API (defaults to api.anthropic.com)")
-	flags.StringVar(&openaiAPIKey, "openai-api-key", "", "OpenAI API key")
-	flags.StringVar(&anthropicAPIKey, "anthropic-api-key", "", "Anthropic API key")
+	// Arguments génériques pour tous les LLMs
+	flags.StringVar(&llmBaseURL, "llm-url", "", "base URL for LLM API (used for all providers, defaults to provider standard URLs)")
+	flags.StringVar(&apiKey, "api-key", "", "API key for LLM (required for Anthropic, OpenAI and Google)")
+	
+	// Arguments spécifiques aux providers
 	flags.StringVar(&googleAPIKey, "google-api-key", "", "Google (Gemini) API key")
 }
 
@@ -129,44 +128,75 @@ func createProvider(ctx context.Context, modelString, systemPrompt string) (llm.
 
 	switch provider {
 	case "anthropic":
-		apiKey := anthropicAPIKey
-		if apiKey == "" {
-			apiKey = os.Getenv("ANTHROPIC_API_KEY")
+		// Vérifier la clé API
+		providerAPIKey := apiKey
+		if providerAPIKey == "" {
+			providerAPIKey = os.Getenv("ANTHROPIC_API_KEY")
 		}
 
-		if apiKey == "" {
+		if providerAPIKey == "" {
 			return nil, fmt.Errorf(
-				"Anthropic API key not provided. Use --anthropic-api-key flag or ANTHROPIC_API_KEY environment variable",
+				"Anthropic API key not provided. Use --api-key flag or ANTHROPIC_API_KEY environment variable",
 			)
 		}
-		return anthropic.NewProvider(apiKey, anthropicBaseURL, model, systemPrompt), nil
+
+		// URL par défaut pour Anthropic si aucune n'est fournie
+		providerURL := llmBaseURL
+		if providerURL == "" {
+			providerURL = "" // API par défaut d'Anthropic
+		}
+
+		return anthropic.NewProvider(providerAPIKey, providerURL, model, systemPrompt), nil
 
 	case "ollama":
-		return ollama.NewProvider(model, systemPrompt)
+		// Pour Ollama, utiliser l'URL générique si fournie, sinon l'URL par défaut (http://localhost:11434)
+		providerURL := llmBaseURL
+		// Si aucune URL n'est fournie, la valeur vide permettra à Ollama d'utiliser la valeur par défaut
+		
+		return ollama.NewProvider(model, systemPrompt, providerURL)
 
 	case "openai":
-		apiKey := openaiAPIKey
-		if apiKey == "" {
-			apiKey = os.Getenv("OPENAI_API_KEY")
+		// Vérifier la clé API
+		providerAPIKey := apiKey
+		if providerAPIKey == "" {
+			providerAPIKey = os.Getenv("OPENAI_API_KEY")
 		}
 
-		if apiKey == "" {
+		if providerAPIKey == "" {
 			return nil, fmt.Errorf(
-				"OpenAI API key not provided. Use --openai-api-key flag or OPENAI_API_KEY environment variable",
+				"OpenAI API key not provided. Use --api-key flag or OPENAI_API_KEY environment variable",
 			)
 		}
-		return openai.NewProvider(apiKey, openaiBaseURL, model, systemPrompt), nil
+
+		// URL par défaut pour OpenAI si aucune n'est fournie
+		providerURL := llmBaseURL
+		if providerURL == "" {
+			providerURL = "" // API par défaut d'OpenAI
+		}
+
+		return openai.NewProvider(providerAPIKey, providerURL, model, systemPrompt), nil
 
 	case "google":
-		apiKey := googleAPIKey
-		if apiKey == "" {
-			apiKey = os.Getenv("GOOGLE_API_KEY")
+		// Vérifier la clé API
+		providerAPIKey := googleAPIKey
+		if providerAPIKey == "" {
+			providerAPIKey = apiKey
 		}
-		if apiKey == "" {
-			// The project structure is provider specific, but Google calls this GEMINI_API_KEY in e.g. AI Studio. Support both.
-			apiKey = os.Getenv("GEMINI_API_KEY")
+		if providerAPIKey == "" {
+			providerAPIKey = os.Getenv("GOOGLE_API_KEY")
+			if providerAPIKey == "" {
+				// The project structure is provider specific, but Google calls this GEMINI_API_KEY in e.g. AI Studio. Support both.
+				providerAPIKey = os.Getenv("GEMINI_API_KEY")
+			}
 		}
-		return google.NewProvider(ctx, apiKey, model, systemPrompt)
+
+		if providerAPIKey == "" {
+			return nil, fmt.Errorf(
+				"Google API key not provided. Use --api-key, --google-api-key flag or GOOGLE_API_KEY/GEMINI_API_KEY environment variable",
+			)
+		}
+
+		return google.NewProvider(ctx, providerAPIKey, model, systemPrompt)
 
 	default:
 		return nil, fmt.Errorf("unsupported provider: %s", provider)

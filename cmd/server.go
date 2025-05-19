@@ -15,27 +15,23 @@ import (
 	"github.com/mark3labs/mcphost/pkg/llm"
 )
 
-// Conversation représente une conversation avec l'IA
 type Conversation struct {
 	ID           string                   `json:"id"`
 	Messages     []history.HistoryMessage `json:"messages"`
 	LastActivity time.Time                `json:"lastActivity"`
 }
 
-// ConversationStore gère le stockage des conversations
 type ConversationStore struct {
 	mu            sync.RWMutex
 	conversations map[string]*Conversation
 }
 
-// NewConversationStore crée un nouveau store de conversations
 func NewConversationStore() *ConversationStore {
 	return &ConversationStore{
 		conversations: make(map[string]*Conversation),
 	}
 }
 
-// GetConversation récupère une conversation par ID
 func (s *ConversationStore) GetConversation(id string) (*Conversation, bool) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
@@ -43,7 +39,6 @@ func (s *ConversationStore) GetConversation(id string) (*Conversation, bool) {
 	return conv, ok
 }
 
-// CreateConversation crée une nouvelle conversation
 func (s *ConversationStore) CreateConversation() *Conversation {
 	s.mu.Lock()
 	defer s.mu.Unlock()

@@ -58,7 +58,9 @@ ollama pull mistral
 ollama serve
 ```
 
-You can also configure the Ollama client using standard environment variables, such as `OLLAMA HOST` for the Ollama base URL.
+You can configure Ollama to use either a local or remote server:
+- Use the `--llm-url` flag to specify a custom Ollama API endpoint (default: http://localhost:11434)
+- Example with remote server: `mcphost -m ollama:llama3 --llm-url http://remote-server:11434`
 
 3. Google API Key (for Gemini):
 ```bash
@@ -162,29 +164,36 @@ Models can be specified using the `--model` (`-m`) flag:
 # Use Ollama with Qwen model
 mcphost -m ollama:qwen2.5:3b
 
+# Use Ollama with a remote server
+mcphost -m ollama:llama3 --llm-url http://remote-server:11434
+
 # Use OpenAI's GPT-4
 mcphost -m openai:gpt-4
 
-# Use OpenAI-compatible model
+# Use OpenAI-compatible model with custom URL
 mcphost --model openai:<your-model-name> \
---openai-url <your-base-url> \
---openai-api-key <your-api-key>
+--llm-url <your-base-url> \
+--api-key <your-api-key>
 
 # Run as HTTP server mode on port 8080
 mcphost --server --port 8080
 ```
 
 ### Flags
-- `--anthropic-url string`: Base URL for Anthropic API (defaults to api.anthropic.com)
-- `--anthropic-api-key string`: Anthropic API key (can also be set via ANTHROPIC_API_KEY environment variable)
+
+#### Arguments génériques pour tous les LLMs
+- `--api-key string`: API key for LLM providers (required for Anthropic, OpenAI and Google)
+- `--llm-url string`: Base URL for LLM API (used for all providers including Ollama, uses defaults if not provided)
+
+#### Arguments spécifiques aux providers
+- `--google-api-key string`: Google API key (can also be set via GOOGLE_API_KEY environment variable)
+
+#### Autres arguments
 - `--config string`: Config file location (default is $HOME/.mcp.json)
 - `--system-prompt string`: system-prompt file location
 - `--debug`: Enable debug logging
 - `--message-window int`: Number of messages to keep in context (default: 10)
 - `-m, --model string`: Model to use (format: provider:model) (default "anthropic:claude-3-5-sonnet-latest")
-- `--openai-url string`: Base URL for OpenAI API (defaults to api.openai.com)
-- `--openai-api-key string`: OpenAI API key (can also be set via OPENAI_API_KEY environment variable)
-- `--google-api-key string`: Google API key (can also be set via GOOGLE_API_KEY environment variable)
 - `--server`: Run in HTTP server mode instead of interactive mode
 - `--port int`: HTTP server port (default: 8080, only used with --server)
 

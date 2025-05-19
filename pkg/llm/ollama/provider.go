@@ -5,7 +5,10 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"net/url"
 	"strings"
+	"time"
 
 	"github.com/charmbracelet/log"
 	"github.com/mark3labs/mcp-go/mcp"
@@ -24,18 +27,39 @@ type Provider struct {
 	client       *api.Client
 	model        string
 	systemPrompt string
+	baseURL      string
 }
 
 // NewProvider creates a new Ollama provider
-func NewProvider(model string, systemPrompt string) (*Provider, error) {
-	client, err := api.ClientFromEnvironment()
-	if err != nil {
-		return nil, err
+func NewProvider(model string, systemPrompt string, baseURL string) (*Provider, error) {
+	var client *api.Client
+	var err error
+
+	// Utiliser l'URL personnalisée si fournie, sinon utiliser l'URL par défaut
+	if baseURL != "" {
+		parsedURL, err := url.Parse(baseURL)
+		if err != nil {
+			return nil, fmt.Errorf("invalid Ollama URL: %w", err)
+		}
+		log.Info("Using custom Ollama URL", "url", parsedURL.String())
+
+		// Créer un client HTTP standard et l'utiliser pour le client Ollama
+		httpClient := &http.Client{
+			Timeout: 180 * time.Second,
+		}
+		client = api.NewClient(parsedURL, httpClient)
+	} else {
+		client, err = api.ClientFromEnvironment()
+		if err != nil {
+			return nil, err
+		}
 	}
+
 	return &Provider{
 		client:       client,
 		model:        model,
 		systemPrompt: systemPrompt,
+		baseURL:      baseURL,
 	}, nil
 }
 
