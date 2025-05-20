@@ -7,16 +7,19 @@ Discuss the Project on [Discord](https://discord.gg/RqSS2NQVsY)
 ## Overview 🌟
 
 MCPHost acts as a host in the MCP client-server architecture, where:
+
 - **Hosts** (like MCPHost) are LLM applications that manage connections and interactions
 - **Clients** maintain 1:1 connections with MCP servers
 - **Servers** provide context, tools, and capabilities to the LLMs
 
 This architecture allows language models to:
+
 - Access external tools and data sources 🛠️
 - Maintain consistent context across interactions 🔄
 - Execute commands and retrieve information safely 🔒
 
 Currently supports:
+
 - Claude 3.5 Sonnet (claude-3-5-sonnet-20240620)
 - Any Ollama-compatible model with function calling support
 - Google Gemini models
@@ -24,7 +27,7 @@ Currently supports:
 
 ## Features ✨
 
-- Interactive conversations with support models
+- Interactive conversations with supported models
 - Support for multiple concurrent MCP servers
 - Dynamic tool discovery and integration
 - Tool calling capabilities for both model types
@@ -43,31 +46,39 @@ Currently supports:
 ## Environment Setup 🔧
 
 1. Anthropic API Key (for Claude):
+
 ```bash
 export ANTHROPIC_API_KEY='your-api-key'
 ```
 
 2. Ollama Setup:
+
 - Install Ollama from https://ollama.ai
 - Pull your desired model:
+
 ```bash
 ollama pull mistral
 ```
+
 - Ensure Ollama is running:
+
 ```bash
 ollama serve
 ```
 
 You can configure Ollama to use either a local or remote server:
+
 - Use the `--llm-url` flag to specify a custom Ollama API endpoint (default: http://localhost:11434)
 - Example with remote server: `mcphost -m ollama:llama3 --llm-url http://remote-server:11434`
 
 3. Google API Key (for Gemini):
+
 ```bash
 export GOOGLE_API_KEY='your-api-key'
 ```
 
 4. OpenAI compatible online Setup
+
 - Get your api server base url, api key and model name
 
 ## Installation 📦
@@ -79,57 +90,53 @@ go install github.com/mark3labs/mcphost@latest
 ## Configuration ⚙️
 
 ### MCP-server
+
 MCPHost will automatically create a configuration file at `~/.mcp.json` if it doesn't exist. You can also specify a custom location using the `--config` flag.
 
 #### STDIO
+
 The configuration for an STDIO MCP-server should be defined as the following:
+
 ```json
 {
   "mcpServers": {
     "sqlite": {
       "command": "uvx",
-      "args": [
-        "mcp-server-sqlite",
-        "--db-path",
-        "/tmp/foo.db"
-      ]
+      "args": ["mcp-server-sqlite", "--db-path", "/tmp/foo.db"]
     },
     "filesystem": {
       "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-filesystem",
-        "/tmp"
-      ]
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/tmp"]
     }
   }
 }
 ```
 
 Each STDIO entry requires:
-- `command`: The command to run (e.g., `uvx`, `npx`) 
+
+- `command`: The command to run (e.g., `uvx`, `npx`)
 - `args`: Array of arguments for the command:
   - For SQLite server: `mcp-server-sqlite` with database path
   - For filesystem server: `@modelcontextprotocol/server-filesystem` with directory path
 
-### Server Side Events (SSE) 
+### Server Side Events (SSE)
 
 For SSE the following config should be used:
+
 ```json
 {
   "mcpServers": {
     "server_name": {
       "url": "http://some_jhost:8000/sse",
-      "headers":[
-        "Authorization: Bearer my-token"
-       ]
+      "headers": ["Authorization: Bearer my-token"]
     }
   }
 }
 ```
 
 Each SSE entry requires:
-- `url`: The URL where the MCP server is accessible. 
+
+- `url`: The URL where the MCP server is accessible.
 - `headers`: (Optional) Array of headers that will be attached to the requests
 
 ### System-Prompt
@@ -138,28 +145,31 @@ You can specify a custom system prompt using the `--system-prompt` flag. The sys
 
 ```json
 {
-    "systemPrompt": "You're a cat. Name is Neko"
+  "systemPrompt": "You're a cat. Name is Neko"
 }
 ```
 
 Usage:
+
 ```bash
 mcphost --system-prompt ./my-system-prompt.json
 ```
-
 
 ## Usage 🚀
 
 MCPHost is a CLI tool that allows you to interact with various AI models through a unified interface. It supports various tools through MCP servers.
 
 ### Available Models
+
 Models can be specified using the `--model` (`-m`) flag:
+
 - Anthropic Claude (default): `anthropic:claude-3-5-sonnet-latest`
 - OpenAI or OpenAI-compatible: `openai:gpt-4`
 - Ollama models: `ollama:modelname`
 - Google: `google:gemini-2.0-flash`
 
 ### Examples
+
 ```bash
 # Use Ollama with Qwen model
 mcphost -m ollama:qwen2.5:3b
@@ -181,16 +191,19 @@ mcphost --server --port 8080
 
 ### Flags
 
-#### Arguments génériques pour tous les LLMs
+#### Generic arguments for all LLMs
+
 - `--api-key string`: API key for LLM providers (required for Anthropic, OpenAI and Google)
 - `--llm-url string`: Base URL for LLM API (used for all providers including Ollama, uses defaults if not provided)
 
-#### Arguments spécifiques aux providers
+#### Provider-specific arguments
+
 - `--google-api-key string`: Google API key (can also be set via GOOGLE_API_KEY environment variable)
 
-#### Autres arguments
+#### Other arguments
+
 - `--config string`: Config file location (default is $HOME/.mcp.json)
-- `--system-prompt string`: system-prompt file location
+- `--system-prompt string`: system prompt file location
 - `--debug`: Enable debug logging
 - `--message-window int`: Number of messages to keep in context (default: 10)
 - `-m, --model string`: Model to use (format: provider:model) (default "anthropic:claude-3-5-sonnet-latest")
@@ -202,9 +215,11 @@ mcphost --server --port 8080
 When running MCPHost in server mode, the following REST API endpoints are available:
 
 #### POST /chat
+
 Send a message to the AI. For new conversations, omit the `referenceId` field. For continuing a conversation, include the `conversationId` from the previous response as `referenceId`.
 
 Request body:
+
 ```json
 {
   "message": "Your message here",
@@ -213,6 +228,7 @@ Request body:
 ```
 
 Response:
+
 ```json
 {
   "conversationId": "conversation-uuid",
@@ -229,6 +245,7 @@ Response:
 ```
 
 #### DELETE /conversation/{id}
+
 Close a conversation when you're done with it.
 
 Response: 204 No Content
@@ -236,12 +253,14 @@ Response: 204 No Content
 ### Server Mode Examples with curl
 
 #### Start mcphost in server mode:
+
 ```bash
 # Start the server with Claude model on port 8080
 mcphost --server --port 8080 --model anthropic:claude-3-5-sonnet-latest
 ```
 
 #### Start a new conversation:
+
 ```bash
 curl -X POST http://localhost:8080/chat \
   -H "Content-Type: application/json" \
@@ -249,6 +268,7 @@ curl -X POST http://localhost:8080/chat \
 ```
 
 Example response:
+
 ```json
 {
   "conversationId": "b7e9b0f0-1c2d-3e4f-5a6b-7c8d9e0f1a2b",
@@ -265,6 +285,7 @@ Example response:
 ```
 
 #### Continue the conversation:
+
 ```bash
 curl -X POST http://localhost:8080/chat \
   -H "Content-Type: application/json" \
@@ -272,6 +293,7 @@ curl -X POST http://localhost:8080/chat \
 ```
 
 #### Close the conversation when finished:
+
 ```bash
 curl -X DELETE http://localhost:8080/conversation/b7e9b0f0-1c2d-3e4f-5a6b-7c8d9e0f1a2b
 ```
@@ -279,6 +301,7 @@ curl -X DELETE http://localhost:8080/conversation/b7e9b0f0-1c2d-3e4f-5a6b-7c8d9e
 ### Interactive Commands
 
 While chatting, you can use:
+
 - `/help`: Show available commands
 - `/tools`: List all available tools
 - `/servers`: List configured MCP servers
@@ -287,6 +310,7 @@ While chatting, you can use:
 - `Ctrl+C`: Exit at any time
 
 ### Global Flags
+
 - `--config`: Specify custom config file location
 - `--message-window`: Set number of messages to keep in context (default: 10)
 
@@ -297,6 +321,7 @@ MCPHost can work with any MCP-compliant server. For examples and reference imple
 ## Contributing 🤝
 
 Contributions are welcome! Feel free to:
+
 - Submit bug reports or feature requests through issues
 - Create pull requests for improvements
 - Share your custom MCP servers
