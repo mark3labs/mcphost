@@ -200,6 +200,8 @@ mcphost --server --port 8080
 
 - `--google-api-key string`: Google API key (can also be set via GOOGLE_API_KEY environment variable)
 
+> Note: Previously provider-specific URL and API key flags (`--anthropic-url`, `--openai-url`, `--ollama-url`, `--anthropic-api-key`, `--openai-api-key`) have been replaced by the generic `--llm-url` and `--api-key` flags above.
+
 #### Other arguments
 
 - `--config string`: Config file location (default is $HOME/.mcp.json)
