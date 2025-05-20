@@ -34,16 +34,12 @@ type Provider struct {
 func NewProvider(model string, systemPrompt string, baseURL string) (*Provider, error) {
 	var client *api.Client
 	var err error
-
-	// Utiliser l'URL personnalisée si fournie, sinon utiliser l'URL par défaut
 	if baseURL != "" {
 		parsedURL, err := url.Parse(baseURL)
 		if err != nil {
 			return nil, fmt.Errorf("invalid Ollama URL: %w", err)
 		}
 		log.Info("Using custom Ollama URL", "url", parsedURL.String())
-
-		// Créer un client HTTP standard et l'utiliser pour le client Ollama
 		httpClient := &http.Client{
 			Timeout: 180 * time.Second,
 		}

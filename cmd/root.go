@@ -32,12 +32,12 @@ var (
 	configFile       string
 	systemPromptFile string
 	messageWindow    int
-	modelFlag        string // New flag for model selection
-	llmBaseURL       string // URL générique pour n'importe quel LLM
-	apiKey           string // Clé API générique pour n'importe quel LLM
+	modelFlag        string
+	llmBaseURL       string
+	apiKey           string
 	googleAPIKey     string
-	serverMode       bool   // Flag pour activer le mode serveur HTTP
-	serverPort       int    // Port pour le serveur HTTP
+	serverMode       bool
+	serverPort       int
 )
 
 const (
@@ -64,7 +64,7 @@ Example:
   mcphost -m openai:gpt-4
   mcphost -m google:gemini-2.0-flash
   
-MCPHost peut fonctionner en mode interactif (par défaut) ou en mode serveur HTTP:
+MCPHost can work in interactive mode (default mode) or as HTTP server:
   mcphost --server --port 8080`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
@@ -97,7 +97,7 @@ func init() {
 	// Add debug flag
 	rootCmd.PersistentFlags().
 		BoolVar(&debugMode, "debug", false, "enable debug logging")
-		
+
 	// Add server mode flags
 	rootCmd.PersistentFlags().
 		BoolVar(&serverMode, "server", false, "run in HTTP server mode instead of interactive mode")
@@ -108,7 +108,7 @@ func init() {
 	// Arguments génériques pour tous les LLMs
 	flags.StringVar(&llmBaseURL, "llm-url", "", "base URL for LLM API (used for all providers, defaults to provider standard URLs)")
 	flags.StringVar(&apiKey, "api-key", "", "API key for LLM (required for Anthropic, OpenAI and Google)")
-	
+
 	// Arguments spécifiques aux providers
 	flags.StringVar(&googleAPIKey, "google-api-key", "", "Google (Gemini) API key")
 }
@@ -140,23 +140,21 @@ func createProvider(ctx context.Context, modelString, systemPrompt string) (llm.
 			)
 		}
 
-		// URL par défaut pour Anthropic si aucune n'est fournie
+		// if value is empty, default url is used
 		providerURL := llmBaseURL
-		if providerURL == "" {
-			providerURL = "" // API par défaut d'Anthropic
+		if provider == "" {
+			providerURL = "api.anthropic.com"
 		}
 
 		return anthropic.NewProvider(providerAPIKey, providerURL, model, systemPrompt), nil
 
 	case "ollama":
-		// Pour Ollama, utiliser l'URL générique si fournie, sinon l'URL par défaut (http://localhost:11434)
+
 		providerURL := llmBaseURL
-		// Si aucune URL n'est fournie, la valeur vide permettra à Ollama d'utiliser la valeur par défaut
-		
+		// if value is empty, default url is used (http://localhost:11434)
 		return ollama.NewProvider(model, systemPrompt, providerURL)
 
 	case "openai":
-		// Vérifier la clé API
 		providerAPIKey := apiKey
 		if providerAPIKey == "" {
 			providerAPIKey = os.Getenv("OPENAI_API_KEY")
@@ -168,16 +166,15 @@ func createProvider(ctx context.Context, modelString, systemPrompt string) (llm.
 			)
 		}
 
-		// URL par défaut pour OpenAI si aucune n'est fournie
+		// if value is empty, default url is used
 		providerURL := llmBaseURL
-		if providerURL == "" {
-			providerURL = "" // API par défaut d'OpenAI
+		if provider == "" {
+			providerURL = "api.openai.com"
 		}
 
 		return openai.NewProvider(providerAPIKey, providerURL, model, systemPrompt), nil
 
 	case "google":
-		// Vérifier la clé API
 		providerAPIKey := googleAPIKey
 		if providerAPIKey == "" {
 			providerAPIKey = apiKey
