@@ -32,12 +32,12 @@ var (
 	configFile       string
 	systemPromptFile string
 	messageWindow    int
-	modelFlag        string // New flag for model selection
-	openaiBaseURL    string // Base URL for OpenAI API
-	anthropicBaseURL string // Base URL for Anthropic API
-	openaiAPIKey     string
-	anthropicAPIKey  string
+	modelFlag        string
+	llmBaseURL       string
+	apiKey           string
 	googleAPIKey     string
+	serverMode       bool
+	serverPort       int
 )
 
 const (
@@ -62,9 +62,16 @@ Available models can be specified using the --model flag:
 Example:
   mcphost -m ollama:qwen2.5:3b
   mcphost -m openai:gpt-4
-  mcphost -m google:gemini-2.0-flash`,
+  mcphost -m google:gemini-2.0-flash
+  
+MCPHost can work in interactive mode (default mode) or as HTTP server:
+  mcphost --server --port 8080`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return runMCPHost(context.Background())
+		ctx := context.Background()
+		if serverMode {
+			return runServerMode(ctx)
+		}
+		return runMCPHost(ctx)
 	},
 }
 
@@ -91,11 +98,18 @@ func init() {
 	rootCmd.PersistentFlags().
 		BoolVar(&debugMode, "debug", false, "enable debug logging")
 
+	// Add server mode flags
+	rootCmd.PersistentFlags().
+		BoolVar(&serverMode, "server", false, "run in HTTP server mode instead of interactive mode")
+	rootCmd.PersistentFlags().
+		IntVar(&serverPort, "port", 8080, "HTTP server port (only used with --server)")
+
 	flags := rootCmd.PersistentFlags()
-	flags.StringVar(&openaiBaseURL, "openai-url", "", "base URL for OpenAI API (defaults to api.openai.com)")
-	flags.StringVar(&anthropicBaseURL, "anthropic-url", "", "base URL for Anthropic API (defaults to api.anthropic.com)")
-	flags.StringVar(&openaiAPIKey, "openai-api-key", "", "OpenAI API key")
-	flags.StringVar(&anthropicAPIKey, "anthropic-api-key", "", "Anthropic API key")
+	// Arguments génériques pour tous les LLMs
+	flags.StringVar(&llmBaseURL, "llm-url", "", "base URL for LLM API (used for all providers, defaults to provider standard URLs)")
+	flags.StringVar(&apiKey, "api-key", "", "API key for LLM (required for Anthropic, OpenAI and Google)")
+
+	// Arguments spécifiques aux providers
 	flags.StringVar(&googleAPIKey, "google-api-key", "", "Google (Gemini) API key")
 }
 
@@ -114,44 +128,72 @@ func createProvider(ctx context.Context, modelString, systemPrompt string) (llm.
 
 	switch provider {
 	case "anthropic":
-		apiKey := anthropicAPIKey
-		if apiKey == "" {
-			apiKey = os.Getenv("ANTHROPIC_API_KEY")
+		// Vérifier la clé API
+		providerAPIKey := apiKey
+		if providerAPIKey == "" {
+			providerAPIKey = os.Getenv("ANTHROPIC_API_KEY")
 		}
 
-		if apiKey == "" {
+		if providerAPIKey == "" {
 			return nil, fmt.Errorf(
-				"Anthropic API key not provided. Use --anthropic-api-key flag or ANTHROPIC_API_KEY environment variable",
+				"Anthropic API key not provided. Use --api-key flag or ANTHROPIC_API_KEY environment variable",
 			)
 		}
-		return anthropic.NewProvider(apiKey, anthropicBaseURL, model, systemPrompt), nil
+
+		// if value is empty, default url is used
+		providerURL := llmBaseURL
+		if provider == "" {
+			providerURL = "api.anthropic.com"
+		}
+
+		return anthropic.NewProvider(providerAPIKey, providerURL, model, systemPrompt), nil
 
 	case "ollama":
-		return ollama.NewProvider(model, systemPrompt)
+
+		providerURL := llmBaseURL
+		// if value is empty, default url is used (http://localhost:11434)
+		return ollama.NewProvider(model, systemPrompt, providerURL)
 
 	case "openai":
-		apiKey := openaiAPIKey
-		if apiKey == "" {
-			apiKey = os.Getenv("OPENAI_API_KEY")
+		providerAPIKey := apiKey
+		if providerAPIKey == "" {
+			providerAPIKey = os.Getenv("OPENAI_API_KEY")
 		}
 
-		if apiKey == "" {
+		if providerAPIKey == "" {
 			return nil, fmt.Errorf(
-				"OpenAI API key not provided. Use --openai-api-key flag or OPENAI_API_KEY environment variable",
+				"OpenAI API key not provided. Use --api-key flag or OPENAI_API_KEY environment variable",
 			)
 		}
-		return openai.NewProvider(apiKey, openaiBaseURL, model, systemPrompt), nil
+
+		// if value is empty, default url is used
+		providerURL := llmBaseURL
+		if provider == "" {
+			providerURL = "api.openai.com"
+		}
+
+		return openai.NewProvider(providerAPIKey, providerURL, model, systemPrompt), nil
 
 	case "google":
-		apiKey := googleAPIKey
-		if apiKey == "" {
-			apiKey = os.Getenv("GOOGLE_API_KEY")
+		providerAPIKey := googleAPIKey
+		if providerAPIKey == "" {
+			providerAPIKey = apiKey
 		}
-		if apiKey == "" {
-			// The project structure is provider specific, but Google calls this GEMINI_API_KEY in e.g. AI Studio. Support both.
-			apiKey = os.Getenv("GEMINI_API_KEY")
+		if providerAPIKey == "" {
+			providerAPIKey = os.Getenv("GOOGLE_API_KEY")
+			if providerAPIKey == "" {
+				// The project structure is provider specific, but Google calls this GEMINI_API_KEY in e.g. AI Studio. Support both.
+				providerAPIKey = os.Getenv("GEMINI_API_KEY")
+			}
 		}
-		return google.NewProvider(ctx, apiKey, model, systemPrompt)
+
+		if providerAPIKey == "" {
+			return nil, fmt.Errorf(
+				"Google API key not provided. Use --api-key, --google-api-key flag or GOOGLE_API_KEY/GEMINI_API_KEY environment variable",
+			)
+		}
+
+		return google.NewProvider(ctx, providerAPIKey, model, systemPrompt)
 
 	default:
 		return nil, fmt.Errorf("unsupported provider: %s", provider)
@@ -601,6 +643,99 @@ func runMCPHost(ctx context.Context) error {
 			return err
 		}
 	}
+}
+
+// runServerMode démarre mcphost en mode serveur HTTP
+func runServerMode(ctx context.Context) error {
+	// Configuration du log
+	if debugMode {
+		log.SetLevel(log.DebugLevel)
+		log.SetReportCaller(true)
+	} else {
+		log.SetLevel(log.InfoLevel)
+		log.SetReportCaller(false)
+	}
+
+	log.Info("Démarrage en mode serveur HTTP", "port", serverPort)
+
+	// Charger le système prompt
+	systemPrompt, err := loadSystemPrompt(systemPromptFile)
+	if err != nil {
+		return fmt.Errorf("erreur lors du chargement du prompt système: %v", err)
+	}
+
+	// Créer le fournisseur basé sur le modèle
+	provider, err := createProvider(ctx, modelFlag, systemPrompt)
+	if err != nil {
+		return fmt.Errorf("erreur lors de la création du fournisseur: %v", err)
+	}
+
+	// Afficher des informations sur le modèle sélectionné
+	parts := strings.SplitN(modelFlag, ":", 2)
+	log.Info("Modèle chargé",
+		"provider", provider.Name(),
+		"model", parts[1])
+
+	// Charger la configuration MCP
+	mcpConfig, err := loadMCPConfig()
+	if err != nil {
+		return fmt.Errorf("erreur lors du chargement de la configuration MCP: %v", err)
+	}
+
+	// Créer les clients MCP
+	mcpClients, err := createMCPClients(mcpConfig)
+	if err != nil {
+		return fmt.Errorf("erreur lors de la création des clients MCP: %v", err)
+	}
+
+	// Fermer les serveurs MCP à la fin
+	defer func() {
+		log.Info("Arrêt des serveurs MCP...")
+		for name, client := range mcpClients {
+			if err := client.Close(); err != nil {
+				log.Error("Échec de la fermeture du serveur", "name", name, "error", err)
+			} else {
+				log.Info("Serveur fermé", "name", name)
+			}
+		}
+	}()
+
+	// Afficher les serveurs connectés
+	for name := range mcpClients {
+		log.Info("Serveur connecté", "name", name)
+	}
+
+	// Charger les outils disponibles
+	var allTools []llm.Tool
+	for serverName, mcpClient := range mcpClients {
+		toolCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
+		toolsResult, err := mcpClient.ListTools(toolCtx, mcp.ListToolsRequest{})
+		cancel()
+
+		if err != nil {
+			log.Error(
+				"Erreur lors du chargement des outils",
+				"server",
+				serverName,
+				"error",
+				err,
+			)
+			continue
+		}
+
+		serverTools := mcpToolsToAnthropicTools(serverName, toolsResult.Tools)
+		allTools = append(allTools, serverTools...)
+		log.Info(
+			"Outils chargés",
+			"server",
+			serverName,
+			"count",
+			len(toolsResult.Tools),
+		)
+	}
+
+	// Démarrer le serveur HTTP
+	return RunServerMode(ctx, provider, allTools, serverPort, messageWindow)
 }
 
 // loadSystemPrompt loads the system prompt from a JSON file
