@@ -8,7 +8,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/cloudwego/eino/compose"
 	"github.com/cloudwego/eino/schema"
 	"github.com/mark3labs/mcphost/internal/agent"
 	"github.com/mark3labs/mcphost/internal/config"
@@ -109,7 +108,7 @@ func runMCPHost(ctx context.Context) error {
 	}
 
 	// Create agent configuration
-	agentConfig := &agent.Config{
+	agentConfig := &agent.AgentConfig{
 		ModelConfig:   modelConfig,
 		MCPConfig:     mcpConfig,
 		SystemPrompt:  systemPrompt,
@@ -118,7 +117,7 @@ func runMCPHost(ctx context.Context) error {
 	}
 
 	// Create the agent
-	mcpAgent, err := agent.NewMCPAgent(ctx, agentConfig)
+	mcpAgent, err := agent.NewAgent(ctx, agentConfig)
 	if err != nil {
 		return fmt.Errorf("failed to create agent: %v", err)
 	}
@@ -191,17 +190,45 @@ func runMCPHost(ctx context.Context) error {
 			messages = messages[len(messages)-messageWindow:]
 		}
 
-		// Get agent response with spinner and callbacks
+		// Get agent response with controlled spinner that stops for tool call display
 		var response *schema.Message
-		err = cli.ShowSpinner("Thinking...", func() error {
-			var spinnerErr error
-			// Create callback handler to capture tool calls in real-time
-			callbackHandler := cli.CreateCallbackHandler()
-			
-			// Use the agent with callbacks to capture tool calls as they happen
-			response, spinnerErr = mcpAgent.Generate(ctx, messages, compose.WithCallbacks(callbackHandler))
-			return spinnerErr
-		})
+		var currentSpinner *ui.Spinner
+		
+		// Start initial spinner
+		currentSpinner = ui.NewSpinner("Thinking...")
+		currentSpinner.Start()
+		
+		response, err = mcpAgent.GenerateWithLoop(ctx, messages,
+			// Tool call handler - called when a tool is about to be executed
+			func(toolName, toolArgs string) {
+				// Stop spinner before displaying tool call
+				if currentSpinner != nil {
+					currentSpinner.Stop()
+					currentSpinner = nil
+				}
+				cli.DisplayToolCallMessage(toolName, toolArgs)
+			},
+			// Tool result handler - called when a tool execution completes
+			func(toolName, toolArgs, result string, isError bool) {
+				cli.DisplayToolMessage(toolName, toolArgs, result, isError)
+				// Start spinner again for next LLM call
+				currentSpinner = ui.NewSpinner("Thinking...")
+				currentSpinner.Start()
+			},
+			// Response handler - called when the LLM generates a response
+			func(content string) {
+				// Stop spinner when we get the final response
+				if currentSpinner != nil {
+					currentSpinner.Stop()
+					currentSpinner = nil
+				}
+			},
+		)
+		
+		// Make sure spinner is stopped if still running
+		if currentSpinner != nil {
+			currentSpinner.Stop()
+		}
 		if err != nil {
 			cli.DisplayError(fmt.Errorf("agent error: %v", err))
 			continue
