@@ -38,7 +38,7 @@ through a unified interface. It supports various tools through MCP servers
 and provides streaming responses.
 
 Available models can be specified using the --model flag:
-- Anthropic Claude (default): anthropic:claude-3-5-sonnet-latest
+- Anthropic Claude (default): anthropic:claude-sonnet-4-20250514
 - OpenAI: openai:gpt-4
 - Ollama models: ollama:modelname
 - Google: google:modelname
@@ -67,7 +67,7 @@ func init() {
 	rootCmd.PersistentFlags().
 		IntVar(&messageWindow, "message-window", 10, "number of messages to keep in context")
 	rootCmd.PersistentFlags().
-		StringVarP(&modelFlag, "model", "m", "anthropic:claude-3-5-sonnet-latest",
+		StringVarP(&modelFlag, "model", "m", "anthropic:claude-sonnet-4-20250514",
 			"model to use (format: provider:model)")
 	rootCmd.PersistentFlags().
 		BoolVar(&debugMode, "debug", false, "enable debug logging")

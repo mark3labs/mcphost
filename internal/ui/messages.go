@@ -17,6 +17,7 @@ const (
 	ToolMessage
 	ToolCallMessage // New type for showing tool calls in progress
 	SystemMessage   // New type for MCPHost system messages (help, tools, etc.)
+	ErrorMessage    // New type for error messages
 )
 
 // UIMessage represents a rendered message for display
@@ -200,6 +201,52 @@ func (r *MessageRenderer) RenderSystemMessage(content string, timestamp time.Tim
 
 	return UIMessage{
 		Type:      SystemMessage,
+		Content:   rendered,
+		Height:    lipgloss.Height(rendered),
+		Timestamp: timestamp,
+	}
+}
+
+// RenderErrorMessage renders an error message with proper styling
+func (r *MessageRenderer) RenderErrorMessage(errorMsg string, timestamp time.Time) UIMessage {
+	baseStyle := lipgloss.NewStyle()
+	
+	// Create the main message style with border
+	style := baseStyle.
+		Width(r.width - 1).
+		BorderLeft(true).
+		Foreground(mutedColor).
+		BorderForeground(errorColor).
+		BorderStyle(lipgloss.ThickBorder()).
+		PaddingLeft(1)
+
+	// Format timestamp
+	timeStr := timestamp.Local().Format("02 Jan 2006 03:04 PM")
+	
+	// Create info line with Error label
+	info := baseStyle.
+		Width(r.width - 1).
+		Foreground(mutedColor).
+		Render(fmt.Sprintf(" Error (%s)", timeStr))
+
+	// Format error content with error styling
+	errorContent := baseStyle.
+		Foreground(errorColor).
+		Bold(true).
+		Render(fmt.Sprintf("❌ %s", errorMsg))
+	
+	// Combine content and info
+	parts := []string{
+		errorContent,
+		info,
+	}
+
+	rendered := style.Render(
+		lipgloss.JoinVertical(lipgloss.Left, parts...),
+	)
+
+	return UIMessage{
+		Type:      ErrorMessage,
 		Content:   rendered,
 		Height:    lipgloss.Height(rendered),
 		Timestamp: timestamp,

@@ -16,7 +16,6 @@ import (
 
 var (
 	promptStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("12"))
-	errorStyle  = lipgloss.NewStyle().Foreground(lipgloss.Color("9"))
 )
 
 // CLI handles the command line interface with improved message rendering
@@ -160,14 +159,18 @@ func (c *CLI) DisplayStreamingMessage(reader *schema.StreamReader[*schema.Messag
 	return c.DisplayAssistantMessage(content.String())
 }
 
-// DisplayError displays an error message
+// DisplayError displays an error message using the message component
 func (c *CLI) DisplayError(err error) {
-	fmt.Printf("\n%s\n", errorStyle.Render("Error: "+err.Error()))
+	msg := c.messageRenderer.RenderErrorMessage(err.Error(), time.Now())
+	c.messageContainer.AddMessage(msg)
+	c.displayContainer()
 }
 
-// DisplayInfo displays an informational message
+// DisplayInfo displays an informational message using the system message component
 func (c *CLI) DisplayInfo(message string) {
-	fmt.Printf("\n%s\n", message)
+	msg := c.messageRenderer.RenderSystemMessage(message, time.Now())
+	c.messageContainer.AddMessage(msg)
+	c.displayContainer()
 }
 
 // DisplayHelp displays help information in a message block
