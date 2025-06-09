@@ -1,10 +1,10 @@
 package config
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
-	"path/filepath"
+
+	"github.com/spf13/viper"
 )
 
 // MCPServerConfig represents configuration for an MCP server
@@ -27,29 +27,45 @@ type SystemPromptConfig struct {
 
 // LoadMCPConfig loads MCP configuration from file
 func LoadMCPConfig(configFile string) (*Config, error) {
+	v := viper.New()
+	
 	if configFile == "" {
 		homeDir, err := os.UserHomeDir()
 		if err != nil {
 			return nil, fmt.Errorf("error getting home directory: %v", err)
 		}
-		configFile = filepath.Join(homeDir, ".mcp.json")
-	}
-
-	// Create default config if file doesn't exist
-	if _, err := os.Stat(configFile); os.IsNotExist(err) {
-		defaultConfig := &Config{
-			MCPServers: make(map[string]MCPServerConfig),
+		
+		// Set config name and search paths
+		v.SetConfigName(".mcp")
+		v.AddConfigPath(homeDir)
+		
+		// Set config type precedence: yaml first, then json
+		v.SetConfigType("yaml")
+		
+		// Try to read config file
+		if err := v.ReadInConfig(); err != nil {
+			// If yaml not found, try json
+			v.SetConfigType("json")
+			if err := v.ReadInConfig(); err != nil {
+				// If neither found, return default config
+				if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+					return &Config{
+						MCPServers: make(map[string]MCPServerConfig),
+					}, nil
+				}
+				return nil, fmt.Errorf("error reading config file: %v", err)
+			}
 		}
-		return defaultConfig, nil
-	}
-
-	data, err := os.ReadFile(configFile)
-	if err != nil {
-		return nil, fmt.Errorf("error reading config file: %v", err)
+	} else {
+		// Use specified config file
+		v.SetConfigFile(configFile)
+		if err := v.ReadInConfig(); err != nil {
+			return nil, fmt.Errorf("error reading config file: %v", err)
+		}
 	}
 
 	var config Config
-	if err := json.Unmarshal(data, &config); err != nil {
+	if err := v.Unmarshal(&config); err != nil {
 		return nil, fmt.Errorf("error parsing config file: %v", err)
 	}
 
@@ -62,15 +78,17 @@ func LoadSystemPrompt(filePath string) (string, error) {
 		return "", nil
 	}
 
-	data, err := os.ReadFile(filePath)
-	if err != nil {
+	v := viper.New()
+	v.SetConfigFile(filePath)
+	
+	if err := v.ReadInConfig(); err != nil {
 		return "", fmt.Errorf("error reading system prompt file: %v", err)
 	}
 
-	var config SystemPromptConfig
-	if err := json.Unmarshal(data, &config); err != nil {
-		return "", fmt.Errorf("error parsing system prompt file: %v", err)
+	systemPrompt := v.GetString("systemPrompt")
+	if systemPrompt == "" {
+		return "", fmt.Errorf("systemPrompt field not found in config file")
 	}
 
-	return config.SystemPrompt, nil
+	return systemPrompt, nil
 }
