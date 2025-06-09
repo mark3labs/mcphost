@@ -7,7 +7,6 @@ mcphost
 .idea
 test/
 build/
-scripts/
 dist/
 contribute/output/
 CONTEXT.md

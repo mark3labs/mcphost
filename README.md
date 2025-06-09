@@ -26,7 +26,9 @@ Currently supports:
 
 - Interactive conversations with support models
 - **Non-interactive mode** for scripting and automation
+- **Script mode** for executable YAML-based automation scripts
 - Support for multiple concurrent MCP servers
+- **Tool filtering** with `allowedTools` and `excludedTools` per server
 - Dynamic tool discovery and integration
 - Tool calling capabilities for both model types
 - Configurable MCP server locations and arguments
@@ -99,7 +101,9 @@ The configuration for an STDIO MCP-server should be defined as the following:
         "-y",
         "@modelcontextprotocol/server-filesystem",
         "/tmp"
-      ]
+      ],
+      "allowedTools": ["read_file", "write_file"],
+      "excludedTools": ["delete_file"]
     }
   }
 }
@@ -110,6 +114,10 @@ Each STDIO entry requires:
 - `args`: Array of arguments for the command:
   - For SQLite server: `mcp-server-sqlite` with database path
   - For filesystem server: `@modelcontextprotocol/server-filesystem` with directory path
+- `allowedTools`: (Optional) Array of tool names to include (whitelist)
+- `excludedTools`: (Optional) Array of tool names to exclude (blacklist)
+
+**Note**: `allowedTools` and `excludedTools` are mutually exclusive - you can only use one per server.
 
 ### Server Side Events (SSE) 
 
@@ -158,6 +166,50 @@ Start an interactive conversation session:
 ```bash
 mcphost
 ```
+
+### Script Mode
+
+Run executable YAML-based automation scripts:
+
+```bash
+# Using the flag
+mcphost --script myscript.sh
+
+# Direct execution (if executable and has shebang)
+./myscript.sh
+```
+
+#### Script Format
+
+Scripts combine YAML configuration with prompts in a single executable file:
+
+```yaml
+#!/usr/local/bin/mcphost --script
+# This script uses the container-use MCP server from https://github.com/dagger/container-use
+mcpServers:
+  container-use:
+    command: cu
+    args:
+      - "stdio"
+prompt: |
+  Create 2 variations of a simple hello world app using Flask and FastAPI. 
+  Each in their own environment. Give me the URL of each app
+```
+
+#### Script Features
+
+- **Executable**: Use shebang line for direct execution
+- **YAML Configuration**: Define MCP servers directly in the script
+- **Embedded Prompts**: Include the prompt in the YAML
+- **Config Fallback**: If no `mcpServers` defined, uses default config
+- **Tool Filtering**: Supports `allowedTools`/`excludedTools` per server
+- **Clean Exit**: Automatically exits after completion
+
+#### Script Examples
+
+See `examples/scripts/` for sample scripts:
+- `example-script.sh` - Script with custom MCP servers
+- `simple-script.sh` - Script using default config fallback
 
 ### Non-Interactive Mode
 
@@ -226,6 +278,7 @@ mcphost -p "Generate a random UUID" --quiet | tr '[:lower:]' '[:upper:]'
 - `--google-api-key string`: Google API key (can also be set via GOOGLE_API_KEY environment variable)
 - `-p, --prompt string`: **Run in non-interactive mode with the given prompt**
 - `--quiet`: **Suppress all output except the AI response (only works with --prompt)**
+- `--script`: **Run in script mode (parse YAML frontmatter and prompt from file)**
 
 
 ### Interactive Commands

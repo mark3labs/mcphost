@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"bufio"
 	"context"
 	"fmt"
 	"io"
@@ -14,6 +15,7 @@ import (
 	"github.com/mark3labs/mcphost/internal/models"
 	"github.com/mark3labs/mcphost/internal/ui"
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v3"
 )
 
 var (
@@ -29,6 +31,8 @@ var (
 	debugMode        bool
 	promptFlag       string
 	quietFlag        bool
+	scriptFlag       bool
+	scriptMCPConfig  *config.Config // Used to override config in script mode
 )
 
 var rootCmd = &cobra.Command{
@@ -52,7 +56,11 @@ Examples:
   
   # Non-interactive mode
   mcphost -p "What is the weather like today?"
-  mcphost -p "Calculate 15 * 23" --quiet`,
+  mcphost -p "Calculate 15 * 23" --quiet
+  
+  # Script mode
+  mcphost --script myscript.sh
+  ./myscript.sh  # if script has shebang #!/path/to/mcphost --script`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return runMCPHost(context.Background())
 	},
@@ -81,6 +89,8 @@ func init() {
 		StringVarP(&promptFlag, "prompt", "p", "", "run in non-interactive mode with the given prompt")
 	rootCmd.PersistentFlags().
 		BoolVar(&quietFlag, "quiet", false, "suppress all output (only works with --prompt)")
+	rootCmd.PersistentFlags().
+		BoolVar(&scriptFlag, "script", false, "run in script mode (parse YAML frontmatter and prompt from file)")
 
 	flags := rootCmd.PersistentFlags()
 	flags.StringVar(&openaiBaseURL, "openai-url", "", "base URL for OpenAI API")
@@ -91,6 +101,15 @@ func init() {
 }
 
 func runMCPHost(ctx context.Context) error {
+	// Handle script mode
+	if scriptFlag {
+		return runScriptMode(ctx)
+	}
+
+	return runNormalMode(ctx)
+}
+
+func runNormalMode(ctx context.Context) error {
 	// Validate flag combinations
 	if quietFlag && promptFlag == "" {
 		return fmt.Errorf("--quiet flag can only be used with --prompt/-p")
@@ -102,9 +121,18 @@ func runMCPHost(ctx context.Context) error {
 	}
 
 	// Load configuration
-	mcpConfig, err := config.LoadMCPConfig(configFile)
-	if err != nil {
-		return fmt.Errorf("failed to load MCP config: %v", err)
+	var mcpConfig *config.Config
+	var err error
+	
+	if scriptMCPConfig != nil {
+		// Use script-provided config
+		mcpConfig = scriptMCPConfig
+	} else {
+		// Load normal config
+		mcpConfig, err = config.LoadMCPConfig(configFile)
+		if err != nil {
+			return fmt.Errorf("failed to load MCP config: %v", err)
+		}
 	}
 
 	systemPrompt, err := config.LoadSystemPrompt(systemPromptFile)
@@ -390,4 +418,171 @@ func runInteractiveMode(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI,
 		// Add assistant response to history
 		messages = append(messages, response)
 	}
+}
+
+// ScriptConfig represents the YAML frontmatter in a script file
+type ScriptConfig struct {
+	MCPServers map[string]config.MCPServerConfig `yaml:"mcpServers"`
+	Prompt     string                            `yaml:"prompt"`
+}
+
+// runScriptMode handles script mode execution
+func runScriptMode(ctx context.Context) error {
+	var scriptFile string
+	
+	// Determine script file from arguments
+	// When called via shebang, the script file is the first non-flag argument
+	// When called with --script flag, we need to find the script file in args
+	args := os.Args[1:]
+	
+	// Filter out flags to find the script file
+	for _, arg := range args {
+		if arg == "--script" {
+			// Skip the --script flag itself
+			continue
+		}
+		if strings.HasPrefix(arg, "-") {
+			// Skip other flags
+			continue
+		}
+		// This should be our script file
+		scriptFile = arg
+		break
+	}
+	
+	if scriptFile == "" {
+		return fmt.Errorf("script mode requires a script file argument")
+	}
+	
+	// Parse the script file
+	scriptConfig, prompt, err := parseScriptFile(scriptFile)
+	if err != nil {
+		return fmt.Errorf("failed to parse script file: %v", err)
+	}
+	
+	// Override the global configFile and promptFlag with script values
+	originalConfigFile := configFile
+	originalPromptFlag := promptFlag
+	
+	// Create config from script or load normal config
+	var mcpConfig *config.Config
+	if len(scriptConfig.MCPServers) > 0 {
+		// Use servers from script
+		mcpConfig = &config.Config{
+			MCPServers: scriptConfig.MCPServers,
+		}
+	} else {
+		// Fall back to normal config loading
+		mcpConfig, err = config.LoadMCPConfig(configFile)
+		if err != nil {
+			return fmt.Errorf("failed to load MCP config: %v", err)
+		}
+	}
+	
+	// Override the global config for normal mode
+	scriptMCPConfig = mcpConfig
+	
+	// Set the prompt from script
+	promptFlag = prompt
+	
+	// Restore original values after execution
+	defer func() {
+		configFile = originalConfigFile
+		promptFlag = originalPromptFlag
+		scriptMCPConfig = nil
+	}()
+	
+	// Now run the normal execution path which will use our overridden config
+	return runNormalMode(ctx)
+}
+
+// parseScriptFile parses a script file with YAML frontmatter and prompt
+func parseScriptFile(filename string) (*ScriptConfig, string, error) {
+	file, err := os.Open(filename)
+	if err != nil {
+		return nil, "", err
+	}
+	defer file.Close()
+	
+	scanner := bufio.NewScanner(file)
+	
+	// Skip shebang line if present
+	if scanner.Scan() {
+		line := scanner.Text()
+		if !strings.HasPrefix(line, "#!") {
+			// If it's not a shebang, we need to process this line
+			return parseScriptContent(line + "\n" + readRemainingLines(scanner))
+		}
+	}
+	
+	// Read the rest of the file
+	content := readRemainingLines(scanner)
+	return parseScriptContent(content)
+}
+
+// readRemainingLines reads all remaining lines from a scanner
+func readRemainingLines(scanner *bufio.Scanner) string {
+	var lines []string
+	for scanner.Scan() {
+		lines = append(lines, scanner.Text())
+	}
+	return strings.Join(lines, "\n")
+}
+
+// parseScriptContent parses the content to extract YAML frontmatter and prompt
+func parseScriptContent(content string) (*ScriptConfig, string, error) {
+	lines := strings.Split(content, "\n")
+	
+	// Find YAML frontmatter and prompt
+	var yamlLines []string
+	var promptLines []string
+	var inPrompt bool
+	
+	for _, line := range lines {
+		trimmed := strings.TrimSpace(line)
+		if strings.HasPrefix(trimmed, "prompt:") {
+			inPrompt = true
+			// Extract the prompt value if it's on the same line
+			if len(trimmed) > 7 {
+				promptValue := strings.TrimSpace(trimmed[7:])
+				if promptValue != "" {
+					promptLines = append(promptLines, promptValue)
+				}
+			}
+			continue
+		}
+		
+		if inPrompt {
+			// Continue collecting prompt lines (handle multi-line YAML strings)
+			if strings.HasPrefix(line, "  ") || strings.HasPrefix(line, "\t") {
+				promptLines = append(promptLines, strings.TrimPrefix(strings.TrimPrefix(line, "  "), "\t"))
+			} else if trimmed != "" && !strings.Contains(trimmed, ":") {
+				promptLines = append(promptLines, line)
+			} else if trimmed != "" {
+				// New YAML key, stop collecting prompt
+				inPrompt = false
+				yamlLines = append(yamlLines, line)
+			}
+		} else {
+			yamlLines = append(yamlLines, line)
+		}
+	}
+	
+	// Parse YAML
+	yamlContent := strings.Join(yamlLines, "\n")
+	var scriptConfig ScriptConfig
+	if err := yaml.Unmarshal([]byte(yamlContent), &scriptConfig); err != nil {
+		return nil, "", fmt.Errorf("failed to parse YAML: %v", err)
+	}
+	
+	// Join prompt lines
+	prompt := strings.Join(promptLines, "\n")
+	prompt = strings.TrimSpace(prompt)
+	
+	// If prompt wasn't found in YAML, use the scriptConfig.Prompt
+	if prompt == "" {
+		prompt = scriptConfig.Prompt
+	}
+	
+	return &scriptConfig, prompt, nil
 }
