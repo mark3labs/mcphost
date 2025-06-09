@@ -16,6 +16,7 @@ const (
 	AssistantMessage
 	ToolMessage
 	ToolCallMessage // New type for showing tool calls in progress
+	SystemMessage   // New type for MCPHost system messages (help, tools, etc.)
 )
 
 // UIMessage represents a rendered message for display
@@ -32,6 +33,7 @@ type UIMessage struct {
 var (
 	primaryColor   = lipgloss.Color("#7C3AED") // Purple
 	secondaryColor = lipgloss.Color("#06B6D4") // Cyan
+	systemColor    = lipgloss.Color("#10B981") // Green for MCPHost system messages
 	textColor      = lipgloss.Color("#FFFFFF") // White
 	mutedColor     = lipgloss.Color("#6B7280") // Gray
 	errorColor     = lipgloss.Color("#EF4444") // Red
@@ -147,6 +149,57 @@ func (r *MessageRenderer) RenderAssistantMessage(content string, timestamp time.
 
 	return UIMessage{
 		Type:      AssistantMessage,
+		Content:   rendered,
+		Height:    lipgloss.Height(rendered),
+		Timestamp: timestamp,
+	}
+}
+
+// RenderSystemMessage renders a system message (help, tools, etc.) with proper styling
+func (r *MessageRenderer) RenderSystemMessage(content string, timestamp time.Time) UIMessage {
+	baseStyle := lipgloss.NewStyle()
+	
+	// Create the main message style with border
+	style := baseStyle.
+		Width(r.width - 1).
+		BorderLeft(true).
+		Foreground(mutedColor).
+		BorderForeground(systemColor).
+		BorderStyle(lipgloss.ThickBorder()).
+		PaddingLeft(1)
+
+	// Format timestamp
+	timeStr := timestamp.Local().Format("02 Jan 2006 03:04 PM")
+	
+	// Create info line with MCPHost label
+	info := baseStyle.
+		Width(r.width - 1).
+		Foreground(mutedColor).
+		Render(fmt.Sprintf(" MCPHost (%s)", timeStr))
+
+	// Render the message content with markdown
+	messageContent := r.renderMarkdown(content, r.width-2)
+	
+	// Handle empty content
+	if strings.TrimSpace(content) == "" {
+		messageContent = baseStyle.
+			Italic(true).
+			Foreground(mutedColor).
+			Render("*No content*")
+	}
+	
+	// Combine content and info
+	parts := []string{
+		strings.TrimSuffix(messageContent, "\n"),
+		info,
+	}
+
+	rendered := style.Render(
+		lipgloss.JoinVertical(lipgloss.Left, parts...),
+	)
+
+	return UIMessage{
+		Type:      SystemMessage,
 		Content:   rendered,
 		Height:    lipgloss.Height(rendered),
 		Timestamp: timestamp,
@@ -343,14 +396,10 @@ func (r *MessageRenderer) truncateText(text string, maxWidth int) string {
 	return "..."
 }
 
-// renderMarkdown renders markdown content (simplified version)
+// renderMarkdown renders markdown content using glamour
 func (r *MessageRenderer) renderMarkdown(content string, width int) string {
-	// For now, just return the content with proper width
-	// In a full implementation, you'd use a markdown renderer like glamour
-	baseStyle := lipgloss.NewStyle()
-	return baseStyle.
-		Width(width).
-		Render(content)
+	rendered := toMarkdown(content, width)
+	return strings.TrimSuffix(rendered, "\n")
 }
 
 // MessageContainer wraps multiple messages in a container
@@ -402,6 +451,7 @@ func (c *MessageContainer) Render() string {
 
 	return baseStyle.
 		Width(c.width).
+		PaddingBottom(1).
 		Render(
 			lipgloss.JoinVertical(lipgloss.Top, parts...),
 		)
@@ -414,7 +464,7 @@ func (c *MessageContainer) renderEmptyState() string {
 	header := baseStyle.
 		Width(c.width).
 		Align(lipgloss.Center).
-		Foreground(primaryColor).
+		Foreground(systemColor).
 		Bold(true).
 		Render("MCPHost - AI Assistant with MCP Tools")
 
@@ -427,6 +477,7 @@ func (c *MessageContainer) renderEmptyState() string {
 	return baseStyle.
 		Width(c.width).
 		Height(c.height).
+		PaddingBottom(1).
 		Render(
 			lipgloss.JoinVertical(
 				lipgloss.Center,

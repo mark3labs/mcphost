@@ -8,8 +8,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/charmbracelet/glamour"
-	"github.com/charmbracelet/glamour/styles"
 	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/cloudwego/eino/schema"
@@ -23,7 +21,6 @@ var (
 
 // CLI handles the command line interface with improved message rendering
 type CLI struct {
-	renderer         *glamour.TermRenderer
 	messageRenderer  *MessageRenderer
 	messageContainer *MessageContainer
 	width            int
@@ -36,19 +33,26 @@ type CLI struct {
 func NewCLI() (*CLI, error) {
 	cli := &CLI{}
 	cli.updateSize()
-	
-	if err := cli.updateRenderer(); err != nil {
-		return nil, fmt.Errorf("failed to initialize renderer: %v", err)
-	}
-	
 	cli.messageRenderer = NewMessageRenderer(cli.width)
 	cli.messageContainer = NewMessageContainer(cli.width, cli.height-4) // Reserve space for input and help
 	
 	return cli, nil
 }
 
-// GetPrompt gets user input using the huh library
+// GetPrompt gets user input using the huh library with divider and padding
 func (c *CLI) GetPrompt() (string, error) {
+	// Create a divider before the input
+	dividerStyle := lipgloss.NewStyle().
+		Width(c.width).
+		BorderTop(true).
+		BorderStyle(lipgloss.NormalBorder()).
+		BorderForeground(mutedColor).
+		MarginTop(1).
+		MarginBottom(1)
+	
+	// Render the divider
+	fmt.Print(dividerStyle.Render(""))
+	
 	var prompt string
 	err := huh.NewForm(huh.NewGroup(huh.NewText().
 		Title("Enter your prompt (Type /help for commands, Ctrl+C to quit)").
@@ -166,36 +170,61 @@ func (c *CLI) DisplayInfo(message string) {
 	fmt.Printf("\n%s\n", message)
 }
 
-// DisplayHelp displays help information
+// DisplayHelp displays help information in a message block
 func (c *CLI) DisplayHelp() {
-	help := `
-Available commands:
-- /help: Show this help message
-- /tools: List all available tools
-- /servers: List configured MCP servers
-- /history: Display conversation history
-- /quit: Exit the application
-- Ctrl+C: Exit at any time
+	help := `## Available Commands
 
-You can also just type your message to chat with the AI assistant.
-`
-	fmt.Println(help)
+- ` + "`/help`" + `: Show this help message
+- ` + "`/tools`" + `: List all available tools
+- ` + "`/servers`" + `: List configured MCP servers
+- ` + "`/history`" + `: Display conversation history
+- ` + "`/quit`" + `: Exit the application
+- ` + "`Ctrl+C`" + `: Exit at any time
+
+You can also just type your message to chat with the AI assistant.`
+
+	// Display as a system message
+	msg := c.messageRenderer.RenderSystemMessage(help, time.Now())
+	c.messageContainer.AddMessage(msg)
+	c.displayContainer()
 }
 
-// DisplayTools displays available tools
+// DisplayTools displays available tools in a message block
 func (c *CLI) DisplayTools(tools []string) {
-	fmt.Println("\nAvailable tools:")
-	for i, tool := range tools {
-		fmt.Printf("%d. %s\n", i+1, tool)
+	var content strings.Builder
+	content.WriteString("## Available Tools\n\n")
+	
+	if len(tools) == 0 {
+		content.WriteString("No tools are currently available.")
+	} else {
+		for i, tool := range tools {
+			content.WriteString(fmt.Sprintf("%d. `%s`\n", i+1, tool))
+		}
 	}
+	
+	// Display as a system message
+	msg := c.messageRenderer.RenderSystemMessage(content.String(), time.Now())
+	c.messageContainer.AddMessage(msg)
+	c.displayContainer()
 }
 
-// DisplayServers displays configured MCP servers
+// DisplayServers displays configured MCP servers in a message block
 func (c *CLI) DisplayServers(servers []string) {
-	fmt.Println("\nConfigured MCP servers:")
-	for i, server := range servers {
-		fmt.Printf("%d. %s\n", i+1, server)
+	var content strings.Builder
+	content.WriteString("## Configured MCP Servers\n\n")
+	
+	if len(servers) == 0 {
+		content.WriteString("No MCP servers are currently configured.")
+	} else {
+		for i, server := range servers {
+			content.WriteString(fmt.Sprintf("%d. `%s`\n", i+1, server))
+		}
 	}
+	
+	// Display as a system message
+	msg := c.messageRenderer.RenderSystemMessage(content.String(), time.Now())
+	c.messageContainer.AddMessage(msg)
+	c.displayContainer()
 }
 
 // DisplayHistory displays conversation history using the message container
@@ -284,11 +313,3 @@ func (c *CLI) updateSize() {
 	}
 }
 
-func (c *CLI) updateRenderer() error {
-	var err error
-	c.renderer, err = glamour.NewTermRenderer(
-		glamour.WithStandardStyle(styles.TokyoNightStyle),
-		glamour.WithWordWrap(c.width-20),
-	)
-	return err
-}
