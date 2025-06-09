@@ -9,15 +9,27 @@ import (
 
 // MCPServerConfig represents configuration for an MCP server
 type MCPServerConfig struct {
-	Command string   `json:"command,omitempty"`
-	Args    []string `json:"args,omitempty"`
-	URL     string   `json:"url,omitempty"`
-	Headers []string `json:"headers,omitempty"`
+	Command      string   `json:"command,omitempty"`
+	Args         []string `json:"args,omitempty"`
+	URL          string   `json:"url,omitempty"`
+	Headers      []string `json:"headers,omitempty"`
+	AllowedTools []string `json:"allowedTools,omitempty"`
+	ExcludedTools []string `json:"excludedTools,omitempty"`
 }
 
 // Config represents the application configuration
 type Config struct {
 	MCPServers map[string]MCPServerConfig `json:"mcpServers"`
+}
+
+// Validate validates the configuration
+func (c *Config) Validate() error {
+	for serverName, serverConfig := range c.MCPServers {
+		if len(serverConfig.AllowedTools) > 0 && len(serverConfig.ExcludedTools) > 0 {
+			return fmt.Errorf("server %s: allowedTools and excludedTools are mutually exclusive", serverName)
+		}
+	}
+	return nil
 }
 
 // SystemPromptConfig represents system prompt configuration
@@ -67,6 +79,11 @@ func LoadMCPConfig(configFile string) (*Config, error) {
 	var config Config
 	if err := v.Unmarshal(&config); err != nil {
 		return nil, fmt.Errorf("error parsing config file: %v", err)
+	}
+
+	// Validate that allowedTools and excludedTools are mutually exclusive
+	if err := config.Validate(); err != nil {
+		return nil, err
 	}
 
 	return &config, nil

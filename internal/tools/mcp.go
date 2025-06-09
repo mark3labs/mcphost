@@ -116,6 +116,11 @@ func (m *MCPToolManager) LoadTools(ctx context.Context, config *config.Config) e
 
 		// Convert MCP tools to eino tools
 		for _, mcpTool := range toolsResult.Tools {
+			// Filter tools based on allowedTools/excludedTools
+			if !m.shouldIncludeTool(mcpTool.Name, serverConfig) {
+				continue
+			}
+			
 			einoTool := &MCPTool{
 				client:   client,
 				toolInfo: &mcpTool,
@@ -141,6 +146,31 @@ func (m *MCPToolManager) Close() error {
 		}
 	}
 	return nil
+}
+
+// shouldIncludeTool determines if a tool should be included based on allowedTools/excludedTools
+func (m *MCPToolManager) shouldIncludeTool(toolName string, serverConfig config.MCPServerConfig) bool {
+	// If allowedTools is specified, only include tools in the list
+	if len(serverConfig.AllowedTools) > 0 {
+		for _, allowedTool := range serverConfig.AllowedTools {
+			if allowedTool == toolName {
+				return true
+			}
+		}
+		return false
+	}
+	
+	// If excludedTools is specified, exclude tools in the list
+	if len(serverConfig.ExcludedTools) > 0 {
+		for _, excludedTool := range serverConfig.ExcludedTools {
+			if excludedTool == toolName {
+				return false
+			}
+		}
+	}
+	
+	// Include by default
+	return true
 }
 
 func (m *MCPToolManager) createMCPClient(ctx context.Context, serverName string, serverConfig config.MCPServerConfig) (client.MCPClient, error) {
