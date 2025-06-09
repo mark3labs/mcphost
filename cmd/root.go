@@ -244,6 +244,20 @@ func runNonInteractiveMode(ctx context.Context, mcpAgent *agent.Agent, cli *ui.C
 				}
 			}
 		},
+		// Tool call content handler - called when content accompanies tool calls
+		func(content string) {
+			if !quiet && cli != nil {
+				// Stop spinner before displaying content
+				if currentSpinner != nil {
+					currentSpinner.Stop()
+					currentSpinner = nil
+				}
+				cli.DisplayAssistantMessageWithModel(content, modelName)
+				// Start spinner again for tool calls
+				currentSpinner = ui.NewSpinner("Thinking...")
+				currentSpinner.Start()
+			}
+		},
 	)
 	
 	// Make sure spinner is stopped if still running
@@ -343,6 +357,18 @@ func runInteractiveMode(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI,
 					currentSpinner.Stop()
 					currentSpinner = nil
 				}
+			},
+			// Tool call content handler - called when content accompanies tool calls
+			func(content string) {
+				// Stop spinner before displaying content
+				if currentSpinner != nil {
+					currentSpinner.Stop()
+					currentSpinner = nil
+				}
+				cli.DisplayAssistantMessageWithModel(content, modelName)
+				// Start spinner again for tool calls
+				currentSpinner = ui.NewSpinner("Thinking...")
+				currentSpinner.Start()
 			},
 		)
 		

@@ -58,6 +58,9 @@ type ToolResultHandler func(toolName, toolArgs, result string, isError bool)
 // ResponseHandler is a function type for handling LLM responses
 type ResponseHandler func(content string)
 
+// ToolCallContentHandler is a function type for handling content that accompanies tool calls
+type ToolCallContentHandler func(content string)
+
 func firstChunkStreamToolCallChecker(_ context.Context, sr *schema.StreamReader[*schema.Message]) (bool, error) {
 	defer sr.Close()
 
@@ -345,7 +348,7 @@ func (a *Agent) Stream(ctx context.Context, input []*schema.Message, opts ...com
 
 // GenerateWithLoop processes messages with a custom loop that displays tool calls in real-time
 func (a *Agent) GenerateWithLoop(ctx context.Context, messages []*schema.Message, 
-	onToolCall ToolCallHandler, onToolResult ToolResultHandler, onResponse ResponseHandler) (*schema.Message, error) {
+	onToolCall ToolCallHandler, onToolResult ToolResultHandler, onResponse ResponseHandler, onToolCallContent ToolCallContentHandler) (*schema.Message, error) {
 	
 	// Create a copy of messages to avoid modifying the original
 	workingMessages := make([]*schema.Message, len(messages))
@@ -391,6 +394,11 @@ func (a *Agent) GenerateWithLoop(ctx context.Context, messages []*schema.Message
 
 		// Check if this is a tool call or final response
 		if len(response.ToolCalls) > 0 {
+			// Display any content that accompanies the tool calls
+			if response.Content != "" && onToolCallContent != nil {
+				onToolCallContent(response.Content)
+			}
+			
 			// Handle tool calls
 			for _, toolCall := range response.ToolCalls {
 				// Notify about tool call
