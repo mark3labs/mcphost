@@ -24,8 +24,6 @@ type CLI struct {
 	messageContainer *MessageContainer
 	width            int
 	height           int
-	bufferedMessages []UIMessage // Buffer for messages during spinner execution
-	isSpinning       bool         // Track if spinner is active
 }
 
 // NewCLI creates a new CLI instance with message container
@@ -73,28 +71,12 @@ func (c *CLI) GetPrompt() (string, error) {
 
 // ShowSpinner displays a spinner with the given message and executes the action
 func (c *CLI) ShowSpinner(message string, action func() error) error {
-	c.isSpinning = true
-	c.bufferedMessages = []UIMessage{} // Clear buffer
-	
 	spinner := NewSpinner(message)
 	spinner.Start()
 	
 	err := action()
 	
 	spinner.Stop()
-	c.isSpinning = false
-	
-	// Display any buffered messages after spinner stops
-	hadBufferedMessages := len(c.bufferedMessages) > 0
-	for _, msg := range c.bufferedMessages {
-		c.messageContainer.AddMessage(msg)
-	}
-	c.bufferedMessages = []UIMessage{} // Clear buffer
-	
-	// Refresh display if we had buffered messages
-	if hadBufferedMessages {
-		c.displayContainer()
-	}
 	
 	return err
 }
@@ -123,19 +105,16 @@ func (c *CLI) DisplayAssistantMessageWithModel(message, modelName string) error 
 func (c *CLI) DisplayToolCallMessage(toolName, toolArgs string) {
 	msg := c.messageRenderer.RenderToolCallMessage(toolName, toolArgs, time.Now())
 	
-	if c.isSpinning {
-		// Buffer the message during spinner execution
-		c.bufferedMessages = append(c.bufferedMessages, msg)
-	} else {
-		// Display immediately if not spinning
-		c.messageContainer.AddMessage(msg)
-		c.displayContainer()
-	}
+	// Always display immediately - spinner management is handled externally
+	c.messageContainer.AddMessage(msg)
+	c.displayContainer()
 }
 
 // DisplayToolMessage displays a tool call message
 func (c *CLI) DisplayToolMessage(toolName, toolArgs, toolResult string, isError bool) {
 	msg := c.messageRenderer.RenderToolMessage(toolName, toolArgs, toolResult, isError)
+	
+	// Always display immediately - spinner management is handled externally
 	c.messageContainer.AddMessage(msg)
 	c.displayContainer()
 }
