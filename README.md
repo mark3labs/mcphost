@@ -25,6 +25,7 @@ Currently supports:
 ## Features ✨
 
 - Interactive conversations with support models
+- **Non-interactive mode** for scripting and automation
 - Support for multiple concurrent MCP servers
 - Dynamic tool discovery and integration
 - Tool calling capabilities for both model types
@@ -148,7 +149,30 @@ mcphost --system-prompt ./my-system-prompt.json
 
 ## Usage 🚀
 
-MCPHost is a CLI tool that allows you to interact with various AI models through a unified interface. It supports various tools through MCP servers.
+MCPHost is a CLI tool that allows you to interact with various AI models through a unified interface. It supports various tools through MCP servers and can run in both interactive and non-interactive modes.
+
+### Interactive Mode (Default)
+
+Start an interactive conversation session:
+
+```bash
+mcphost
+```
+
+### Non-Interactive Mode
+
+Run a single prompt and exit - perfect for scripting and automation:
+
+```bash
+# Basic non-interactive usage
+mcphost -p "What is the weather like today?"
+
+# Quiet mode - only output the AI response (no UI elements)
+mcphost -p "What is 2+2?" --quiet
+
+# Use with different models
+mcphost -m ollama:qwen2.5:3b -p "Explain quantum computing" --quiet
+```
 
 ### Available Models
 Models can be specified using the `--model` (`-m`) flag:
@@ -158,6 +182,8 @@ Models can be specified using the `--model` (`-m`) flag:
 - Google: `google:gemini-2.0-flash`
 
 ### Examples
+
+#### Interactive Mode
 ```bash
 # Use Ollama with Qwen model
 mcphost -m ollama:qwen2.5:3b
@@ -171,6 +197,22 @@ mcphost --model openai:<your-model-name> \
 --openai-api-key <your-api-key>
 ```
 
+#### Non-Interactive Mode
+```bash
+# Single prompt with full UI
+mcphost -p "List files in the current directory"
+
+# Quiet mode for scripting (only AI response output)
+mcphost -p "What is the capital of France?" --quiet
+
+# Use in shell scripts
+RESULT=$(mcphost -p "Calculate 15 * 23" --quiet)
+echo "The answer is: $RESULT"
+
+# Pipe to other commands
+mcphost -p "Generate a random UUID" --quiet | tr '[:lower:]' '[:upper:]'
+```
+
 ### Flags
 - `--anthropic-url string`: Base URL for Anthropic API (defaults to api.anthropic.com)
 - `--anthropic-api-key string`: Anthropic API key (can also be set via ANTHROPIC_API_KEY environment variable)
@@ -182,6 +224,8 @@ mcphost --model openai:<your-model-name> \
 - `--openai-url string`: Base URL for OpenAI API (defaults to api.openai.com)
 - `--openai-api-key string`: OpenAI API key (can also be set via OPENAI_API_KEY environment variable)
 - `--google-api-key string`: Google API key (can also be set via GOOGLE_API_KEY environment variable)
+- `-p, --prompt string`: **Run in non-interactive mode with the given prompt**
+- `--quiet`: **Suppress all output except the AI response (only works with --prompt)**
 
 
 ### Interactive Commands
@@ -197,6 +241,59 @@ While chatting, you can use:
 ### Global Flags
 - `--config`: Specify custom config file location
 - `--message-window`: Set number of messages to keep in context (default: 10)
+
+## Automation & Scripting 🤖
+
+MCPHost's non-interactive mode makes it perfect for automation, scripting, and integration with other tools.
+
+### Use Cases
+
+#### Shell Scripts
+```bash
+#!/bin/bash
+# Get weather and save to file
+mcphost -p "What's the weather in New York?" --quiet > weather.txt
+
+# Process files with AI
+for file in *.txt; do
+    summary=$(mcphost -p "Summarize this file: $(cat $file)" --quiet)
+    echo "$file: $summary" >> summaries.txt
+done
+```
+
+#### CI/CD Integration
+```bash
+# Code review automation
+DIFF=$(git diff HEAD~1)
+mcphost -p "Review this code diff and suggest improvements: $DIFF" --quiet
+
+# Generate release notes
+COMMITS=$(git log --oneline HEAD~10..HEAD)
+mcphost -p "Generate release notes from these commits: $COMMITS" --quiet
+```
+
+#### Data Processing
+```bash
+# Process CSV data
+mcphost -p "Analyze this CSV data and provide insights: $(cat data.csv)" --quiet
+
+# Generate reports
+mcphost -p "Create a summary report from this JSON: $(cat metrics.json)" --quiet
+```
+
+#### API Integration
+```bash
+# Use as a microservice
+curl -X POST http://localhost:8080/process \
+  -d "$(mcphost -p 'Generate a UUID' --quiet)"
+```
+
+### Tips for Scripting
+- Use `--quiet` flag to get clean output suitable for parsing
+- Combine with standard Unix tools (`grep`, `awk`, `sed`, etc.)
+- Set appropriate timeouts for long-running operations
+- Handle errors appropriately in your scripts
+- Use environment variables for API keys in production
 
 ## MCP Server Compatibility 🔌
 
