@@ -244,6 +244,7 @@ func runNonInteractiveMode(ctx context.Context, mcpAgent *agent.Agent, cli *ui.C
 				}
 			}
 		},
+
 		// Tool call content handler - called when content accompanies tool calls
 		func(content string) {
 			if !quiet && cli != nil {
