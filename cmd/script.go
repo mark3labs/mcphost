@@ -5,6 +5,8 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/mark3labs/mcphost/internal/config"
@@ -28,14 +30,29 @@ mcp-servers:
     command: "npx"
     args: ["-y", "@modelcontextprotocol/server-filesystem", "/tmp"]
 ---
-prompt: "List the files in the current directory"
+List the files in ${directory} and tell me about them.
 
 The script command supports the same flags as the main command,
-which will override any settings in the script file.`,
+which will override any settings in the script file.
+
+Variable substitution:
+Variables in the script can be substituted using ${variable} syntax.
+Pass variables using --args:variable value syntax:
+
+  mcphost script myscript.sh --args:directory /tmp --args:name "John"
+
+This will replace ${directory} with "/tmp" and ${name} with "John" in the script.`,
 	Args: cobra.ExactArgs(1),
+	FParseErrWhitelist: cobra.FParseErrWhitelist{
+		UnknownFlags: true, // Allow unknown flags for variable substitution
+	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		scriptFile := args[0]
-		return runScriptCommand(context.Background(), scriptFile)
+		
+		// Parse custom variables from unknown flags
+		variables := parseCustomVariables(cmd)
+		
+		return runScriptCommand(context.Background(), scriptFile, variables)
 	},
 }
 
@@ -57,9 +74,71 @@ func init() {
 	scriptCmd.Flags().StringVar(&googleAPIKey, "google-api-key", "", "Google (Gemini) API key")
 }
 
-func runScriptCommand(ctx context.Context, scriptFile string) error {
+// parseCustomVariables extracts custom variables from command line arguments
+func parseCustomVariables(_ *cobra.Command) map[string]string {
+	variables := make(map[string]string)
+	
+	// Get all arguments passed to the command
+	args := os.Args[1:] // Skip program name
+	
+	// Find the script subcommand position
+	scriptPos := -1
+	for i, arg := range args {
+		if arg == "script" {
+			scriptPos = i
+			break
+		}
+	}
+	
+	if scriptPos == -1 {
+		return variables
+	}
+	
+	// Parse arguments after the script file
+	scriptFileFound := false
+	
+	for i := scriptPos + 1; i < len(args); i++ {
+		arg := args[i]
+		
+		// Skip the script file argument (first non-flag after "script")
+		if !scriptFileFound && !strings.HasPrefix(arg, "-") {
+			scriptFileFound = true
+			continue
+		}
+		
+		// Parse custom variables with --args: prefix
+		if strings.HasPrefix(arg, "--args:") {
+			varName := strings.TrimPrefix(arg, "--args:")
+			if varName == "" {
+				continue // Skip malformed --args: without name
+			}
+			
+			// Check if we have a value
+			if i+1 < len(args) {
+				varValue := args[i+1]
+				
+				// Make sure the next arg isn't a flag
+				if !strings.HasPrefix(varValue, "-") {
+					variables[varName] = varValue
+					i++ // Skip the value
+				} else {
+					// No value provided, treat as empty string
+					variables[varName] = ""
+				}
+			} else {
+				// No value provided, treat as empty string
+				variables[varName] = ""
+			}
+		}
+	}
+	
+	return variables
+}
+
+
+func runScriptCommand(ctx context.Context, scriptFile string, variables map[string]string) error {
 	// Parse the script file
-	scriptConfig, err := parseScriptFile(scriptFile)
+	scriptConfig, err := parseScriptFile(scriptFile, variables)
 	if err != nil {
 		return fmt.Errorf("failed to parse script file: %v", err)
 	}
@@ -164,6 +243,10 @@ func applyScriptFlags(mcpConfig *config.Config) {
 	if modelFlag == "" && mcpConfig.Model != "" {
 		modelFlag = mcpConfig.Model
 	}
+	// Set default model if none specified anywhere
+	if modelFlag == "" {
+		modelFlag = "anthropic:claude-sonnet-4-20250514"
+	}
 	if maxSteps == 0 && mcpConfig.MaxSteps != 0 {
 		maxSteps = mcpConfig.MaxSteps
 	}
@@ -194,7 +277,7 @@ func applyScriptFlags(mcpConfig *config.Config) {
 }
 
 // parseScriptFile parses a script file with YAML frontmatter and returns config
-func parseScriptFile(filename string) (*config.Config, error) {
+func parseScriptFile(filename string, variables map[string]string) (*config.Config, error) {
 	file, err := os.Open(filename)
 	if err != nil {
 		return nil, err
@@ -208,13 +291,13 @@ func parseScriptFile(filename string) (*config.Config, error) {
 		line := scanner.Text()
 		if !strings.HasPrefix(line, "#!") {
 			// If it's not a shebang, we need to process this line
-			return parseScriptContent(line + "\n" + readRemainingLines(scanner))
+			return parseScriptContent(line+"\n"+readRemainingLines(scanner), variables)
 		}
 	}
 
 	// Read the rest of the file
 	content := readRemainingLines(scanner)
-	return parseScriptContent(content)
+	return parseScriptContent(content, variables)
 }
 
 // readRemainingLines reads all remaining lines from a scanner
@@ -226,24 +309,145 @@ func readRemainingLines(scanner *bufio.Scanner) string {
 	return strings.Join(lines, "\n")
 }
 
-// parseScriptContent parses the content to extract YAML frontmatter
-func parseScriptContent(content string) (*config.Config, error) {
+// parseScriptContent parses the content to extract YAML frontmatter and prompt
+func parseScriptContent(content string, variables map[string]string) (*config.Config, error) {
+	// Substitute variables in the content
+	content = substituteVariables(content, variables)
+	
 	lines := strings.Split(content, "\n")
 
-	// Find YAML frontmatter
+	// Find YAML frontmatter between --- delimiters
 	var yamlLines []string
+	var promptLines []string
+	var inFrontmatter bool
+	var foundFrontmatter bool
+	var frontmatterEnd int = -1
 
-	for _, line := range lines {
-		yamlLines = append(yamlLines, line)
+	for i, line := range lines {
+		trimmed := strings.TrimSpace(line)
+		
+		// Skip comment lines (lines starting with #)
+		if strings.HasPrefix(trimmed, "#") {
+			continue
+		}
+		
+		// Check for frontmatter start
+		if trimmed == "---" && !inFrontmatter {
+			// Start of frontmatter
+			inFrontmatter = true
+			foundFrontmatter = true
+			continue
+		}
+		
+		// Check for frontmatter end
+		if trimmed == "---" && inFrontmatter {
+			// End of frontmatter
+			inFrontmatter = false
+			frontmatterEnd = i + 1
+			continue
+		}
+		
+		// Collect frontmatter lines
+		if inFrontmatter {
+			yamlLines = append(yamlLines, line)
+		}
 	}
 
-	// Parse YAML
-	yamlContent := strings.Join(yamlLines, "\n")
+	// Extract prompt (everything after frontmatter)
+	if foundFrontmatter && frontmatterEnd != -1 && frontmatterEnd < len(lines) {
+		promptLines = lines[frontmatterEnd:]
+	} else if !foundFrontmatter {
+		// If no frontmatter found, treat entire content as prompt
+		promptLines = lines
+		yamlLines = []string{} // Empty YAML
+	}
+
+	// Parse YAML frontmatter
 	var scriptConfig config.Config
-	if err := yaml.Unmarshal([]byte(yamlContent), &scriptConfig); err != nil {
-		return nil, fmt.Errorf("failed to parse YAML: %v", err)
+	if len(yamlLines) > 0 {
+		yamlContent := strings.Join(yamlLines, "\n")
+		if err := yaml.Unmarshal([]byte(yamlContent), &scriptConfig); err != nil {
+			return nil, fmt.Errorf("failed to parse YAML frontmatter: %v\nYAML content:\n%s", err, yamlContent)
+		}
+	}
+
+	// Parse comment-based configuration (lines starting with # key: value)
+	for _, line := range lines {
+		trimmed := strings.TrimSpace(line)
+		if strings.HasPrefix(trimmed, "#") {
+			// Remove the # and trim whitespace
+			configLine := strings.TrimSpace(trimmed[1:])
+			
+			// Parse key: value format
+			if parts := strings.SplitN(configLine, ":", 2); len(parts) == 2 {
+				key := strings.TrimSpace(parts[0])
+				value := strings.TrimSpace(parts[1])
+				
+				// Apply comment-based config
+				switch key {
+				case "model":
+					if scriptConfig.Model == "" {
+						scriptConfig.Model = value
+					}
+				case "max-steps":
+					if scriptConfig.MaxSteps == 0 {
+						if steps, err := strconv.Atoi(value); err == nil {
+							scriptConfig.MaxSteps = steps
+						}
+					}
+				case "message-window":
+					if scriptConfig.MessageWindow == 0 {
+						if window, err := strconv.Atoi(value); err == nil {
+							scriptConfig.MessageWindow = window
+						}
+					}
+				case "debug":
+					if !scriptConfig.Debug {
+						if debug, err := strconv.ParseBool(value); err == nil {
+							scriptConfig.Debug = debug
+						}
+					}
+				case "system-prompt":
+					if scriptConfig.SystemPrompt == "" {
+						scriptConfig.SystemPrompt = value
+					}
+				}
+			}
+		}
+	}
+
+	// Set prompt from content after frontmatter
+	if len(promptLines) > 0 {
+		prompt := strings.Join(promptLines, "\n")
+		prompt = strings.TrimSpace(prompt) // Remove leading/trailing whitespace
+		if prompt != "" {
+			scriptConfig.Prompt = prompt
+		}
 	}
 
 	return &scriptConfig, nil
+}
+
+// substituteVariables replaces ${variable} patterns with their values
+func substituteVariables(content string, variables map[string]string) string {
+	result := content
+	
+	// Use regex to find and replace ${variable} patterns
+	re := regexp.MustCompile(`\$\{([^}]+)\}`)
+	
+	result = re.ReplaceAllStringFunc(result, func(match string) string {
+		// Extract variable name (remove ${ and })
+		varName := match[2 : len(match)-1]
+		
+		// Look up the variable value
+		if value, exists := variables[varName]; exists {
+			return value
+		}
+		
+		// If variable not found, leave it as is
+		return match
+	})
+	
+	return result
 }
 
