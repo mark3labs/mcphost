@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 	"regexp"
-	"strconv"
 	"strings"
 
 	"github.com/mark3labs/mcphost/internal/config"
@@ -371,50 +370,7 @@ func parseScriptContent(content string, variables map[string]string) (*config.Co
 		}
 	}
 
-	// Parse comment-based configuration (lines starting with # key: value)
-	for _, line := range lines {
-		trimmed := strings.TrimSpace(line)
-		if strings.HasPrefix(trimmed, "#") {
-			// Remove the # and trim whitespace
-			configLine := strings.TrimSpace(trimmed[1:])
-			
-			// Parse key: value format
-			if parts := strings.SplitN(configLine, ":", 2); len(parts) == 2 {
-				key := strings.TrimSpace(parts[0])
-				value := strings.TrimSpace(parts[1])
-				
-				// Apply comment-based config
-				switch key {
-				case "model":
-					if scriptConfig.Model == "" {
-						scriptConfig.Model = value
-					}
-				case "max-steps":
-					if scriptConfig.MaxSteps == 0 {
-						if steps, err := strconv.Atoi(value); err == nil {
-							scriptConfig.MaxSteps = steps
-						}
-					}
-				case "message-window":
-					if scriptConfig.MessageWindow == 0 {
-						if window, err := strconv.Atoi(value); err == nil {
-							scriptConfig.MessageWindow = window
-						}
-					}
-				case "debug":
-					if !scriptConfig.Debug {
-						if debug, err := strconv.ParseBool(value); err == nil {
-							scriptConfig.Debug = debug
-						}
-					}
-				case "system-prompt":
-					if scriptConfig.SystemPrompt == "" {
-						scriptConfig.SystemPrompt = value
-					}
-				}
-			}
-		}
-	}
+
 
 	// Set prompt from content after frontmatter
 	if len(promptLines) > 0 {
