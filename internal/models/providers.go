@@ -21,7 +21,6 @@ type ProviderConfig struct {
 	OpenAIAPIKey     string
 	OpenAIBaseURL    string
 	GoogleAPIKey     string
-	UseCustomGemini  bool // Flag to use custom Gemini implementation
 }
 
 // CreateProvider creates an eino ToolCallingChatModel based on the provider configuration
