@@ -7,12 +7,9 @@ import (
 	"strings"
 
 	"github.com/cloudwego/eino-ext/components/model/claude"
-	"github.com/cloudwego/eino-ext/components/model/gemini"
 	"github.com/cloudwego/eino-ext/components/model/ollama"
 	"github.com/cloudwego/eino-ext/components/model/openai"
 	"github.com/cloudwego/eino/components/model"
-	"github.com/google/generative-ai-go/genai"
-	"google.golang.org/api/option"
 )
 
 // ProviderConfig holds configuration for creating LLM providers
@@ -24,6 +21,7 @@ type ProviderConfig struct {
 	OpenAIAPIKey     string
 	OpenAIBaseURL    string
 	GoogleAPIKey     string
+	UseCustomGemini  bool // Flag to use custom Gemini implementation
 }
 
 // CreateProvider creates an eino ToolCallingChatModel based on the provider configuration
@@ -105,17 +103,8 @@ func createGoogleProvider(ctx context.Context, config *ProviderConfig, modelName
 		return nil, fmt.Errorf("Google API key not provided. Use --google-api-key flag or GOOGLE_API_KEY/GEMINI_API_KEY environment variable")
 	}
 
-	client, err := genai.NewClient(ctx, option.WithAPIKey(apiKey))
-	if err != nil {
-		return nil, fmt.Errorf("failed to create Google client: %v", err)
-	}
-
-	geminiConfig := &gemini.Config{
-		Client: client,
-		Model:  modelName,
-	}
-
-	return gemini.NewChatModel(ctx, geminiConfig)
+	// Use custom implementation by default
+	return NewGeminiToolCallingModel(ctx, apiKey, modelName)
 }
 
 func createOllamaProvider(ctx context.Context, config *ProviderConfig, modelName string) (model.ToolCallingChatModel, error) {
