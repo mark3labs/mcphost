@@ -29,8 +29,7 @@ type Config struct {
 	OpenAIAPIKey    string                     `json:"openai-api-key,omitempty" yaml:"openai-api-key,omitempty"`
 	AnthropicAPIKey string                     `json:"anthropic-api-key,omitempty" yaml:"anthropic-api-key,omitempty"`
 	GoogleAPIKey    string                     `json:"google-api-key,omitempty" yaml:"google-api-key,omitempty"`
-	OpenAIURL       string                     `json:"openai-url,omitempty" yaml:"openai-url,omitempty"`
-	AnthropicURL    string                     `json:"anthropic-url,omitempty" yaml:"anthropic-url,omitempty"`
+	ModelURL        string                     `json:"model-url,omitempty" yaml:"model-url,omitempty"`
 	Prompt          string                     `json:"prompt,omitempty" yaml:"prompt,omitempty"`
 	
 	// Model generation parameters
@@ -202,8 +201,7 @@ mcpServers:
 # openai-api-key: "your-openai-key"
 # anthropic-api-key: "your-anthropic-key"  
 # google-api-key: "your-google-key"
-# openai-url: "https://api.openai.com/v1"
-# anthropic-url: "https://api.anthropic.com"
+# model-url: "https://api.openai.com/v1"    # Base URL for OpenAI, Anthropic, or Ollama
 `
 
 	_, err = file.WriteString(content)

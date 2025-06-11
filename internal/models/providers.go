@@ -21,10 +21,9 @@ type ProviderConfig struct {
 	ModelString      string
 	SystemPrompt     string
 	AnthropicAPIKey  string
-	AnthropicBaseURL string
 	OpenAIAPIKey     string
-	OpenAIBaseURL    string
 	GoogleAPIKey     string
+	ModelURL         string // Base URL for OpenAI, Anthropic, and Ollama
 	
 	// Model generation parameters
 	MaxTokens     int
@@ -78,8 +77,8 @@ func createAnthropicProvider(ctx context.Context, config *ProviderConfig, modelN
 		MaxTokens: maxTokens,
 	}
 
-	if config.AnthropicBaseURL != "" {
-		claudeConfig.BaseURL = &config.AnthropicBaseURL
+	if config.ModelURL != "" {
+		claudeConfig.BaseURL = &config.ModelURL
 	}
 
 	if config.Temperature != nil {
@@ -115,8 +114,8 @@ func createOpenAIProvider(ctx context.Context, config *ProviderConfig, modelName
 		Model:  modelName,
 	}
 
-	if config.OpenAIBaseURL != "" {
-		openaiConfig.BaseURL = config.OpenAIBaseURL
+	if config.ModelURL != "" {
+		openaiConfig.BaseURL = config.ModelURL
 	}
 
 	if config.MaxTokens > 0 {
@@ -183,14 +182,21 @@ func createGoogleProvider(ctx context.Context, config *ProviderConfig, modelName
 }
 
 func createOllamaProvider(ctx context.Context, config *ProviderConfig, modelName string) (model.ToolCallingChatModel, error) {
-	ollamaConfig := &ollama.ChatModelConfig{
-		BaseURL: "http://localhost:11434", // Default Ollama URL
-		Model:   modelName,
+	baseURL := "http://localhost:11434" // Default Ollama URL
+	
+	// Check for custom Ollama host from environment
+	if host := os.Getenv("OLLAMA_HOST"); host != "" {
+		baseURL = host
+	}
+	
+	// Override with ModelURL if provided
+	if config.ModelURL != "" {
+		baseURL = config.ModelURL
 	}
 
-	// Check for custom Ollama host
-	if host := os.Getenv("OLLAMA_HOST"); host != "" {
-		ollamaConfig.BaseURL = host
+	ollamaConfig := &ollama.ChatModelConfig{
+		BaseURL: baseURL,
+		Model:   modelName,
 	}
 
 	// Set up options for Ollama using the api.Options struct

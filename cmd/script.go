@@ -66,8 +66,7 @@ func init() {
 	scriptCmd.Flags().StringVarP(&promptFlag, "prompt", "p", "", "override the prompt from the script file")
 	scriptCmd.Flags().BoolVar(&quietFlag, "quiet", false, "suppress all output")
 	scriptCmd.Flags().IntVar(&maxSteps, "max-steps", 0, "maximum number of agent steps (0 for unlimited)")
-	scriptCmd.Flags().StringVar(&openaiBaseURL, "openai-url", "", "base URL for OpenAI API")
-	scriptCmd.Flags().StringVar(&anthropicBaseURL, "anthropic-url", "", "base URL for Anthropic API")
+	scriptCmd.Flags().StringVar(&modelURL, "model-url", "", "base URL for the model API (applies to OpenAI, Anthropic, and Ollama)")
 	scriptCmd.Flags().StringVar(&openaiAPIKey, "openai-api-key", "", "OpenAI API key")
 	scriptCmd.Flags().StringVar(&anthropicAPIKey, "anthropic-api-key", "", "Anthropic API key")
 	scriptCmd.Flags().StringVar(&googleAPIKey, "google-api-key", "", "Google (Gemini) API key")
@@ -160,8 +159,7 @@ func runScriptCommand(ctx context.Context, scriptFile string, variables map[stri
 	originalOpenAIAPIKey := openaiAPIKey
 	originalAnthropicAPIKey := anthropicAPIKey
 	originalGoogleAPIKey := googleAPIKey
-	originalOpenAIURL := openaiBaseURL
-	originalAnthropicURL := anthropicBaseURL
+	originalModelURL := modelURL
 	originalMaxTokens := maxTokens
 	originalTemperature := temperature
 	originalTopP := topP
@@ -201,8 +199,7 @@ func runScriptCommand(ctx context.Context, scriptFile string, variables map[stri
 		openaiAPIKey = originalOpenAIAPIKey
 		anthropicAPIKey = originalAnthropicAPIKey
 		googleAPIKey = originalGoogleAPIKey
-		openaiBaseURL = originalOpenAIURL
-		anthropicBaseURL = originalAnthropicURL
+		modelURL = originalModelURL
 		maxTokens = originalMaxTokens
 		temperature = originalTemperature
 		topP = originalTopP
@@ -240,11 +237,8 @@ func mergeScriptConfig(mcpConfig *config.Config, scriptConfig *config.Config) {
 	if scriptConfig.GoogleAPIKey != "" {
 		mcpConfig.GoogleAPIKey = scriptConfig.GoogleAPIKey
 	}
-	if scriptConfig.OpenAIURL != "" {
-		mcpConfig.OpenAIURL = scriptConfig.OpenAIURL
-	}
-	if scriptConfig.AnthropicURL != "" {
-		mcpConfig.AnthropicURL = scriptConfig.AnthropicURL
+	if scriptConfig.ModelURL != "" {
+		mcpConfig.ModelURL = scriptConfig.ModelURL
 	}
 	if scriptConfig.Prompt != "" {
 		mcpConfig.Prompt = scriptConfig.Prompt
@@ -298,11 +292,8 @@ func applyScriptFlags(mcpConfig *config.Config, cmd *cobra.Command) {
 	if !cmd.Flags().Changed("google-api-key") && mcpConfig.GoogleAPIKey != "" {
 		googleAPIKey = mcpConfig.GoogleAPIKey
 	}
-	if !cmd.Flags().Changed("openai-url") && mcpConfig.OpenAIURL != "" {
-		openaiBaseURL = mcpConfig.OpenAIURL
-	}
-	if !cmd.Flags().Changed("anthropic-url") && mcpConfig.AnthropicURL != "" {
-		anthropicBaseURL = mcpConfig.AnthropicURL
+	if !cmd.Flags().Changed("model-url") && mcpConfig.ModelURL != "" {
+		modelURL = mcpConfig.ModelURL
 	}
 	if !cmd.Flags().Changed("max-tokens") && mcpConfig.MaxTokens != 0 {
 		maxTokens = mcpConfig.MaxTokens

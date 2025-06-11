@@ -22,8 +22,7 @@ var (
 	systemPromptFile string
 	messageWindow    int
 	modelFlag        string
-	openaiBaseURL    string
-	anthropicBaseURL string
+	modelURL         string
 	openaiAPIKey     string
 	anthropicAPIKey  string
 	googleAPIKey     string
@@ -98,8 +97,7 @@ func init() {
 		IntVar(&maxSteps, "max-steps", 0, "maximum number of agent steps (0 for unlimited)")
 
 	flags := rootCmd.PersistentFlags()
-	flags.StringVar(&openaiBaseURL, "openai-url", "", "base URL for OpenAI API")
-	flags.StringVar(&anthropicBaseURL, "anthropic-url", "", "base URL for Anthropic API")
+	flags.StringVar(&modelURL, "model-url", "", "base URL for the model API (applies to OpenAI, Anthropic, and Ollama)")
 	flags.StringVar(&openaiAPIKey, "openai-api-key", "", "OpenAI API key")
 	flags.StringVar(&anthropicAPIKey, "anthropic-api-key", "", "Anthropic API key")
 	flags.StringVar(&googleAPIKey, "google-api-key", "", "Google (Gemini) API key")
@@ -117,8 +115,7 @@ func init() {
 	viper.BindPFlag("model", rootCmd.PersistentFlags().Lookup("model"))
 	viper.BindPFlag("debug", rootCmd.PersistentFlags().Lookup("debug"))
 	viper.BindPFlag("max-steps", rootCmd.PersistentFlags().Lookup("max-steps"))
-	viper.BindPFlag("openai-url", rootCmd.PersistentFlags().Lookup("openai-url"))
-	viper.BindPFlag("anthropic-url", rootCmd.PersistentFlags().Lookup("anthropic-url"))
+	viper.BindPFlag("model-url", rootCmd.PersistentFlags().Lookup("model-url"))
 	viper.BindPFlag("openai-api-key", rootCmd.PersistentFlags().Lookup("openai-api-key"))
 	viper.BindPFlag("anthropic-api-key", rootCmd.PersistentFlags().Lookup("anthropic-api-key"))
 	viper.BindPFlag("google-api-key", rootCmd.PersistentFlags().Lookup("google-api-key"))
@@ -203,8 +200,7 @@ func runNormalMode(ctx context.Context) error {
 	finalMessageWindow := viper.GetInt("message-window")
 	finalDebug := viper.GetBool("debug")
 	finalMaxSteps := viper.GetInt("max-steps")
-	finalOpenAIURL := viper.GetString("openai-url")
-	finalAnthropicURL := viper.GetString("anthropic-url")
+	finalModelURL := viper.GetString("model-url")
 	finalOpenAIKey := viper.GetString("openai-api-key")
 	finalAnthropicKey := viper.GetString("anthropic-api-key")
 	finalGoogleKey := viper.GetString("google-api-key")
@@ -227,18 +223,17 @@ func runNormalMode(ctx context.Context) error {
 
 	// Create model configuration
 	modelConfig := &models.ProviderConfig{
-		ModelString:      finalModel,
-		SystemPrompt:     systemPrompt,
-		AnthropicAPIKey:  finalAnthropicKey,
-		AnthropicBaseURL: finalAnthropicURL,
-		OpenAIAPIKey:     finalOpenAIKey,
-		OpenAIBaseURL:    finalOpenAIURL,
-		GoogleAPIKey:     finalGoogleKey,
-		MaxTokens:        finalMaxTokens,
-		Temperature:      &finalTemperature,
-		TopP:             &finalTopP,
-		TopK:             &finalTopK,
-		StopSequences:    finalStopSequences,
+		ModelString:     finalModel,
+		SystemPrompt:    systemPrompt,
+		AnthropicAPIKey: finalAnthropicKey,
+		OpenAIAPIKey:    finalOpenAIKey,
+		GoogleAPIKey:    finalGoogleKey,
+		ModelURL:        finalModelURL,
+		MaxTokens:       finalMaxTokens,
+		Temperature:     &finalTemperature,
+		TopP:            &finalTopP,
+		TopK:            &finalTopK,
+		StopSequences:   finalStopSequences,
 	}
 
 	// Create agent configuration
