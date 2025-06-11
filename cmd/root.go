@@ -108,6 +108,12 @@ func init() {
 	viper.BindPFlag("openai-api-key", rootCmd.PersistentFlags().Lookup("openai-api-key"))
 	viper.BindPFlag("anthropic-api-key", rootCmd.PersistentFlags().Lookup("anthropic-api-key"))
 	viper.BindPFlag("google-api-key", rootCmd.PersistentFlags().Lookup("google-api-key"))
+
+	// Set defaults in viper (lowest precedence)
+	viper.SetDefault("model", "anthropic:claude-sonnet-4-20250514")
+	viper.SetDefault("message-window", 40)
+	viper.SetDefault("max-steps", 0)
+	viper.SetDefault("debug", false)
 }
 
 func runMCPHost(ctx context.Context) error {
@@ -168,56 +174,42 @@ func runNormalMode(ctx context.Context) error {
 		viper.ReadInConfig() // Ignore error if file doesn't exist
 	}
 
-	// Override flag values with config file values (using viper's bound values)
-	if viper.GetString("system-prompt") != "" {
-		systemPromptFile = viper.GetString("system-prompt")
-	}
-	if viper.GetInt("message-window") != 0 {
-		messageWindow = viper.GetInt("message-window")
-	}
-	if viper.GetString("model") != "" {
-		modelFlag = viper.GetString("model")
-	}
-	if viper.GetBool("debug") {
-		debugMode = viper.GetBool("debug")
-	}
-	if viper.GetInt("max-steps") != 0 {
-		maxSteps = viper.GetInt("max-steps")
-	}
-	if viper.GetString("openai-url") != "" {
-		openaiBaseURL = viper.GetString("openai-url")
-	}
-	if viper.GetString("anthropic-url") != "" {
-		anthropicBaseURL = viper.GetString("anthropic-url")
-	}
-	if viper.GetString("openai-api-key") != "" {
-		openaiAPIKey = viper.GetString("openai-api-key")
-	}
-	if viper.GetString("anthropic-api-key") != "" {
-		anthropicAPIKey = viper.GetString("anthropic-api-key")
-	}
-	if viper.GetString("google-api-key") != "" {
-		googleAPIKey = viper.GetString("google-api-key")
+	// Get final values from viper (respects precedence: flag > config > default)
+	finalModel := viper.GetString("model")
+	finalSystemPrompt := viper.GetString("system-prompt")
+	finalMessageWindow := viper.GetInt("message-window")
+	finalDebug := viper.GetBool("debug")
+	finalMaxSteps := viper.GetInt("max-steps")
+	finalOpenAIURL := viper.GetString("openai-url")
+	finalAnthropicURL := viper.GetString("anthropic-url")
+	finalOpenAIKey := viper.GetString("openai-api-key")
+	finalAnthropicKey := viper.GetString("anthropic-api-key")
+	finalGoogleKey := viper.GetString("google-api-key")
+
+	// Update debug mode if it was set in config
+	if finalDebug && !debugMode {
+		debugMode = finalDebug
+		log.SetFlags(log.LstdFlags | log.Lshortfile)
 	}
 
-	systemPrompt, err := config.LoadSystemPrompt(systemPromptFile)
+	systemPrompt, err := config.LoadSystemPrompt(finalSystemPrompt)
 	if err != nil {
 		return fmt.Errorf("failed to load system prompt: %v", err)
 	}
 
 	// Create model configuration
 	modelConfig := &models.ProviderConfig{
-		ModelString:      modelFlag,
+		ModelString:      finalModel,
 		SystemPrompt:     systemPrompt,
-		AnthropicAPIKey:  anthropicAPIKey,
-		AnthropicBaseURL: anthropicBaseURL,
-		OpenAIAPIKey:     openaiAPIKey,
-		OpenAIBaseURL:    openaiBaseURL,
-		GoogleAPIKey:     googleAPIKey,
+		AnthropicAPIKey:  finalAnthropicKey,
+		AnthropicBaseURL: finalAnthropicURL,
+		OpenAIAPIKey:     finalOpenAIKey,
+		OpenAIBaseURL:    finalOpenAIURL,
+		GoogleAPIKey:     finalGoogleKey,
 	}
 
 	// Create agent configuration
-	agentMaxSteps := maxSteps
+	agentMaxSteps := finalMaxSteps
 	if agentMaxSteps == 0 {
 		agentMaxSteps = 1000 // Set a high limit for "unlimited"
 	}
@@ -227,7 +219,7 @@ func runNormalMode(ctx context.Context) error {
 		MCPConfig:     mcpConfig,
 		SystemPrompt:  systemPrompt,
 		MaxSteps:      agentMaxSteps,
-		MessageWindow: messageWindow,
+		MessageWindow: finalMessageWindow,
 	}
 
 	// Create the agent
@@ -238,7 +230,7 @@ func runNormalMode(ctx context.Context) error {
 	defer mcpAgent.Close()
 
 	// Get model name for display
-	parts := strings.SplitN(modelFlag, ":", 2)
+	parts := strings.SplitN(finalModel, ":", 2)
 	modelName := "Unknown"
 	if len(parts) == 2 {
 		modelName = parts[1]

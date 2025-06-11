@@ -51,7 +51,7 @@ This will replace ${directory} with "/tmp" and ${name} with "John" in the script
 		// Parse custom variables from unknown flags
 		variables := parseCustomVariables(cmd)
 		
-		return runScriptCommand(context.Background(), scriptFile, variables)
+		return runScriptCommand(context.Background(), scriptFile, variables, cmd)
 	},
 }
 
@@ -135,7 +135,7 @@ func parseCustomVariables(_ *cobra.Command) map[string]string {
 }
 
 
-func runScriptCommand(ctx context.Context, scriptFile string, variables map[string]string) error {
+func runScriptCommand(ctx context.Context, scriptFile string, variables map[string]string, cmd *cobra.Command) error {
 	// Parse the script file
 	scriptConfig, err := parseScriptFile(scriptFile, variables)
 	if err != nil {
@@ -175,7 +175,7 @@ func runScriptCommand(ctx context.Context, scriptFile string, variables map[stri
 	scriptMCPConfig = mcpConfig
 
 	// Apply script configuration to global flags (only if not overridden by command flags)
-	applyScriptFlags(mcpConfig)
+	applyScriptFlags(mcpConfig, cmd)
 
 	// Restore original values after execution
 	defer func() {
@@ -234,43 +234,42 @@ func mergeScriptConfig(mcpConfig *config.Config, scriptConfig *config.Config) {
 	}
 }
 
-func applyScriptFlags(mcpConfig *config.Config) {
+func applyScriptFlags(mcpConfig *config.Config, cmd *cobra.Command) {
+	// For scripts, we need to respect: flag > script > config > default
+	// We can use cobra's Changed() method to detect if flags were explicitly set
+	
 	// Only apply script values if the corresponding flag wasn't explicitly set
-	if promptFlag == "" && mcpConfig.Prompt != "" {
+	if !cmd.Flags().Changed("prompt") && mcpConfig.Prompt != "" {
 		promptFlag = mcpConfig.Prompt
 	}
-	if modelFlag == "" && mcpConfig.Model != "" {
+	if !cmd.Flags().Changed("model") && mcpConfig.Model != "" {
 		modelFlag = mcpConfig.Model
 	}
-	// Set default model if none specified anywhere
-	if modelFlag == "" {
-		modelFlag = "anthropic:claude-sonnet-4-20250514"
-	}
-	if maxSteps == 0 && mcpConfig.MaxSteps != 0 {
+	if !cmd.Flags().Changed("max-steps") && mcpConfig.MaxSteps != 0 {
 		maxSteps = mcpConfig.MaxSteps
 	}
-	if messageWindow == 40 && mcpConfig.MessageWindow != 0 { // 40 is the default
+	if !cmd.Flags().Changed("message-window") && mcpConfig.MessageWindow != 0 {
 		messageWindow = mcpConfig.MessageWindow
 	}
-	if !debugMode && mcpConfig.Debug {
+	if !cmd.Flags().Changed("debug") && mcpConfig.Debug {
 		debugMode = mcpConfig.Debug
 	}
-	if systemPromptFile == "" && mcpConfig.SystemPrompt != "" {
+	if !cmd.Flags().Changed("system-prompt") && mcpConfig.SystemPrompt != "" {
 		systemPromptFile = mcpConfig.SystemPrompt
 	}
-	if openaiAPIKey == "" && mcpConfig.OpenAIAPIKey != "" {
+	if !cmd.Flags().Changed("openai-api-key") && mcpConfig.OpenAIAPIKey != "" {
 		openaiAPIKey = mcpConfig.OpenAIAPIKey
 	}
-	if anthropicAPIKey == "" && mcpConfig.AnthropicAPIKey != "" {
+	if !cmd.Flags().Changed("anthropic-api-key") && mcpConfig.AnthropicAPIKey != "" {
 		anthropicAPIKey = mcpConfig.AnthropicAPIKey
 	}
-	if googleAPIKey == "" && mcpConfig.GoogleAPIKey != "" {
+	if !cmd.Flags().Changed("google-api-key") && mcpConfig.GoogleAPIKey != "" {
 		googleAPIKey = mcpConfig.GoogleAPIKey
 	}
-	if openaiBaseURL == "" && mcpConfig.OpenAIURL != "" {
+	if !cmd.Flags().Changed("openai-url") && mcpConfig.OpenAIURL != "" {
 		openaiBaseURL = mcpConfig.OpenAIURL
 	}
-	if anthropicBaseURL == "" && mcpConfig.AnthropicURL != "" {
+	if !cmd.Flags().Changed("anthropic-url") && mcpConfig.AnthropicURL != "" {
 		anthropicBaseURL = mcpConfig.AnthropicURL
 	}
 }
