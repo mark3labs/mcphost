@@ -207,6 +207,65 @@ func (r *MessageRenderer) RenderSystemMessage(content string, timestamp time.Tim
 	}
 }
 
+// RenderDebugConfigMessage renders debug configuration settings with tool response block styling
+func (r *MessageRenderer) RenderDebugConfigMessage(config map[string]any, timestamp time.Time) UIMessage {
+	baseStyle := lipgloss.NewStyle()
+
+	// Create the main message style with border using tool color
+	style := baseStyle.
+		Width(r.width - 1).
+		BorderLeft(true).
+		Foreground(mutedColor).
+		BorderForeground(toolColor).
+		BorderStyle(lipgloss.ThickBorder()).
+		PaddingLeft(1)
+
+	// Format timestamp
+	timeStr := timestamp.Local().Format("02 Jan 2006 03:04 PM")
+
+	// Create header with debug icon
+	header := baseStyle.
+		Foreground(toolColor).
+		Bold(true).
+		Render("🔧 Debug Configuration")
+
+	// Format configuration settings
+	var configLines []string
+	for key, value := range config {
+		if value != nil {
+			configLines = append(configLines, fmt.Sprintf("  %s: %v", key, value))
+		}
+	}
+
+	configContent := baseStyle.
+		Foreground(mutedColor).
+		Render(strings.Join(configLines, "\n"))
+
+	// Create info line
+	info := baseStyle.
+		Width(r.width - 1).
+		Foreground(mutedColor).
+		Render(fmt.Sprintf(" MCPHost (%s)", timeStr))
+
+	// Combine parts
+	parts := []string{header}
+	if len(configLines) > 0 {
+		parts = append(parts, configContent)
+	}
+	parts = append(parts, info)
+
+	rendered := style.Render(
+		lipgloss.JoinVertical(lipgloss.Left, parts...),
+	)
+
+	return UIMessage{
+		Type:      SystemMessage,
+		Content:   rendered,
+		Height:    lipgloss.Height(rendered),
+		Timestamp: timestamp,
+	}
+}
+
 // RenderErrorMessage renders an error message with proper styling
 func (r *MessageRenderer) RenderErrorMessage(errorMsg string, timestamp time.Time) UIMessage {
 	baseStyle := lipgloss.NewStyle()

@@ -346,9 +346,8 @@ mcphost -p "Generate a random UUID" --quiet | tr '[:lower:]' '[:upper:]'
 ```
 
 ### Flags
-- `--provider-url string`: Base URL for the provider API (applies to OpenAI, Anthropic, and Ollama)
-- `--provider-api-key string`: API key for the provider (applies to OpenAI and Anthropic)
-- `--google-api-key string`: Google (Gemini) API key (can also be set via GOOGLE_API_KEY environment variable)
+- `--provider-url string`: Base URL for the provider API (applies to OpenAI, Anthropic, Ollama, and Google)
+- `--provider-api-key string`: API key for the provider (applies to OpenAI, Anthropic, and Google)
 - `--config string`: Config file location (default is $HOME/.mcphost.yml)
 - `--system-prompt string`: system-prompt file location
 - `--debug`: Enable debug logging
@@ -392,8 +391,7 @@ top-k: 40
 stop-sequences: ["Human:", "Assistant:"]
 
 # API Configuration
-provider-api-key: "your-api-key"      # For OpenAI or Anthropic
-google-api-key: "your-google-key"     # For Google/Gemini
+provider-api-key: "your-api-key"      # For OpenAI, Anthropic, or Google
 provider-url: "https://api.openai.com/v1"  # Custom base URL
 ```
 

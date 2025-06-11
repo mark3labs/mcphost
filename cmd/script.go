@@ -65,9 +65,8 @@ func init() {
 	scriptCmd.Flags().StringVarP(&promptFlag, "prompt", "p", "", "override the prompt from the script file")
 	scriptCmd.Flags().BoolVar(&quietFlag, "quiet", false, "suppress all output")
 	scriptCmd.Flags().IntVar(&maxSteps, "max-steps", 0, "maximum number of agent steps (0 for unlimited)")
-	scriptCmd.Flags().StringVar(&providerURL, "provider-url", "", "base URL for the provider API (applies to OpenAI, Anthropic, and Ollama)")
-	scriptCmd.Flags().StringVar(&providerAPIKey, "provider-api-key", "", "API key for the provider (applies to OpenAI and Anthropic)")
-	scriptCmd.Flags().StringVar(&googleAPIKey, "google-api-key", "", "Google (Gemini) API key")
+	scriptCmd.Flags().StringVar(&providerURL, "provider-url", "", "base URL for the provider API (applies to OpenAI, Anthropic, Ollama, and Google)")
+	scriptCmd.Flags().StringVar(&providerAPIKey, "provider-api-key", "", "API key for the provider (applies to OpenAI, Anthropic, and Google)")
 	
 	// Model generation parameters
 	scriptCmd.Flags().IntVar(&maxTokens, "max-tokens", 4096, "maximum number of tokens in the response")
@@ -154,7 +153,6 @@ func runScriptCommand(ctx context.Context, scriptFile string, variables map[stri
 	originalDebugMode := debugMode
 	originalSystemPromptFile := systemPromptFile
 	originalProviderAPIKey := providerAPIKey
-	originalGoogleAPIKey := googleAPIKey
 	originalProviderURL := providerURL
 	originalMaxTokens := maxTokens
 	originalTemperature := temperature
@@ -192,7 +190,6 @@ func runScriptCommand(ctx context.Context, scriptFile string, variables map[stri
 		debugMode = originalDebugMode
 		systemPromptFile = originalSystemPromptFile
 		providerAPIKey = originalProviderAPIKey
-		googleAPIKey = originalGoogleAPIKey
 		providerURL = originalProviderURL
 		maxTokens = originalMaxTokens
 		temperature = originalTemperature
@@ -221,9 +218,6 @@ func mergeScriptConfig(mcpConfig *config.Config, scriptConfig *config.Config) {
 	}
 	if scriptConfig.ProviderAPIKey != "" {
 		mcpConfig.ProviderAPIKey = scriptConfig.ProviderAPIKey
-	}
-	if scriptConfig.GoogleAPIKey != "" {
-		mcpConfig.GoogleAPIKey = scriptConfig.GoogleAPIKey
 	}
 	if scriptConfig.ProviderURL != "" {
 		mcpConfig.ProviderURL = scriptConfig.ProviderURL
@@ -270,9 +264,6 @@ func applyScriptFlags(mcpConfig *config.Config, cmd *cobra.Command) {
 	}
 	if !cmd.Flags().Changed("provider-api-key") && mcpConfig.ProviderAPIKey != "" {
 		providerAPIKey = mcpConfig.ProviderAPIKey
-	}
-	if !cmd.Flags().Changed("google-api-key") && mcpConfig.GoogleAPIKey != "" {
-		googleAPIKey = mcpConfig.GoogleAPIKey
 	}
 	if !cmd.Flags().Changed("provider-url") && mcpConfig.ProviderURL != "" {
 		providerURL = mcpConfig.ProviderURL

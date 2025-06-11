@@ -152,6 +152,13 @@ func (c *CLI) DisplayInfo(message string) {
 	c.displayContainer()
 }
 
+// DisplayDebugConfig displays configuration settings in debug mode using tool response block styling
+func (c *CLI) DisplayDebugConfig(config map[string]any) {
+	msg := c.messageRenderer.RenderDebugConfigMessage(config, time.Now())
+	c.messageContainer.AddMessage(msg)
+	c.displayContainer()
+}
+
 // DisplayHelp displays help information in a message block
 func (c *CLI) DisplayHelp() {
 	help := `## Available Commands

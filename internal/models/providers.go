@@ -21,7 +21,6 @@ type ProviderConfig struct {
 	ModelString    string
 	SystemPrompt   string
 	ProviderAPIKey string // API key for OpenAI and Anthropic
-	GoogleAPIKey   string // Separate API key for Google/Gemini
 	ProviderURL    string // Base URL for OpenAI, Anthropic, and Ollama
 	
 	// Model generation parameters
@@ -137,7 +136,7 @@ func createOpenAIProvider(ctx context.Context, config *ProviderConfig, modelName
 }
 
 func createGoogleProvider(ctx context.Context, config *ProviderConfig, modelName string) (model.ToolCallingChatModel, error) {
-	apiKey := config.GoogleAPIKey
+	apiKey := config.ProviderAPIKey
 	if apiKey == "" {
 		apiKey = os.Getenv("GOOGLE_API_KEY")
 	}
@@ -145,7 +144,7 @@ func createGoogleProvider(ctx context.Context, config *ProviderConfig, modelName
 		apiKey = os.Getenv("GEMINI_API_KEY")
 	}
 	if apiKey == "" {
-		return nil, fmt.Errorf("Google API key not provided. Use --google-api-key flag or GOOGLE_API_KEY/GEMINI_API_KEY environment variable")
+		return nil, fmt.Errorf("Google API key not provided. Use --provider-api-key flag or GOOGLE_API_KEY/GEMINI_API_KEY environment variable")
 	}
 
 	client, err := genai.NewClient(ctx, &genai.ClientConfig{

@@ -24,7 +24,6 @@ var (
 	modelFlag        string
 	providerURL      string
 	providerAPIKey   string
-	googleAPIKey     string
 	debugMode        bool
 	promptFlag       string
 	quietFlag        bool
@@ -95,9 +94,8 @@ func init() {
 		IntVar(&maxSteps, "max-steps", 0, "maximum number of agent steps (0 for unlimited)")
 
 	flags := rootCmd.PersistentFlags()
-	flags.StringVar(&providerURL, "provider-url", "", "base URL for the provider API (applies to OpenAI, Anthropic, and Ollama)")
-	flags.StringVar(&providerAPIKey, "provider-api-key", "", "API key for the provider (applies to OpenAI and Anthropic)")
-	flags.StringVar(&googleAPIKey, "google-api-key", "", "Google (Gemini) API key")
+	flags.StringVar(&providerURL, "provider-url", "", "base URL for the provider API (applies to OpenAI, Anthropic, Ollama, and Google)")
+	flags.StringVar(&providerAPIKey, "provider-api-key", "", "API key for the provider (applies to OpenAI, Anthropic, and Google)")
 
 	// Model generation parameters
 	flags.IntVar(&maxTokens, "max-tokens", 4096, "maximum number of tokens in the response")
@@ -113,7 +111,6 @@ func init() {
 	viper.BindPFlag("max-steps", rootCmd.PersistentFlags().Lookup("max-steps"))
 	viper.BindPFlag("provider-url", rootCmd.PersistentFlags().Lookup("provider-url"))
 	viper.BindPFlag("provider-api-key", rootCmd.PersistentFlags().Lookup("provider-api-key"))
-	viper.BindPFlag("google-api-key", rootCmd.PersistentFlags().Lookup("google-api-key"))
 	viper.BindPFlag("max-tokens", rootCmd.PersistentFlags().Lookup("max-tokens"))
 	viper.BindPFlag("temperature", rootCmd.PersistentFlags().Lookup("temperature"))
 	viper.BindPFlag("top-p", rootCmd.PersistentFlags().Lookup("top-p"))
@@ -195,7 +192,6 @@ func runNormalMode(ctx context.Context) error {
 	finalMaxSteps := viper.GetInt("max-steps")
 	finalProviderURL := viper.GetString("provider-url")
 	finalProviderAPIKey := viper.GetString("provider-api-key")
-	finalGoogleKey := viper.GetString("google-api-key")
 	finalMaxTokens := viper.GetInt("max-tokens")
 	finalTemperature := float32(viper.GetFloat64("temperature"))
 	finalTopP := float32(viper.GetFloat64("top-p"))
@@ -218,7 +214,6 @@ func runNormalMode(ctx context.Context) error {
 		ModelString:     finalModel,
 		SystemPrompt:    systemPrompt,
 		ProviderAPIKey:  finalProviderAPIKey,
-		GoogleAPIKey:    finalGoogleKey,
 		ProviderURL:     finalProviderURL,
 		MaxTokens:       finalMaxTokens,
 		Temperature:     &finalTemperature,
@@ -265,6 +260,32 @@ func runNormalMode(ctx context.Context) error {
 			cli.DisplayInfo(fmt.Sprintf("Model loaded: %s (%s)", parts[0], parts[1]))
 		}
 		cli.DisplayInfo(fmt.Sprintf("Loaded %d tools from MCP servers", len(tools)))
+
+		// Display debug configuration if debug mode is enabled
+		if finalDebug {
+			debugConfig := map[string]any{
+				"model":           finalModel,
+				"max-steps":       finalMaxSteps,
+				"max-tokens":      finalMaxTokens,
+				"temperature":     finalTemperature,
+				"top-p":           finalTopP,
+				"top-k":           finalTopK,
+				"provider-url":    finalProviderURL,
+				"system-prompt":   finalSystemPrompt,
+			}
+			
+			// Only include non-empty stop sequences
+			if len(finalStopSequences) > 0 {
+				debugConfig["stop-sequences"] = finalStopSequences
+			}
+			
+			// Only include API keys if they're set (but don't show the actual values for security)
+			if finalProviderAPIKey != "" {
+				debugConfig["provider-api-key"] = "[SET]"
+			}
+			
+			cli.DisplayDebugConfig(debugConfig)
+		}
 	}
 
 	// Prepare data for slash commands

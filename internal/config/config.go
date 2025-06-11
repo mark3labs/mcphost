@@ -27,7 +27,6 @@ type Config struct {
 	Debug           bool                       `json:"debug,omitempty" yaml:"debug,omitempty"`
 	SystemPrompt    string                     `json:"system-prompt,omitempty" yaml:"system-prompt,omitempty"`
 	ProviderAPIKey  string                     `json:"provider-api-key,omitempty" yaml:"provider-api-key,omitempty"`
-	GoogleAPIKey    string                     `json:"google-api-key,omitempty" yaml:"google-api-key,omitempty"`
 	ProviderURL     string                     `json:"provider-url,omitempty" yaml:"provider-url,omitempty"`
 	Prompt          string                     `json:"prompt,omitempty" yaml:"prompt,omitempty"`
 	
@@ -188,8 +187,7 @@ mcpServers:
 # stop-sequences: ["Human:", "Assistant:"]     # Custom stop sequences
 
 # API Configuration (can also use environment variables)
-# provider-api-key: "your-api-key"         # API key for OpenAI or Anthropic
-# google-api-key: "your-google-key"        # Google (Gemini) API key
+# provider-api-key: "your-api-key"         # API key for OpenAI, Anthropic, or Google
 # provider-url: "https://api.openai.com/v1" # Base URL for OpenAI, Anthropic, or Ollama
 `
 
