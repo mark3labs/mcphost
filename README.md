@@ -153,15 +153,30 @@ Each SSE entry requires:
 - `url`: The URL where the MCP server is accessible. 
 - `headers`: (Optional) Array of headers that will be attached to the requests
 
-### System-Prompt
+### System Prompt
 
-You can specify a custom system prompt using the `--system-prompt` flag. The system prompt should be a JSON file containing the instructions and context you want to provide to the model. For example:
+You can specify a custom system prompt using the `--system-prompt` flag. You can either:
 
-```json
-{
-    "systemPrompt": "You're a cat. Name is Neko"
-}
-```
+1. **Pass the prompt directly as text:**
+   ```bash
+   mcphost --system-prompt "You are a helpful assistant that responds in a friendly tone."
+   ```
+
+2. **Pass a path to a text file containing the prompt:**
+   ```bash
+   mcphost --system-prompt ./prompts/assistant.md
+   ```
+
+   Example `assistant.md` file:
+   ```markdown
+   You are a helpful coding assistant. 
+   
+   Please:
+   - Write clean, readable code
+   - Include helpful comments
+   - Follow best practices
+   - Explain your reasoning
+   ```
 
 Usage:
 ```bash
@@ -338,7 +353,6 @@ mcphost -p "Generate a random UUID" --quiet | tr '[:lower:]' '[:upper:]'
 - `--system-prompt string`: system-prompt file location
 - `--debug`: Enable debug logging
 - `--max-steps int`: Maximum number of agent steps (0 for unlimited, default: 0)
-- `--message-window int`: Number of messages to keep in context (default: 40)
 - `-m, --model string`: Model to use (format: provider:model) (default "anthropic:claude-sonnet-4-20250514")
 - `-p, --prompt string`: **Run in non-interactive mode with the given prompt**
 - `--quiet`: **Suppress all output except the AI response (only works with --prompt)**
@@ -367,9 +381,8 @@ mcpServers:
 # Application settings
 model: "anthropic:claude-sonnet-4-20250514"
 max-steps: 20
-message-window: 40
 debug: false
-system-prompt: "/path/to/system-prompt.json"
+system-prompt: "/path/to/system-prompt.txt"
 
 # Model generation parameters
 max-tokens: 4096
@@ -399,7 +412,6 @@ While chatting, you can use:
 
 ### Global Flags
 - `--config`: Specify custom config file location
-- `--message-window`: Set number of messages to keep in context (default: 10)
 
 ## Automation & Scripting 🤖
 

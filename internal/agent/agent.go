@@ -16,11 +16,10 @@ import (
 
 // AgentConfig is the config for agent.
 type AgentConfig struct {
-	ModelConfig   *models.ProviderConfig
-	MCPConfig     *config.Config
-	SystemPrompt  string
-	MaxSteps      int
-	MessageWindow int
+	ModelConfig  *models.ProviderConfig
+	MCPConfig    *config.Config
+	SystemPrompt string
+	MaxSteps     int
 }
 
 // ToolCallHandler is a function type for handling tool calls as they happen

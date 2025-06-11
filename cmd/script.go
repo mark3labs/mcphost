@@ -59,8 +59,7 @@ func init() {
 	rootCmd.AddCommand(scriptCmd)
 	
 	// Add the same flags as the root command, but they will override script settings
-	scriptCmd.Flags().StringVar(&systemPromptFile, "system-prompt", "", "system prompt text or path to system prompt json file")
-	scriptCmd.Flags().IntVar(&messageWindow, "message-window", 40, "number of messages to keep in context")
+	scriptCmd.Flags().StringVar(&systemPromptFile, "system-prompt", "", "system prompt text or path to text file")
 	scriptCmd.Flags().StringVarP(&modelFlag, "model", "m", "", "model to use (format: provider:model)")
 	scriptCmd.Flags().BoolVar(&debugMode, "debug", false, "enable debug logging")
 	scriptCmd.Flags().StringVarP(&promptFlag, "prompt", "p", "", "override the prompt from the script file")
@@ -152,7 +151,6 @@ func runScriptCommand(ctx context.Context, scriptFile string, variables map[stri
 	originalPromptFlag := promptFlag
 	originalModelFlag := modelFlag
 	originalMaxSteps := maxSteps
-	originalMessageWindow := messageWindow
 	originalDebugMode := debugMode
 	originalSystemPromptFile := systemPromptFile
 	originalProviderAPIKey := providerAPIKey
@@ -191,7 +189,6 @@ func runScriptCommand(ctx context.Context, scriptFile string, variables map[stri
 		promptFlag = originalPromptFlag
 		modelFlag = originalModelFlag
 		maxSteps = originalMaxSteps
-		messageWindow = originalMessageWindow
 		debugMode = originalDebugMode
 		systemPromptFile = originalSystemPromptFile
 		providerAPIKey = originalProviderAPIKey
@@ -215,9 +212,6 @@ func mergeScriptConfig(mcpConfig *config.Config, scriptConfig *config.Config) {
 	}
 	if scriptConfig.MaxSteps != 0 {
 		mcpConfig.MaxSteps = scriptConfig.MaxSteps
-	}
-	if scriptConfig.MessageWindow != 0 {
-		mcpConfig.MessageWindow = scriptConfig.MessageWindow
 	}
 	if scriptConfig.Debug {
 		mcpConfig.Debug = scriptConfig.Debug
@@ -267,9 +261,6 @@ func applyScriptFlags(mcpConfig *config.Config, cmd *cobra.Command) {
 	}
 	if !cmd.Flags().Changed("max-steps") && mcpConfig.MaxSteps != 0 {
 		maxSteps = mcpConfig.MaxSteps
-	}
-	if !cmd.Flags().Changed("message-window") && mcpConfig.MessageWindow != 0 {
-		messageWindow = mcpConfig.MessageWindow
 	}
 	if !cmd.Flags().Changed("debug") && mcpConfig.Debug {
 		debugMode = mcpConfig.Debug

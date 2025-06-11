@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/spf13/viper"
 )
@@ -23,7 +24,6 @@ type Config struct {
 	MCPServers      map[string]MCPServerConfig `json:"mcpServers" yaml:"mcpServers"`
 	Model           string                     `json:"model,omitempty" yaml:"model,omitempty"`
 	MaxSteps        int                        `json:"max-steps,omitempty" yaml:"max-steps,omitempty"`
-	MessageWindow   int                        `json:"message-window,omitempty" yaml:"message-window,omitempty"`
 	Debug           bool                       `json:"debug,omitempty" yaml:"debug,omitempty"`
 	SystemPrompt    string                     `json:"system-prompt,omitempty" yaml:"system-prompt,omitempty"`
 	ProviderAPIKey  string                     `json:"provider-api-key,omitempty" yaml:"provider-api-key,omitempty"`
@@ -134,20 +134,12 @@ func LoadSystemPrompt(input string) (string, error) {
 
 	// Check if input is a file that exists
 	if _, err := os.Stat(input); err == nil {
-		// Treat as file path
-		v := viper.New()
-		v.SetConfigFile(input)
-
-		if err := v.ReadInConfig(); err != nil {
+		// Read the entire file as plain text
+		content, err := os.ReadFile(input)
+		if err != nil {
 			return "", fmt.Errorf("error reading system prompt file: %v", err)
 		}
-
-		systemPrompt := v.GetString("systemPrompt")
-		if systemPrompt == "" {
-			return "", fmt.Errorf("systemPrompt field not found in config file")
-		}
-
-		return systemPrompt, nil
+		return strings.TrimSpace(string(content)), nil
 	}
 
 	// Treat as direct string
@@ -185,9 +177,8 @@ mcpServers:
 # Application settings (all optional)
 # model: "anthropic:claude-sonnet-4-20250514"  # Default model to use
 # max-steps: 20                                # Maximum agent steps (0 for unlimited)
-# message-window: 40                           # Number of messages to keep in context
 # debug: false                                 # Enable debug logging
-# system-prompt: "/path/to/system-prompt.json" # System prompt file
+# system-prompt: "/path/to/system-prompt.txt" # System prompt text file
 
 # Model generation parameters (all optional)
 # max-tokens: 4096                             # Maximum tokens in response

@@ -80,9 +80,8 @@ func init() {
 	rootCmd.PersistentFlags().
 		StringVar(&configFile, "config", "", "config file (default is $HOME/.mcp.json)")
 	rootCmd.PersistentFlags().
-		StringVar(&systemPromptFile, "system-prompt", "", "system prompt text or path to system prompt json file")
-	rootCmd.PersistentFlags().
-		IntVar(&messageWindow, "message-window", 40, "number of messages to keep in context")
+		StringVar(&systemPromptFile, "system-prompt", "", "system prompt text or path to text file")
+
 	rootCmd.PersistentFlags().
 		StringVarP(&modelFlag, "model", "m", "anthropic:claude-sonnet-4-20250514",
 			"model to use (format: provider:model)")
@@ -109,7 +108,6 @@ func init() {
 
 	// Bind flags to viper for config file support
 	viper.BindPFlag("system-prompt", rootCmd.PersistentFlags().Lookup("system-prompt"))
-	viper.BindPFlag("message-window", rootCmd.PersistentFlags().Lookup("message-window"))
 	viper.BindPFlag("model", rootCmd.PersistentFlags().Lookup("model"))
 	viper.BindPFlag("debug", rootCmd.PersistentFlags().Lookup("debug"))
 	viper.BindPFlag("max-steps", rootCmd.PersistentFlags().Lookup("max-steps"))
@@ -124,7 +122,6 @@ func init() {
 
 	// Set defaults in viper (lowest precedence)
 	viper.SetDefault("model", "anthropic:claude-sonnet-4-20250514")
-	viper.SetDefault("message-window", 40)
 	viper.SetDefault("max-steps", 0)
 	viper.SetDefault("debug", false)
 	viper.SetDefault("max-tokens", 4096)
@@ -194,7 +191,6 @@ func runNormalMode(ctx context.Context) error {
 	// Get final values from viper (respects precedence: flag > config > default)
 	finalModel := viper.GetString("model")
 	finalSystemPrompt := viper.GetString("system-prompt")
-	finalMessageWindow := viper.GetInt("message-window")
 	finalDebug := viper.GetBool("debug")
 	finalMaxSteps := viper.GetInt("max-steps")
 	finalProviderURL := viper.GetString("provider-url")
@@ -233,11 +229,10 @@ func runNormalMode(ctx context.Context) error {
 
 	// Create agent configuration
 	agentConfig := &agent.AgentConfig{
-		ModelConfig:   modelConfig,
-		MCPConfig:     mcpConfig,
-		SystemPrompt:  systemPrompt,
-		MaxSteps:      finalMaxSteps, // Pass 0 for infinite, agent will handle it
-		MessageWindow: finalMessageWindow,
+		ModelConfig:  modelConfig,
+		MCPConfig:    mcpConfig,
+		SystemPrompt: systemPrompt,
+		MaxSteps:     finalMaxSteps, // Pass 0 for infinite, agent will handle it
 	}
 
 	// Create the agent
