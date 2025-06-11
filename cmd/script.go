@@ -309,6 +309,11 @@ func readRemainingLines(scanner *bufio.Scanner) string {
 
 // parseScriptContent parses the content to extract YAML frontmatter and prompt
 func parseScriptContent(content string, variables map[string]string) (*config.Config, error) {
+	// First, validate that all declared variables are provided
+	if err := validateVariables(content, variables); err != nil {
+		return nil, err
+	}
+	
 	// Substitute variables in the content
 	content = substituteVariables(content, variables)
 	
@@ -383,14 +388,50 @@ func parseScriptContent(content string, variables map[string]string) (*config.Co
 	return &scriptConfig, nil
 }
 
+// findVariables extracts all unique variable names from ${variable} patterns in content
+func findVariables(content string) []string {
+	re := regexp.MustCompile(`\$\{([^}]+)\}`)
+	matches := re.FindAllStringSubmatch(content, -1)
+	
+	seenVars := make(map[string]bool)
+	var variables []string
+	
+	for _, match := range matches {
+		if len(match) > 1 {
+			varName := match[1]
+			if !seenVars[varName] {
+				seenVars[varName] = true
+				variables = append(variables, varName)
+			}
+		}
+	}
+	
+	return variables
+}
+
+// validateVariables checks that all declared variables in the content are provided
+func validateVariables(content string, variables map[string]string) error {
+	declaredVars := findVariables(content)
+	
+	var missingVars []string
+	for _, varName := range declaredVars {
+		if _, exists := variables[varName]; !exists {
+			missingVars = append(missingVars, varName)
+		}
+	}
+	
+	if len(missingVars) > 0 {
+		return fmt.Errorf("missing required variables: %s\nProvide them using --args:variable value syntax", strings.Join(missingVars, ", "))
+	}
+	
+	return nil
+}
+
 // substituteVariables replaces ${variable} patterns with their values
 func substituteVariables(content string, variables map[string]string) string {
-	result := content
-	
-	// Use regex to find and replace ${variable} patterns
 	re := regexp.MustCompile(`\$\{([^}]+)\}`)
 	
-	result = re.ReplaceAllStringFunc(result, func(match string) string {
+	return re.ReplaceAllStringFunc(content, func(match string) string {
 		// Extract variable name (remove ${ and })
 		varName := match[2 : len(match)-1]
 		
@@ -402,7 +443,5 @@ func substituteVariables(content string, variables map[string]string) string {
 		// If variable not found, leave it as is
 		return match
 	})
-	
-	return result
 }
 

@@ -177,11 +177,14 @@ mcphost
 
 ### Script Mode
 
-Run executable YAML-based automation scripts:
+Run executable YAML-based automation scripts with variable substitution support:
 
 ```bash
 # Using the flag
 mcphost --script myscript.sh
+
+# With variables
+mcphost script myscript.sh --args:directory /tmp --args:name "John"
 
 # Direct execution (if executable and has shebang)
 ./myscript.sh
@@ -204,11 +207,36 @@ prompt: |
   Each in their own environment. Give me the URL of each app
 ```
 
+#### Variable Substitution
+
+Scripts support variable substitution using `${variable}` syntax. Variables must be provided via command line arguments:
+
+```bash
+# Script with variables
+mcphost script myscript.sh --args:directory /tmp --args:name "John"
+```
+
+Example script with variables:
+```yaml
+#!/usr/local/bin/mcphost --script
+mcpServers:
+  filesystem:
+    command: npx
+    args: ["-y", "@modelcontextprotocol/server-filesystem", "${directory}"]
+prompt: |
+  Hello ${name}! Please list the files in ${directory} and tell me about them.
+```
+
+**Important**: All declared variables (e.g., `${directory}`, `${name}`) must be provided using `--args:variable value` syntax, or the script will exit with an error listing the missing variables.
+
 #### Script Features
 
 - **Executable**: Use shebang line for direct execution
 - **YAML Configuration**: Define MCP servers directly in the script
 - **Embedded Prompts**: Include the prompt in the YAML
+- **Variable Substitution**: Use `${variable}` syntax with `--args:variable value`
+- **Variable Validation**: Missing variables cause script to exit with helpful error
+- **Interactive Mode**: If prompt is empty, drops into interactive mode (handy for setup scripts)
 - **Config Fallback**: If no `mcpServers` defined, uses default config
 - **Tool Filtering**: Supports `allowedTools`/`excludedTools` per server
 - **Clean Exit**: Automatically exits after completion
