@@ -26,10 +26,9 @@ type Config struct {
 	MessageWindow   int                        `json:"message-window,omitempty" yaml:"message-window,omitempty"`
 	Debug           bool                       `json:"debug,omitempty" yaml:"debug,omitempty"`
 	SystemPrompt    string                     `json:"system-prompt,omitempty" yaml:"system-prompt,omitempty"`
-	OpenAIAPIKey    string                     `json:"openai-api-key,omitempty" yaml:"openai-api-key,omitempty"`
-	AnthropicAPIKey string                     `json:"anthropic-api-key,omitempty" yaml:"anthropic-api-key,omitempty"`
+	ProviderAPIKey  string                     `json:"provider-api-key,omitempty" yaml:"provider-api-key,omitempty"`
 	GoogleAPIKey    string                     `json:"google-api-key,omitempty" yaml:"google-api-key,omitempty"`
-	ModelURL        string                     `json:"model-url,omitempty" yaml:"model-url,omitempty"`
+	ProviderURL     string                     `json:"provider-url,omitempty" yaml:"provider-url,omitempty"`
 	Prompt          string                     `json:"prompt,omitempty" yaml:"prompt,omitempty"`
 	
 	// Model generation parameters
@@ -198,10 +197,9 @@ mcpServers:
 # stop-sequences: ["Human:", "Assistant:"]     # Custom stop sequences
 
 # API Configuration (can also use environment variables)
-# openai-api-key: "your-openai-key"
-# anthropic-api-key: "your-anthropic-key"  
-# google-api-key: "your-google-key"
-# model-url: "https://api.openai.com/v1"    # Base URL for OpenAI, Anthropic, or Ollama
+# provider-api-key: "your-api-key"         # API key for OpenAI or Anthropic
+# google-api-key: "your-google-key"        # Google (Gemini) API key
+# provider-url: "https://api.openai.com/v1" # Base URL for OpenAI, Anthropic, or Ollama
 `
 
 	_, err = file.WriteString(content)

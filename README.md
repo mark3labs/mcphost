@@ -38,16 +38,21 @@ Currently supports:
 ## Requirements 📋
 
 - Go 1.23 or later
-- For Claude: An Anthropic API key
+- For OpenAI/Anthropic: API key for the respective provider
 - For Ollama: Local Ollama installation with desired models
 - For Google/Gemini: Google API key (see https://aistudio.google.com/app/apikey)
 - One or more MCP-compatible tool servers
 
 ## Environment Setup 🔧
 
-1. Anthropic API Key (for Claude):
+1. API Keys:
 ```bash
-export ANTHROPIC_API_KEY='your-api-key'
+# For OpenAI or Anthropic (use --provider-api-key flag or this environment variable)
+export OPENAI_API_KEY='your-openai-key'
+export ANTHROPIC_API_KEY='your-anthropic-key'
+
+# For Google/Gemini
+export GOOGLE_API_KEY='your-google-key'
 ```
 
 2. Ollama Setup:
@@ -68,8 +73,9 @@ You can also configure the Ollama client using standard environment variables, s
 export GOOGLE_API_KEY='your-api-key'
 ```
 
-4. OpenAI compatible online Setup
-- Get your api server base url, api key and model name
+4. OpenAI Compatible Setup:
+- Get your API server base URL, API key and model name
+- Use `--provider-url` and `--provider-api-key` flags or set environment variables
 
 ## Installation 📦
 
@@ -180,8 +186,8 @@ mcphost
 Run executable YAML-based automation scripts with variable substitution support:
 
 ```bash
-# Using the flag
-mcphost --script myscript.sh
+# Using the script subcommand
+mcphost script myscript.sh
 
 # With variables
 mcphost script myscript.sh --args:directory /tmp --args:name "John"
@@ -195,7 +201,7 @@ mcphost script myscript.sh --args:directory /tmp --args:name "John"
 Scripts combine YAML configuration with prompts in a single executable file:
 
 ```yaml
-#!/usr/local/bin/mcphost --script
+#!/usr/local/bin/mcphost script
 # This script uses the container-use MCP server from https://github.com/dagger/container-use
 mcpServers:
   container-use:
@@ -218,7 +224,7 @@ mcphost script myscript.sh --args:directory /tmp --args:name "John"
 
 Example script with variables:
 ```yaml
-#!/usr/local/bin/mcphost --script
+#!/usr/local/bin/mcphost script
 mcpServers:
   filesystem:
     command: npx
@@ -262,6 +268,29 @@ mcphost -p "What is 2+2?" --quiet
 mcphost -m ollama:qwen2.5:3b -p "Explain quantum computing" --quiet
 ```
 
+### Model Generation Parameters
+
+MCPHost supports fine-tuning model behavior through various parameters:
+
+```bash
+# Control response length
+mcphost -p "Explain AI" --max-tokens 1000
+
+# Adjust creativity (0.0 = focused, 1.0 = creative)
+mcphost -p "Write a story" --temperature 0.9
+
+# Control diversity with nucleus sampling
+mcphost -p "Generate ideas" --top-p 0.8
+
+# Limit token choices for more focused responses
+mcphost -p "Answer precisely" --top-k 20
+
+# Set custom stop sequences
+mcphost -p "Generate code" --stop-sequences "```","END"
+```
+
+These parameters work with all supported providers (OpenAI, Anthropic, Google, Ollama) where supported by the underlying model.
+
 ### Available Models
 Models can be specified using the `--model` (`-m`) flag:
 - Anthropic Claude (default): `anthropic:claude-3-5-sonnet-latest`
@@ -279,10 +308,10 @@ mcphost -m ollama:qwen2.5:3b
 # Use OpenAI's GPT-4
 mcphost -m openai:gpt-4
 
-# Use OpenAI-compatible model
+# Use OpenAI-compatible model with custom URL and API key
 mcphost --model openai:<your-model-name> \
---openai-url <your-base-url> \
---openai-api-key <your-api-key>
+--provider-url <your-base-url> \
+--provider-api-key <your-api-key>
 ```
 
 #### Non-Interactive Mode
@@ -302,20 +331,24 @@ mcphost -p "Generate a random UUID" --quiet | tr '[:lower:]' '[:upper:]'
 ```
 
 ### Flags
-- `--anthropic-url string`: Base URL for Anthropic API (defaults to api.anthropic.com)
-- `--anthropic-api-key string`: Anthropic API key (can also be set via ANTHROPIC_API_KEY environment variable)
+- `--provider-url string`: Base URL for the provider API (applies to OpenAI, Anthropic, and Ollama)
+- `--provider-api-key string`: API key for the provider (applies to OpenAI and Anthropic)
+- `--google-api-key string`: Google (Gemini) API key (can also be set via GOOGLE_API_KEY environment variable)
 - `--config string`: Config file location (default is $HOME/.mcphost.yml)
 - `--system-prompt string`: system-prompt file location
 - `--debug`: Enable debug logging
 - `--max-steps int`: Maximum number of agent steps (0 for unlimited, default: 0)
 - `--message-window int`: Number of messages to keep in context (default: 40)
 - `-m, --model string`: Model to use (format: provider:model) (default "anthropic:claude-sonnet-4-20250514")
-- `--openai-url string`: Base URL for OpenAI API (defaults to api.openai.com)
-- `--openai-api-key string`: OpenAI API key (can also be set via OPENAI_API_KEY environment variable)
-- `--google-api-key string`: Google API key (can also be set via GOOGLE_API_KEY environment variable)
 - `-p, --prompt string`: **Run in non-interactive mode with the given prompt**
 - `--quiet`: **Suppress all output except the AI response (only works with --prompt)**
-- `--script`: **Run in script mode (parse YAML frontmatter and prompt from file)**
+
+#### Model Generation Parameters
+- `--max-tokens int`: Maximum number of tokens in the response (default: 4096)
+- `--temperature float32`: Controls randomness in responses (0.0-1.0, default: 0.7)
+- `--top-p float32`: Controls diversity via nucleus sampling (0.0-1.0, default: 0.95)
+- `--top-k int32`: Controls diversity by limiting top K tokens to sample from (default: 40)
+- `--stop-sequences strings`: Custom stop sequences (comma-separated)
 
 ### Configuration File Support
 
@@ -338,10 +371,17 @@ message-window: 40
 debug: false
 system-prompt: "/path/to/system-prompt.json"
 
-# API keys (can also use environment variables)
-anthropic-api-key: "your-key-here"
-openai-api-key: "your-key-here"
-google-api-key: "your-key-here"
+# Model generation parameters
+max-tokens: 4096
+temperature: 0.7
+top-p: 0.95
+top-k: 40
+stop-sequences: ["Human:", "Assistant:"]
+
+# API Configuration
+provider-api-key: "your-api-key"      # For OpenAI or Anthropic
+google-api-key: "your-google-key"     # For Google/Gemini
+provider-url: "https://api.openai.com/v1"  # Custom base URL
 ```
 
 **Note**: Command-line flags take precedence over config file values.

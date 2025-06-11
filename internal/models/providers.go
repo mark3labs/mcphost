@@ -18,12 +18,11 @@ import (
 
 // ProviderConfig holds configuration for creating LLM providers
 type ProviderConfig struct {
-	ModelString      string
-	SystemPrompt     string
-	AnthropicAPIKey  string
-	OpenAIAPIKey     string
-	GoogleAPIKey     string
-	ModelURL         string // Base URL for OpenAI, Anthropic, and Ollama
+	ModelString    string
+	SystemPrompt   string
+	ProviderAPIKey string // API key for OpenAI and Anthropic
+	GoogleAPIKey   string // Separate API key for Google/Gemini
+	ProviderURL    string // Base URL for OpenAI, Anthropic, and Ollama
 	
 	// Model generation parameters
 	MaxTokens     int
@@ -58,12 +57,12 @@ func CreateProvider(ctx context.Context, config *ProviderConfig) (model.ToolCall
 }
 
 func createAnthropicProvider(ctx context.Context, config *ProviderConfig, modelName string) (model.ToolCallingChatModel, error) {
-	apiKey := config.AnthropicAPIKey
+	apiKey := config.ProviderAPIKey
 	if apiKey == "" {
 		apiKey = os.Getenv("ANTHROPIC_API_KEY")
 	}
 	if apiKey == "" {
-		return nil, fmt.Errorf("Anthropic API key not provided. Use --anthropic-api-key flag or ANTHROPIC_API_KEY environment variable")
+		return nil, fmt.Errorf("Anthropic API key not provided. Use --provider-api-key flag or ANTHROPIC_API_KEY environment variable")
 	}
 
 	maxTokens := config.MaxTokens
@@ -77,8 +76,8 @@ func createAnthropicProvider(ctx context.Context, config *ProviderConfig, modelN
 		MaxTokens: maxTokens,
 	}
 
-	if config.ModelURL != "" {
-		claudeConfig.BaseURL = &config.ModelURL
+	if config.ProviderURL != "" {
+		claudeConfig.BaseURL = &config.ProviderURL
 	}
 
 	if config.Temperature != nil {
@@ -101,12 +100,12 @@ func createAnthropicProvider(ctx context.Context, config *ProviderConfig, modelN
 }
 
 func createOpenAIProvider(ctx context.Context, config *ProviderConfig, modelName string) (model.ToolCallingChatModel, error) {
-	apiKey := config.OpenAIAPIKey
+	apiKey := config.ProviderAPIKey
 	if apiKey == "" {
 		apiKey = os.Getenv("OPENAI_API_KEY")
 	}
 	if apiKey == "" {
-		return nil, fmt.Errorf("OpenAI API key not provided. Use --openai-api-key flag or OPENAI_API_KEY environment variable")
+		return nil, fmt.Errorf("OpenAI API key not provided. Use --provider-api-key flag or OPENAI_API_KEY environment variable")
 	}
 
 	openaiConfig := &openai.ChatModelConfig{
@@ -114,8 +113,8 @@ func createOpenAIProvider(ctx context.Context, config *ProviderConfig, modelName
 		Model:  modelName,
 	}
 
-	if config.ModelURL != "" {
-		openaiConfig.BaseURL = config.ModelURL
+	if config.ProviderURL != "" {
+		openaiConfig.BaseURL = config.ProviderURL
 	}
 
 	if config.MaxTokens > 0 {
@@ -189,9 +188,9 @@ func createOllamaProvider(ctx context.Context, config *ProviderConfig, modelName
 		baseURL = host
 	}
 	
-	// Override with ModelURL if provided
-	if config.ModelURL != "" {
-		baseURL = config.ModelURL
+	// Override with ProviderURL if provided
+	if config.ProviderURL != "" {
+		baseURL = config.ProviderURL
 	}
 
 	ollamaConfig := &ollama.ChatModelConfig{

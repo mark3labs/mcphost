@@ -60,15 +60,10 @@ func NewAgent(ctx context.Context, config *AgentConfig) (*Agent, error) {
 		return nil, fmt.Errorf("failed to load MCP tools: %v", err)
 	}
 
-	maxSteps := config.MaxSteps
-	if maxSteps == 0 {
-		maxSteps = 20
-	}
-
 	return &Agent{
 		toolManager:  toolManager,
 		model:        model,
-		maxSteps:     maxSteps,
+		maxSteps:     config.MaxSteps, // Keep 0 for infinite, handle in loop
 		systemPrompt: config.SystemPrompt,
 	}, nil
 }
@@ -109,7 +104,7 @@ func (a *Agent) GenerateWithLoop(ctx context.Context, messages []*schema.Message
 	}
 
 	// Main loop
-	for step := 0; step < a.maxSteps; step++ {
+	for step := 0; a.maxSteps == 0 || step < a.maxSteps; step++ {
 		// Call the LLM
 		response, err := a.model.Generate(ctx, workingMessages, model.WithTools(toolInfos))
 		if err != nil {

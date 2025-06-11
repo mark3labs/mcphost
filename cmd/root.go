@@ -22,9 +22,8 @@ var (
 	systemPromptFile string
 	messageWindow    int
 	modelFlag        string
-	modelURL         string
-	openaiAPIKey     string
-	anthropicAPIKey  string
+	providerURL      string
+	providerAPIKey   string
 	googleAPIKey     string
 	debugMode        bool
 	promptFlag       string
@@ -97,9 +96,8 @@ func init() {
 		IntVar(&maxSteps, "max-steps", 0, "maximum number of agent steps (0 for unlimited)")
 
 	flags := rootCmd.PersistentFlags()
-	flags.StringVar(&modelURL, "model-url", "", "base URL for the model API (applies to OpenAI, Anthropic, and Ollama)")
-	flags.StringVar(&openaiAPIKey, "openai-api-key", "", "OpenAI API key")
-	flags.StringVar(&anthropicAPIKey, "anthropic-api-key", "", "Anthropic API key")
+	flags.StringVar(&providerURL, "provider-url", "", "base URL for the provider API (applies to OpenAI, Anthropic, and Ollama)")
+	flags.StringVar(&providerAPIKey, "provider-api-key", "", "API key for the provider (applies to OpenAI and Anthropic)")
 	flags.StringVar(&googleAPIKey, "google-api-key", "", "Google (Gemini) API key")
 
 	// Model generation parameters
@@ -115,9 +113,8 @@ func init() {
 	viper.BindPFlag("model", rootCmd.PersistentFlags().Lookup("model"))
 	viper.BindPFlag("debug", rootCmd.PersistentFlags().Lookup("debug"))
 	viper.BindPFlag("max-steps", rootCmd.PersistentFlags().Lookup("max-steps"))
-	viper.BindPFlag("model-url", rootCmd.PersistentFlags().Lookup("model-url"))
-	viper.BindPFlag("openai-api-key", rootCmd.PersistentFlags().Lookup("openai-api-key"))
-	viper.BindPFlag("anthropic-api-key", rootCmd.PersistentFlags().Lookup("anthropic-api-key"))
+	viper.BindPFlag("provider-url", rootCmd.PersistentFlags().Lookup("provider-url"))
+	viper.BindPFlag("provider-api-key", rootCmd.PersistentFlags().Lookup("provider-api-key"))
 	viper.BindPFlag("google-api-key", rootCmd.PersistentFlags().Lookup("google-api-key"))
 	viper.BindPFlag("max-tokens", rootCmd.PersistentFlags().Lookup("max-tokens"))
 	viper.BindPFlag("temperature", rootCmd.PersistentFlags().Lookup("temperature"))
@@ -200,9 +197,8 @@ func runNormalMode(ctx context.Context) error {
 	finalMessageWindow := viper.GetInt("message-window")
 	finalDebug := viper.GetBool("debug")
 	finalMaxSteps := viper.GetInt("max-steps")
-	finalModelURL := viper.GetString("model-url")
-	finalOpenAIKey := viper.GetString("openai-api-key")
-	finalAnthropicKey := viper.GetString("anthropic-api-key")
+	finalProviderURL := viper.GetString("provider-url")
+	finalProviderAPIKey := viper.GetString("provider-api-key")
 	finalGoogleKey := viper.GetString("google-api-key")
 	finalMaxTokens := viper.GetInt("max-tokens")
 	finalTemperature := float32(viper.GetFloat64("temperature"))
@@ -225,10 +221,9 @@ func runNormalMode(ctx context.Context) error {
 	modelConfig := &models.ProviderConfig{
 		ModelString:     finalModel,
 		SystemPrompt:    systemPrompt,
-		AnthropicAPIKey: finalAnthropicKey,
-		OpenAIAPIKey:    finalOpenAIKey,
+		ProviderAPIKey:  finalProviderAPIKey,
 		GoogleAPIKey:    finalGoogleKey,
-		ModelURL:        finalModelURL,
+		ProviderURL:     finalProviderURL,
 		MaxTokens:       finalMaxTokens,
 		Temperature:     &finalTemperature,
 		TopP:            &finalTopP,
@@ -237,16 +232,11 @@ func runNormalMode(ctx context.Context) error {
 	}
 
 	// Create agent configuration
-	agentMaxSteps := finalMaxSteps
-	if agentMaxSteps == 0 {
-		agentMaxSteps = 1000 // Set a high limit for "unlimited"
-	}
-
 	agentConfig := &agent.AgentConfig{
 		ModelConfig:   modelConfig,
 		MCPConfig:     mcpConfig,
 		SystemPrompt:  systemPrompt,
-		MaxSteps:      agentMaxSteps,
+		MaxSteps:      finalMaxSteps, // Pass 0 for infinite, agent will handle it
 		MessageWindow: finalMessageWindow,
 	}
 

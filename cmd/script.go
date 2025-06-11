@@ -66,9 +66,8 @@ func init() {
 	scriptCmd.Flags().StringVarP(&promptFlag, "prompt", "p", "", "override the prompt from the script file")
 	scriptCmd.Flags().BoolVar(&quietFlag, "quiet", false, "suppress all output")
 	scriptCmd.Flags().IntVar(&maxSteps, "max-steps", 0, "maximum number of agent steps (0 for unlimited)")
-	scriptCmd.Flags().StringVar(&modelURL, "model-url", "", "base URL for the model API (applies to OpenAI, Anthropic, and Ollama)")
-	scriptCmd.Flags().StringVar(&openaiAPIKey, "openai-api-key", "", "OpenAI API key")
-	scriptCmd.Flags().StringVar(&anthropicAPIKey, "anthropic-api-key", "", "Anthropic API key")
+	scriptCmd.Flags().StringVar(&providerURL, "provider-url", "", "base URL for the provider API (applies to OpenAI, Anthropic, and Ollama)")
+	scriptCmd.Flags().StringVar(&providerAPIKey, "provider-api-key", "", "API key for the provider (applies to OpenAI and Anthropic)")
 	scriptCmd.Flags().StringVar(&googleAPIKey, "google-api-key", "", "Google (Gemini) API key")
 	
 	// Model generation parameters
@@ -156,10 +155,9 @@ func runScriptCommand(ctx context.Context, scriptFile string, variables map[stri
 	originalMessageWindow := messageWindow
 	originalDebugMode := debugMode
 	originalSystemPromptFile := systemPromptFile
-	originalOpenAIAPIKey := openaiAPIKey
-	originalAnthropicAPIKey := anthropicAPIKey
+	originalProviderAPIKey := providerAPIKey
 	originalGoogleAPIKey := googleAPIKey
-	originalModelURL := modelURL
+	originalProviderURL := providerURL
 	originalMaxTokens := maxTokens
 	originalTemperature := temperature
 	originalTopP := topP
@@ -196,10 +194,9 @@ func runScriptCommand(ctx context.Context, scriptFile string, variables map[stri
 		messageWindow = originalMessageWindow
 		debugMode = originalDebugMode
 		systemPromptFile = originalSystemPromptFile
-		openaiAPIKey = originalOpenAIAPIKey
-		anthropicAPIKey = originalAnthropicAPIKey
+		providerAPIKey = originalProviderAPIKey
 		googleAPIKey = originalGoogleAPIKey
-		modelURL = originalModelURL
+		providerURL = originalProviderURL
 		maxTokens = originalMaxTokens
 		temperature = originalTemperature
 		topP = originalTopP
@@ -228,17 +225,14 @@ func mergeScriptConfig(mcpConfig *config.Config, scriptConfig *config.Config) {
 	if scriptConfig.SystemPrompt != "" {
 		mcpConfig.SystemPrompt = scriptConfig.SystemPrompt
 	}
-	if scriptConfig.OpenAIAPIKey != "" {
-		mcpConfig.OpenAIAPIKey = scriptConfig.OpenAIAPIKey
-	}
-	if scriptConfig.AnthropicAPIKey != "" {
-		mcpConfig.AnthropicAPIKey = scriptConfig.AnthropicAPIKey
+	if scriptConfig.ProviderAPIKey != "" {
+		mcpConfig.ProviderAPIKey = scriptConfig.ProviderAPIKey
 	}
 	if scriptConfig.GoogleAPIKey != "" {
 		mcpConfig.GoogleAPIKey = scriptConfig.GoogleAPIKey
 	}
-	if scriptConfig.ModelURL != "" {
-		mcpConfig.ModelURL = scriptConfig.ModelURL
+	if scriptConfig.ProviderURL != "" {
+		mcpConfig.ProviderURL = scriptConfig.ProviderURL
 	}
 	if scriptConfig.Prompt != "" {
 		mcpConfig.Prompt = scriptConfig.Prompt
@@ -283,17 +277,14 @@ func applyScriptFlags(mcpConfig *config.Config, cmd *cobra.Command) {
 	if !cmd.Flags().Changed("system-prompt") && mcpConfig.SystemPrompt != "" {
 		systemPromptFile = mcpConfig.SystemPrompt
 	}
-	if !cmd.Flags().Changed("openai-api-key") && mcpConfig.OpenAIAPIKey != "" {
-		openaiAPIKey = mcpConfig.OpenAIAPIKey
-	}
-	if !cmd.Flags().Changed("anthropic-api-key") && mcpConfig.AnthropicAPIKey != "" {
-		anthropicAPIKey = mcpConfig.AnthropicAPIKey
+	if !cmd.Flags().Changed("provider-api-key") && mcpConfig.ProviderAPIKey != "" {
+		providerAPIKey = mcpConfig.ProviderAPIKey
 	}
 	if !cmd.Flags().Changed("google-api-key") && mcpConfig.GoogleAPIKey != "" {
 		googleAPIKey = mcpConfig.GoogleAPIKey
 	}
-	if !cmd.Flags().Changed("model-url") && mcpConfig.ModelURL != "" {
-		modelURL = mcpConfig.ModelURL
+	if !cmd.Flags().Changed("provider-url") && mcpConfig.ProviderURL != "" {
+		providerURL = mcpConfig.ProviderURL
 	}
 	if !cmd.Flags().Changed("max-tokens") && mcpConfig.MaxTokens != 0 {
 		maxTokens = mcpConfig.MaxTokens
