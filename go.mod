@@ -14,6 +14,7 @@ require (
 	github.com/cloudwego/eino-ext/components/model/openai v0.0.0-20250609074000-b7f307dffa18
 	github.com/getkin/kin-openapi v0.118.0
 	github.com/mark3labs/mcp-go v0.31.0
+	github.com/ollama/ollama v0.5.12
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/viper v1.20.1
 	golang.org/x/term v0.31.0
@@ -80,7 +81,6 @@ require (
 	github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826 // indirect
 	github.com/muesli/reflow v0.3.0 // indirect
 	github.com/nikolalohinski/gonja v1.5.3 // indirect
-	github.com/ollama/ollama v0.5.12 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.3 // indirect
 	github.com/perimeterx/marshmallow v1.1.5 // indirect
 	github.com/pkg/errors v0.9.1 // indirect

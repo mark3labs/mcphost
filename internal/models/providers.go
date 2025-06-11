@@ -10,6 +10,7 @@ import (
 	"github.com/cloudwego/eino-ext/components/model/ollama"
 	"github.com/cloudwego/eino-ext/components/model/openai"
 	"github.com/cloudwego/eino/components/model"
+	"github.com/ollama/ollama/api"
 	"google.golang.org/genai"
 
 	"github.com/mark3labs/mcphost/internal/models/gemini"
@@ -24,6 +25,13 @@ type ProviderConfig struct {
 	OpenAIAPIKey     string
 	OpenAIBaseURL    string
 	GoogleAPIKey     string
+	
+	// Model generation parameters
+	MaxTokens     int
+	Temperature   *float32
+	TopP          *float32
+	TopK          *int32
+	StopSequences []string
 }
 
 // CreateProvider creates an eino ToolCallingChatModel based on the provider configuration
@@ -59,14 +67,35 @@ func createAnthropicProvider(ctx context.Context, config *ProviderConfig, modelN
 		return nil, fmt.Errorf("Anthropic API key not provided. Use --anthropic-api-key flag or ANTHROPIC_API_KEY environment variable")
 	}
 
+	maxTokens := config.MaxTokens
+	if maxTokens == 0 {
+		maxTokens = 4096 // Default value
+	}
+
 	claudeConfig := &claude.Config{
 		APIKey:    apiKey,
 		Model:     modelName,
-		MaxTokens: 4096,
+		MaxTokens: maxTokens,
 	}
 
 	if config.AnthropicBaseURL != "" {
 		claudeConfig.BaseURL = &config.AnthropicBaseURL
+	}
+
+	if config.Temperature != nil {
+		claudeConfig.Temperature = config.Temperature
+	}
+
+	if config.TopP != nil {
+		claudeConfig.TopP = config.TopP
+	}
+
+	if config.TopK != nil {
+		claudeConfig.TopK = config.TopK
+	}
+
+	if len(config.StopSequences) > 0 {
+		claudeConfig.StopSequences = config.StopSequences
 	}
 
 	return claude.NewChatModel(ctx, claudeConfig)
@@ -88,6 +117,22 @@ func createOpenAIProvider(ctx context.Context, config *ProviderConfig, modelName
 
 	if config.OpenAIBaseURL != "" {
 		openaiConfig.BaseURL = config.OpenAIBaseURL
+	}
+
+	if config.MaxTokens > 0 {
+		openaiConfig.MaxTokens = &config.MaxTokens
+	}
+
+	if config.Temperature != nil {
+		openaiConfig.Temperature = config.Temperature
+	}
+
+	if config.TopP != nil {
+		openaiConfig.TopP = config.TopP
+	}
+
+	if len(config.StopSequences) > 0 {
+		openaiConfig.Stop = config.StopSequences
 	}
 
 	return openai.NewChatModel(ctx, openaiConfig)
@@ -118,6 +163,22 @@ func createGoogleProvider(ctx context.Context, config *ProviderConfig, modelName
 		Model:  modelName,
 	}
 
+	if config.MaxTokens > 0 {
+		geminiConfig.MaxTokens = &config.MaxTokens
+	}
+
+	if config.Temperature != nil {
+		geminiConfig.Temperature = config.Temperature
+	}
+
+	if config.TopP != nil {
+		geminiConfig.TopP = config.TopP
+	}
+
+	if config.TopK != nil {
+		geminiConfig.TopK = config.TopK
+	}
+
 	return gemini.NewChatModel(ctx, geminiConfig)
 }
 
@@ -131,6 +192,31 @@ func createOllamaProvider(ctx context.Context, config *ProviderConfig, modelName
 	if host := os.Getenv("OLLAMA_HOST"); host != "" {
 		ollamaConfig.BaseURL = host
 	}
+
+	// Set up options for Ollama using the api.Options struct
+	options := &api.Options{}
+	
+	if config.Temperature != nil {
+		options.Temperature = *config.Temperature
+	}
+
+	if config.TopP != nil {
+		options.TopP = *config.TopP
+	}
+
+	if config.TopK != nil {
+		options.TopK = int(*config.TopK)
+	}
+
+	if len(config.StopSequences) > 0 {
+		options.Stop = config.StopSequences
+	}
+
+	if config.MaxTokens > 0 {
+		options.NumPredict = config.MaxTokens
+	}
+
+	ollamaConfig.Options = options
 
 	return ollama.NewChatModel(ctx, ollamaConfig)
 }

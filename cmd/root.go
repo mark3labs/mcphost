@@ -32,6 +32,13 @@ var (
 	quietFlag        bool
 	maxSteps         int
 	scriptMCPConfig  *config.Config // Used to override config in script mode
+	
+	// Model generation parameters
+	maxTokens     int
+	temperature   float32
+	topP          float32
+	topK          int32
+	stopSequences []string
 )
 
 var rootCmd = &cobra.Command{
@@ -97,6 +104,13 @@ func init() {
 	flags.StringVar(&anthropicAPIKey, "anthropic-api-key", "", "Anthropic API key")
 	flags.StringVar(&googleAPIKey, "google-api-key", "", "Google (Gemini) API key")
 
+	// Model generation parameters
+	flags.IntVar(&maxTokens, "max-tokens", 4096, "maximum number of tokens in the response")
+	flags.Float32Var(&temperature, "temperature", 0.7, "controls randomness in responses (0.0-1.0)")
+	flags.Float32Var(&topP, "top-p", 0.95, "controls diversity via nucleus sampling (0.0-1.0)")
+	flags.Int32Var(&topK, "top-k", 40, "controls diversity by limiting top K tokens to sample from")
+	flags.StringSliceVar(&stopSequences, "stop-sequences", nil, "custom stop sequences (comma-separated)")
+
 	// Bind flags to viper for config file support
 	viper.BindPFlag("system-prompt", rootCmd.PersistentFlags().Lookup("system-prompt"))
 	viper.BindPFlag("message-window", rootCmd.PersistentFlags().Lookup("message-window"))
@@ -108,12 +122,21 @@ func init() {
 	viper.BindPFlag("openai-api-key", rootCmd.PersistentFlags().Lookup("openai-api-key"))
 	viper.BindPFlag("anthropic-api-key", rootCmd.PersistentFlags().Lookup("anthropic-api-key"))
 	viper.BindPFlag("google-api-key", rootCmd.PersistentFlags().Lookup("google-api-key"))
+	viper.BindPFlag("max-tokens", rootCmd.PersistentFlags().Lookup("max-tokens"))
+	viper.BindPFlag("temperature", rootCmd.PersistentFlags().Lookup("temperature"))
+	viper.BindPFlag("top-p", rootCmd.PersistentFlags().Lookup("top-p"))
+	viper.BindPFlag("top-k", rootCmd.PersistentFlags().Lookup("top-k"))
+	viper.BindPFlag("stop-sequences", rootCmd.PersistentFlags().Lookup("stop-sequences"))
 
 	// Set defaults in viper (lowest precedence)
 	viper.SetDefault("model", "anthropic:claude-sonnet-4-20250514")
 	viper.SetDefault("message-window", 40)
 	viper.SetDefault("max-steps", 0)
 	viper.SetDefault("debug", false)
+	viper.SetDefault("max-tokens", 4096)
+	viper.SetDefault("temperature", 0.7)
+	viper.SetDefault("top-p", 0.95)
+	viper.SetDefault("top-k", 40)
 }
 
 func runMCPHost(ctx context.Context) error {
@@ -185,6 +208,11 @@ func runNormalMode(ctx context.Context) error {
 	finalOpenAIKey := viper.GetString("openai-api-key")
 	finalAnthropicKey := viper.GetString("anthropic-api-key")
 	finalGoogleKey := viper.GetString("google-api-key")
+	finalMaxTokens := viper.GetInt("max-tokens")
+	finalTemperature := float32(viper.GetFloat64("temperature"))
+	finalTopP := float32(viper.GetFloat64("top-p"))
+	finalTopK := int32(viper.GetInt("top-k"))
+	finalStopSequences := viper.GetStringSlice("stop-sequences")
 
 	// Update debug mode if it was set in config
 	if finalDebug && !debugMode {
@@ -206,6 +234,11 @@ func runNormalMode(ctx context.Context) error {
 		OpenAIAPIKey:     finalOpenAIKey,
 		OpenAIBaseURL:    finalOpenAIURL,
 		GoogleAPIKey:     finalGoogleKey,
+		MaxTokens:        finalMaxTokens,
+		Temperature:      &finalTemperature,
+		TopP:             &finalTopP,
+		TopK:             &finalTopK,
+		StopSequences:    finalStopSequences,
 	}
 
 	// Create agent configuration

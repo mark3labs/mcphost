@@ -71,6 +71,13 @@ func init() {
 	scriptCmd.Flags().StringVar(&openaiAPIKey, "openai-api-key", "", "OpenAI API key")
 	scriptCmd.Flags().StringVar(&anthropicAPIKey, "anthropic-api-key", "", "Anthropic API key")
 	scriptCmd.Flags().StringVar(&googleAPIKey, "google-api-key", "", "Google (Gemini) API key")
+	
+	// Model generation parameters
+	scriptCmd.Flags().IntVar(&maxTokens, "max-tokens", 4096, "maximum number of tokens in the response")
+	scriptCmd.Flags().Float32Var(&temperature, "temperature", 0.7, "controls randomness in responses (0.0-1.0)")
+	scriptCmd.Flags().Float32Var(&topP, "top-p", 0.95, "controls diversity via nucleus sampling (0.0-1.0)")
+	scriptCmd.Flags().Int32Var(&topK, "top-k", 40, "controls diversity by limiting top K tokens to sample from")
+	scriptCmd.Flags().StringSliceVar(&stopSequences, "stop-sequences", nil, "custom stop sequences (comma-separated)")
 }
 
 // parseCustomVariables extracts custom variables from command line arguments
@@ -155,6 +162,11 @@ func runScriptCommand(ctx context.Context, scriptFile string, variables map[stri
 	originalGoogleAPIKey := googleAPIKey
 	originalOpenAIURL := openaiBaseURL
 	originalAnthropicURL := anthropicBaseURL
+	originalMaxTokens := maxTokens
+	originalTemperature := temperature
+	originalTopP := topP
+	originalTopK := topK
+	originalStopSequences := stopSequences
 
 	// Create config from script or load normal config
 	var mcpConfig *config.Config
@@ -191,6 +203,11 @@ func runScriptCommand(ctx context.Context, scriptFile string, variables map[stri
 		googleAPIKey = originalGoogleAPIKey
 		openaiBaseURL = originalOpenAIURL
 		anthropicBaseURL = originalAnthropicURL
+		maxTokens = originalMaxTokens
+		temperature = originalTemperature
+		topP = originalTopP
+		topK = originalTopK
+		stopSequences = originalStopSequences
 		scriptMCPConfig = nil
 	}()
 
@@ -232,6 +249,21 @@ func mergeScriptConfig(mcpConfig *config.Config, scriptConfig *config.Config) {
 	if scriptConfig.Prompt != "" {
 		mcpConfig.Prompt = scriptConfig.Prompt
 	}
+	if scriptConfig.MaxTokens != 0 {
+		mcpConfig.MaxTokens = scriptConfig.MaxTokens
+	}
+	if scriptConfig.Temperature != nil {
+		mcpConfig.Temperature = scriptConfig.Temperature
+	}
+	if scriptConfig.TopP != nil {
+		mcpConfig.TopP = scriptConfig.TopP
+	}
+	if scriptConfig.TopK != nil {
+		mcpConfig.TopK = scriptConfig.TopK
+	}
+	if len(scriptConfig.StopSequences) > 0 {
+		mcpConfig.StopSequences = scriptConfig.StopSequences
+	}
 }
 
 func applyScriptFlags(mcpConfig *config.Config, cmd *cobra.Command) {
@@ -271,6 +303,21 @@ func applyScriptFlags(mcpConfig *config.Config, cmd *cobra.Command) {
 	}
 	if !cmd.Flags().Changed("anthropic-url") && mcpConfig.AnthropicURL != "" {
 		anthropicBaseURL = mcpConfig.AnthropicURL
+	}
+	if !cmd.Flags().Changed("max-tokens") && mcpConfig.MaxTokens != 0 {
+		maxTokens = mcpConfig.MaxTokens
+	}
+	if !cmd.Flags().Changed("temperature") && mcpConfig.Temperature != nil {
+		temperature = *mcpConfig.Temperature
+	}
+	if !cmd.Flags().Changed("top-p") && mcpConfig.TopP != nil {
+		topP = *mcpConfig.TopP
+	}
+	if !cmd.Flags().Changed("top-k") && mcpConfig.TopK != nil {
+		topK = *mcpConfig.TopK
+	}
+	if !cmd.Flags().Changed("stop-sequences") && len(mcpConfig.StopSequences) > 0 {
+		stopSequences = mcpConfig.StopSequences
 	}
 }
 

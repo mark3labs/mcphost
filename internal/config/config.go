@@ -32,6 +32,13 @@ type Config struct {
 	OpenAIURL       string                     `json:"openai-url,omitempty" yaml:"openai-url,omitempty"`
 	AnthropicURL    string                     `json:"anthropic-url,omitempty" yaml:"anthropic-url,omitempty"`
 	Prompt          string                     `json:"prompt,omitempty" yaml:"prompt,omitempty"`
+	
+	// Model generation parameters
+	MaxTokens     int      `json:"max-tokens,omitempty" yaml:"max-tokens,omitempty"`
+	Temperature   *float32 `json:"temperature,omitempty" yaml:"temperature,omitempty"`
+	TopP          *float32 `json:"top-p,omitempty" yaml:"top-p,omitempty"`
+	TopK          *int32   `json:"top-k,omitempty" yaml:"top-k,omitempty"`
+	StopSequences []string `json:"stop-sequences,omitempty" yaml:"stop-sequences,omitempty"`
 }
 
 // Validate validates the configuration
@@ -183,6 +190,13 @@ mcpServers:
 # message-window: 40                           # Number of messages to keep in context
 # debug: false                                 # Enable debug logging
 # system-prompt: "/path/to/system-prompt.json" # System prompt file
+
+# Model generation parameters (all optional)
+# max-tokens: 4096                             # Maximum tokens in response
+# temperature: 0.7                             # Randomness (0.0-1.0)
+# top-p: 0.95                                  # Nucleus sampling (0.0-1.0)
+# top-k: 40                                    # Top K sampling
+# stop-sequences: ["Human:", "Assistant:"]     # Custom stop sequences
 
 # API Configuration (can also use environment variables)
 # openai-api-key: "your-openai-key"
