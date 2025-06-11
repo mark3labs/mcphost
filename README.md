@@ -47,12 +47,10 @@ Currently supports:
 
 1. API Keys:
 ```bash
-# For OpenAI or Anthropic (use --provider-api-key flag or this environment variable)
-export OPENAI_API_KEY='your-openai-key'
-export ANTHROPIC_API_KEY='your-anthropic-key'
-
-# For Google/Gemini
-export GOOGLE_API_KEY='your-google-key'
+# For all providers (use --provider-api-key flag or these environment variables)
+export OPENAI_API_KEY='your-openai-key'        # For OpenAI
+export ANTHROPIC_API_KEY='your-anthropic-key'  # For Anthropic
+export GOOGLE_API_KEY='your-google-key'        # For Google/Gemini
 ```
 
 2. Ollama Setup:
