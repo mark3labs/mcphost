@@ -11,12 +11,13 @@ import (
 
 // MCPServerConfig represents configuration for an MCP server
 type MCPServerConfig struct {
-	Command       string   `json:"command,omitempty"`
-	Args          []string `json:"args,omitempty"`
-	URL           string   `json:"url,omitempty"`
-	Headers       []string `json:"headers,omitempty"`
-	AllowedTools  []string `json:"allowedTools,omitempty"`
-	ExcludedTools []string `json:"excludedTools,omitempty"`
+	Command       string         `json:"command,omitempty"`
+	Args          []string       `json:"args,omitempty"`
+	Env           map[string]any `json:"env,omitempty"`
+	URL           string         `json:"url,omitempty"`
+	Headers       []string       `json:"headers,omitempty"`
+	AllowedTools  []string       `json:"allowedTools,omitempty"`
+	ExcludedTools []string       `json:"excludedTools,omitempty"`
 }
 
 // Config represents the application configuration

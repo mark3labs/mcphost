@@ -194,7 +194,12 @@ func (m *MCPToolManager) shouldExcludeTool(toolName string, serverConfig config.
 func (m *MCPToolManager) createMCPClient(ctx context.Context, serverName string, serverConfig config.MCPServerConfig) (client.MCPClient, error) {
 	if serverConfig.Command != "" {
 		// STDIO client
-		return client.NewStdioMCPClient(serverConfig.Command, nil, serverConfig.Args...)
+		env := make([]string, 0, len(serverConfig.Env))
+		for k, v := range serverConfig.Env {
+			env = append(env, fmt.Sprintf("%s=%v", k, v))
+		}
+
+		return client.NewStdioMCPClient(serverConfig.Command, env, serverConfig.Args...)
 	} else if serverConfig.URL != "" {
 		// SSE client
 		sseClient, err := client.NewSSEMCPClient(serverConfig.URL)
