@@ -39,14 +39,16 @@ type UsageTracker struct {
 	sessionStats SessionStats
 	lastRequest  *UsageStats
 	width        int
+	isOAuth      bool // Whether OAuth credentials are being used (costs should be $0)
 }
 
 // NewUsageTracker creates a new usage tracker for the given model
-func NewUsageTracker(modelInfo *models.ModelInfo, provider string, width int) *UsageTracker {
+func NewUsageTracker(modelInfo *models.ModelInfo, provider string, width int, isOAuth bool) *UsageTracker {
 	return &UsageTracker{
 		modelInfo: modelInfo,
 		provider:  provider,
 		width:     width,
+		isOAuth:   isOAuth,
 	}
 }
 
@@ -64,18 +66,23 @@ func (ut *UsageTracker) UpdateUsage(inputTokens, outputTokens, cacheReadTokens, 
 	defer ut.mu.Unlock()
 
 	// Calculate costs based on model pricing
-	inputCost := float64(inputTokens) * ut.modelInfo.Cost.Input / 1000000 // Cost is per million tokens
-	outputCost := float64(outputTokens) * ut.modelInfo.Cost.Output / 1000000
+	// For OAuth credentials, costs are $0 for usage tracking purposes
+	var inputCost, outputCost, cacheReadCost, cacheWriteCost, totalCost float64
+	
+	if !ut.isOAuth {
+		inputCost = float64(inputTokens) * ut.modelInfo.Cost.Input / 1000000 // Cost is per million tokens
+		outputCost = float64(outputTokens) * ut.modelInfo.Cost.Output / 1000000
 
-	var cacheReadCost, cacheWriteCost float64
-	if ut.modelInfo.Cost.CacheRead != nil {
-		cacheReadCost = float64(cacheReadTokens) * (*ut.modelInfo.Cost.CacheRead) / 1000000
-	}
-	if ut.modelInfo.Cost.CacheWrite != nil {
-		cacheWriteCost = float64(cacheWriteTokens) * (*ut.modelInfo.Cost.CacheWrite) / 1000000
-	}
+		if ut.modelInfo.Cost.CacheRead != nil {
+			cacheReadCost = float64(cacheReadTokens) * (*ut.modelInfo.Cost.CacheRead) / 1000000
+		}
+		if ut.modelInfo.Cost.CacheWrite != nil {
+			cacheWriteCost = float64(cacheWriteTokens) * (*ut.modelInfo.Cost.CacheWrite) / 1000000
+		}
 
-	totalCost := inputCost + outputCost + cacheReadCost + cacheWriteCost
+		totalCost = inputCost + outputCost + cacheReadCost + cacheWriteCost
+	}
+	// If OAuth, all costs remain 0.0
 
 	// Update last request stats
 	ut.lastRequest = &UsageStats{
