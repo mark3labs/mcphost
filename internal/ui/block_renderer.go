@@ -101,7 +101,7 @@ func renderContentBlock(content string, containerWidth int, options ...rendering
 		paddingRight:  2,
 		width:         containerWidth,
 	}
-	
+
 	for _, option := range options {
 		option(renderer)
 	}
@@ -154,7 +154,7 @@ func renderContentBlock(content string, containerWidth int, options ...rendering
 	}
 
 	content = style.Render(content)
-	
+
 	// Place the content horizontally with proper background
 	content = lipgloss.PlaceHorizontal(
 		renderer.width,

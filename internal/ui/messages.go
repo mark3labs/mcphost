@@ -85,7 +85,7 @@ func (r *MessageRenderer) RenderUserMessage(content string, timestamp time.Time)
 
 	// Combine content and info
 	theme := getTheme()
-	fullContent := strings.TrimSuffix(messageContent, "\n") + "\n" + 
+	fullContent := strings.TrimSuffix(messageContent, "\n") + "\n" +
 		lipgloss.NewStyle().Foreground(theme.VeryMuted).Render(info)
 
 	// Use the new block renderer
@@ -130,7 +130,7 @@ func (r *MessageRenderer) RenderAssistantMessage(content string, timestamp time.
 	info := fmt.Sprintf(" %s (%s)", modelName, timeStr)
 
 	// Combine content and info
-	fullContent := strings.TrimSuffix(messageContent, "\n") + "\n" + 
+	fullContent := strings.TrimSuffix(messageContent, "\n") + "\n" +
 		lipgloss.NewStyle().Foreground(theme.VeryMuted).Render(info)
 
 	// Use the new block renderer
@@ -172,7 +172,7 @@ func (r *MessageRenderer) RenderSystemMessage(content string, timestamp time.Tim
 	info := fmt.Sprintf(" MCPHost System (%s)", timeStr)
 
 	// Combine content and info
-	fullContent := strings.TrimSuffix(messageContent, "\n") + "\n" + 
+	fullContent := strings.TrimSuffix(messageContent, "\n") + "\n" +
 		lipgloss.NewStyle().Foreground(theme.VeryMuted).Render(info)
 
 	// Use the new block renderer
@@ -268,7 +268,7 @@ func (r *MessageRenderer) RenderErrorMessage(errorMsg string, timestamp time.Tim
 	info := fmt.Sprintf(" Error (%s)", timeStr)
 
 	// Combine content and info
-	fullContent := errorContent + "\n" + 
+	fullContent := errorContent + "\n" +
 		lipgloss.NewStyle().Foreground(theme.VeryMuted).Render(info)
 
 	// Use the new block renderer
@@ -309,7 +309,7 @@ func (r *MessageRenderer) RenderToolCallMessage(toolName, toolArgs string, times
 	// Combine parts
 	var fullContent string
 	if argsContent != "" {
-		fullContent = argsContent + "\n" + 
+		fullContent = argsContent + "\n" +
 			lipgloss.NewStyle().Foreground(theme.VeryMuted).Render(info)
 	} else {
 		fullContent = lipgloss.NewStyle().Foreground(theme.VeryMuted).Render(info)
@@ -513,7 +513,7 @@ func (c *MessageContainer) Render() string {
 			msg.Content,
 		)
 		parts = append(parts, centeredMsg)
-		
+
 		// Add spacing between messages (except after the last one)
 		if i < len(c.messages)-1 {
 			parts = append(parts, "")

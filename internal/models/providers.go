@@ -29,22 +29,22 @@ const (
 // resolveModelAlias resolves model aliases to their full names using the registry
 func resolveModelAlias(provider, modelName string) string {
 	registry := GetGlobalRegistry()
-	
+
 	// Common alias patterns for Anthropic models - using Claude 4 as the latest/default
 	aliasMap := map[string]string{
 		// Claude 4 models (latest and most capable)
-		"claude-opus-latest":       "claude-opus-4-20250514",
-		"claude-sonnet-latest":     "claude-sonnet-4-20250514",
-		"claude-4-opus-latest":     "claude-opus-4-20250514",
-		"claude-4-sonnet-latest":   "claude-sonnet-4-20250514",
-		
+		"claude-opus-latest":     "claude-opus-4-20250514",
+		"claude-sonnet-latest":   "claude-sonnet-4-20250514",
+		"claude-4-opus-latest":   "claude-opus-4-20250514",
+		"claude-4-sonnet-latest": "claude-sonnet-4-20250514",
+
 		// Claude 3.x models for backward compatibility
 		"claude-3-5-haiku-latest":  "claude-3-5-haiku-20241022",
-		"claude-3-5-sonnet-latest": "claude-3-5-sonnet-20241022", 
+		"claude-3-5-sonnet-latest": "claude-3-5-sonnet-20241022",
 		"claude-3-7-sonnet-latest": "claude-3-7-sonnet-20250219",
 		"claude-3-opus-latest":     "claude-3-opus-20240229",
 	}
-	
+
 	// Check if it's a known alias
 	if resolved, exists := aliasMap[modelName]; exists {
 		// Verify the resolved model exists in the registry
@@ -52,7 +52,7 @@ func resolveModelAlias(provider, modelName string) string {
 			return resolved
 		}
 	}
-	
+
 	// Return original if no alias found or resolved model doesn't exist
 	return modelName
 }

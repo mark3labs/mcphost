@@ -21,22 +21,22 @@ func SetTheme(theme Theme) {
 
 // Theme represents a complete UI theme
 type Theme struct {
-	Primary         lipgloss.AdaptiveColor
-	Secondary       lipgloss.AdaptiveColor
-	Success         lipgloss.AdaptiveColor
-	Warning         lipgloss.AdaptiveColor
-	Error           lipgloss.AdaptiveColor
-	Info            lipgloss.AdaptiveColor
-	Text            lipgloss.AdaptiveColor
-	Muted           lipgloss.AdaptiveColor
-	VeryMuted       lipgloss.AdaptiveColor
-	Background      lipgloss.AdaptiveColor
-	Border          lipgloss.AdaptiveColor
-	MutedBorder     lipgloss.AdaptiveColor
-	System          lipgloss.AdaptiveColor
-	Tool            lipgloss.AdaptiveColor
-	Accent          lipgloss.AdaptiveColor
-	Highlight       lipgloss.AdaptiveColor
+	Primary     lipgloss.AdaptiveColor
+	Secondary   lipgloss.AdaptiveColor
+	Success     lipgloss.AdaptiveColor
+	Warning     lipgloss.AdaptiveColor
+	Error       lipgloss.AdaptiveColor
+	Info        lipgloss.AdaptiveColor
+	Text        lipgloss.AdaptiveColor
+	Muted       lipgloss.AdaptiveColor
+	VeryMuted   lipgloss.AdaptiveColor
+	Background  lipgloss.AdaptiveColor
+	Border      lipgloss.AdaptiveColor
+	MutedBorder lipgloss.AdaptiveColor
+	System      lipgloss.AdaptiveColor
+	Tool        lipgloss.AdaptiveColor
+	Accent      lipgloss.AdaptiveColor
+	Highlight   lipgloss.AdaptiveColor
 }
 
 // DefaultTheme returns the default MCPHost theme (Catppuccin Mocha)

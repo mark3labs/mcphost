@@ -319,13 +319,13 @@ func (c *CLI) ClearMessages() {
 func (c *CLI) displayContainer() {
 	// Clear screen and display messages
 	fmt.Print("\033[2J\033[H") // Clear screen and move cursor to top
-	
+
 	// Add left padding to the entire container
 	content := c.messageContainer.Render()
 	paddedContent := lipgloss.NewStyle().
 		PaddingLeft(2).
 		Render(content)
-	
+
 	fmt.Print(paddedContent)
 }
 

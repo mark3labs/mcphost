@@ -315,7 +315,7 @@ func runNormalMode(ctx context.Context) error {
 							isOAuth = true
 						}
 					}
-					
+
 					usageTracker := ui.NewUsageTracker(modelInfo, provider, 80, isOAuth) // Will be updated with actual width
 					cli.SetUsageTracker(usageTracker)
 				}
