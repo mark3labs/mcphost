@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -13,6 +14,7 @@ import (
 	"github.com/mark3labs/mcphost/internal/auth"
 	"github.com/mark3labs/mcphost/internal/config"
 	"github.com/mark3labs/mcphost/internal/models"
+	"github.com/mark3labs/mcphost/internal/session"
 	"github.com/mark3labs/mcphost/internal/tokens"
 	"github.com/mark3labs/mcphost/internal/ui"
 	"github.com/spf13/cobra"
@@ -31,6 +33,10 @@ var (
 	noExitFlag       bool
 	maxSteps         int
 	scriptMCPConfig  *config.Config // Used to override config in script mode
+
+	// Session management
+	saveSessionPath string
+	loadSessionPath string
 
 	// Model generation parameters
 	maxTokens     int
@@ -66,6 +72,11 @@ Examples:
   # Non-interactive mode
   mcphost -p "What is the weather like today?"
   mcphost -p "Calculate 15 * 23" --quiet
+  
+  # Session management
+  mcphost --save-session ./my-session.json -p "Hello"
+  mcphost --load-session ./my-session.json -p "Continue our conversation"
+  mcphost --load-session ./session.json --save-session ./session.json -p "Next message"
   
   # Script mode
   mcphost script myscript.sh`,
@@ -151,6 +162,12 @@ func init() {
 		BoolVar(&noExitFlag, "no-exit", false, "prevent non-interactive mode from exiting, show input prompt instead")
 	rootCmd.PersistentFlags().
 		IntVar(&maxSteps, "max-steps", 0, "maximum number of agent steps (0 for unlimited)")
+
+	// Session management flags
+	rootCmd.PersistentFlags().
+		StringVar(&saveSessionPath, "save-session", "", "save session to file after each message")
+	rootCmd.PersistentFlags().
+		StringVar(&loadSessionPath, "load-session", "", "load session from file at startup")
 
 	flags := rootCmd.PersistentFlags()
 	flags.StringVar(&providerURL, "provider-url", "", "base URL for the provider API (applies to OpenAI, Anthropic, Ollama, and Google)")
@@ -377,10 +394,120 @@ func runNormalMode(ctx context.Context) error {
 
 	// Main interaction logic
 	var messages []*schema.Message
+	var sessionManager *session.Manager
+
+	// Load existing session if specified
+	if loadSessionPath != "" {
+		loadedSession, err := session.LoadFromFile(loadSessionPath)
+		if err != nil {
+			return fmt.Errorf("failed to load session: %v", err)
+		}
+		
+		// Convert session messages to schema messages
+		for _, msg := range loadedSession.Messages {
+			messages = append(messages, msg.ConvertToSchemaMessage())
+		}
+		
+		// If we're also saving, use the loaded session with the session manager
+		if saveSessionPath != "" {
+			sessionManager = session.NewManagerWithSession(loadedSession, saveSessionPath)
+		}
+		
+		if !quietFlag && cli != nil {
+			// Create a map of tool call IDs to tool calls for quick lookup
+			toolCallMap := make(map[string]session.ToolCall)
+			for _, sessionMsg := range loadedSession.Messages {
+				if sessionMsg.Role == "assistant" && len(sessionMsg.ToolCalls) > 0 {
+					for _, tc := range sessionMsg.ToolCalls {
+						toolCallMap[tc.ID] = tc
+					}
+				}
+			}
+			
+			// Display all previous messages as they would have appeared
+			for _, sessionMsg := range loadedSession.Messages {
+				if sessionMsg.Role == "user" {
+					cli.DisplayUserMessage(sessionMsg.Content)
+				} else if sessionMsg.Role == "assistant" {
+					// Display tool calls if present
+					if len(sessionMsg.ToolCalls) > 0 {
+						for _, tc := range sessionMsg.ToolCalls {
+							// Convert arguments to string
+							var argsStr string
+							if argBytes, err := json.Marshal(tc.Arguments); err == nil {
+								argsStr = string(argBytes)
+							}
+							
+							// Display tool call
+							cli.DisplayToolCallMessage(tc.Name, argsStr)
+						}
+					}
+					
+					// Display assistant response (only if there's content)
+					if sessionMsg.Content != "" {
+						cli.DisplayAssistantMessage(sessionMsg.Content)
+					}
+				} else if sessionMsg.Role == "tool" {
+					// Display tool result
+					if sessionMsg.ToolCallID != "" {
+						if toolCall, exists := toolCallMap[sessionMsg.ToolCallID]; exists {
+							// Convert arguments to string
+							var argsStr string
+							if argBytes, err := json.Marshal(toolCall.Arguments); err == nil {
+								argsStr = string(argBytes)
+							}
+							
+							// Parse tool result content - it might be JSON-encoded MCP content
+							resultContent := sessionMsg.Content
+							
+							// Try to parse as MCP content structure
+							var mcpContent struct {
+								Content []struct {
+									Type string `json:"type"`
+									Text string `json:"text"`
+								} `json:"content"`
+							}
+							
+							// First try to unmarshal as-is
+							if err := json.Unmarshal([]byte(sessionMsg.Content), &mcpContent); err == nil {
+								// Extract text from MCP content structure
+								if len(mcpContent.Content) > 0 && mcpContent.Content[0].Type == "text" {
+									resultContent = mcpContent.Content[0].Text
+								}
+							} else {
+								// If that fails, try unquoting first (in case it's double-encoded)
+								var unquoted string
+								if err := json.Unmarshal([]byte(sessionMsg.Content), &unquoted); err == nil {
+									if err := json.Unmarshal([]byte(unquoted), &mcpContent); err == nil {
+										if len(mcpContent.Content) > 0 && mcpContent.Content[0].Type == "text" {
+											resultContent = mcpContent.Content[0].Text
+										}
+									}
+								}
+							}
+							
+							// Display tool result (assuming no error for saved results)
+							cli.DisplayToolMessage(toolCall.Name, argsStr, resultContent, false)
+						}
+					}
+				}
+			}
+		}
+	} else if saveSessionPath != "" {
+		// Only saving, create new session manager
+		sessionManager = session.NewManager(saveSessionPath)
+		
+		// Set metadata
+		sessionManager.SetMetadata(session.Metadata{
+			MCPHostVersion: "dev", // TODO: Get actual version
+			Provider:       parts[0],
+			Model:          modelName,
+		})
+	}
 
 	// Check if running in non-interactive mode
 	if promptFlag != "" {
-		return runNonInteractiveMode(ctx, mcpAgent, cli, promptFlag, modelName, messages, quietFlag, noExitFlag, mcpConfig)
+		return runNonInteractiveMode(ctx, mcpAgent, cli, promptFlag, modelName, messages, quietFlag, noExitFlag, mcpConfig, sessionManager)
 	}
 
 	// Quiet mode is not allowed in interactive mode
@@ -388,7 +515,7 @@ func runNormalMode(ctx context.Context) error {
 		return fmt.Errorf("--quiet flag can only be used with --prompt/-p")
 	}
 
-	return runInteractiveMode(ctx, mcpAgent, cli, serverNames, toolNames, modelName, messages)
+	return runInteractiveMode(ctx, mcpAgent, cli, serverNames, toolNames, modelName, messages, sessionManager)
 }
 
 // AgenticLoopConfig configures the behavior of the unified agentic loop
@@ -402,10 +529,11 @@ type AgenticLoopConfig struct {
 	Quiet bool // suppress all output except final response
 
 	// Context data
-	ServerNames []string       // for slash commands
-	ToolNames   []string       // for slash commands
-	ModelName   string         // for display
-	MCPConfig   *config.Config // for continuing to interactive mode
+	ServerNames    []string         // for slash commands
+	ToolNames      []string         // for slash commands
+	ModelName      string           // for display
+	MCPConfig      *config.Config   // for continuing to interactive mode
+	SessionManager *session.Manager // for session persistence
 }
 
 // runAgenticLoop handles all execution modes with a single unified loop
@@ -421,7 +549,7 @@ func runAgenticLoop(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI, mes
 		tempMessages := append(messages, schema.UserMessage(config.InitialPrompt))
 
 		// Process the initial prompt with tool calls
-		response, err := runAgenticStep(ctx, mcpAgent, cli, tempMessages, config)
+		response, conversationMessages, err := runAgenticStep(ctx, mcpAgent, cli, tempMessages, config)
 		if err != nil {
 			// Check if this was a user cancellation
 			if err.Error() == "generation cancelled by user" && cli != nil {
@@ -434,8 +562,24 @@ func runAgenticLoop(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI, mes
 			}
 		} else {
 			// Only add to history after successful completion
-			messages = append(messages, schema.UserMessage(config.InitialPrompt))
+			userMsg := schema.UserMessage(config.InitialPrompt)
+			messages = append(messages, userMsg)
 			messages = append(messages, response)
+
+			// Save to session if session manager is available
+			if config.SessionManager != nil {
+				// Simple approach: save the entire conversation history
+				// This includes the user message + all generated messages
+				allMessages := append([]*schema.Message{userMsg}, conversationMessages...)
+				
+				// Clear the session and save the complete history
+				if err := config.SessionManager.ReplaceAllMessages(allMessages); err != nil {
+					// Log error but don't fail the operation
+					if cli != nil && !config.Quiet {
+						cli.DisplayError(fmt.Errorf("failed to save conversation to session: %v", err))
+					}
+				}
+			}
 
 			// If not continuing to interactive mode, exit here
 			if !config.ContinueAfterRun {
@@ -456,7 +600,7 @@ func runAgenticLoop(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI, mes
 }
 
 // runAgenticStep processes a single step of the agentic loop (handles tool calls)
-func runAgenticStep(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI, messages []*schema.Message, config AgenticLoopConfig) (*schema.Message, error) {
+func runAgenticStep(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI, messages []*schema.Message, config AgenticLoopConfig) (*schema.Message, []*schema.Message, error) {
 	var currentSpinner *ui.Spinner
 
 	// Start initial spinner (skip if quiet)
@@ -465,7 +609,7 @@ func runAgenticStep(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI, mes
 		currentSpinner.Start()
 	}
 
-	response, err := mcpAgent.GenerateWithLoop(ctx, messages,
+	result, err := mcpAgent.GenerateWithLoop(ctx, messages,
 		// Tool call handler - called when a tool is about to be executed
 		func(toolName, toolArgs string) {
 			if !config.Quiet && cli != nil {
@@ -496,7 +640,36 @@ func runAgenticStep(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI, mes
 		// Tool result handler - called when a tool execution completes
 		func(toolName, toolArgs, result string, isError bool) {
 			if !config.Quiet && cli != nil {
-				cli.DisplayToolMessage(toolName, toolArgs, result, isError)
+				// Parse tool result content - it might be JSON-encoded MCP content
+				resultContent := result
+				
+				// Try to parse as MCP content structure
+				var mcpContent struct {
+					Content []struct {
+						Type string `json:"type"`
+						Text string `json:"text"`
+					} `json:"content"`
+				}
+				
+				// First try to unmarshal as-is
+				if err := json.Unmarshal([]byte(result), &mcpContent); err == nil {
+					// Extract text from MCP content structure
+					if len(mcpContent.Content) > 0 && mcpContent.Content[0].Type == "text" {
+						resultContent = mcpContent.Content[0].Text
+					}
+				} else {
+					// If that fails, try unquoting first (in case it's double-encoded)
+					var unquoted string
+					if err := json.Unmarshal([]byte(result), &unquoted); err == nil {
+						if err := json.Unmarshal([]byte(unquoted), &mcpContent); err == nil {
+							if len(mcpContent.Content) > 0 && mcpContent.Content[0].Type == "text" {
+								resultContent = mcpContent.Content[0].Text
+							}
+						}
+					}
+				}
+				
+				cli.DisplayToolMessage(toolName, toolArgs, resultContent, isError)
 				// Start spinner again for next LLM call
 				currentSpinner = ui.NewSpinner("Thinking...")
 				currentSpinner.Start()
@@ -537,14 +710,18 @@ func runAgenticStep(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI, mes
 		if !config.Quiet && cli != nil {
 			cli.DisplayError(fmt.Errorf("agent error: %v", err))
 		}
-		return nil, err
+		return nil, nil, err
 	}
+
+	// Get the final response and conversation messages
+	response := result.FinalResponse
+	conversationMessages := result.ConversationMessages
 
 	// Display assistant response with model name (skip if quiet)
 	if !config.Quiet && cli != nil {
 		if err := cli.DisplayAssistantMessageWithModel(response.Content, config.ModelName); err != nil {
 			cli.DisplayError(fmt.Errorf("display error: %v", err))
-			return nil, err
+			return nil, nil, err
 		}
 
 		// Update usage tracking with the last user message and response
@@ -564,7 +741,8 @@ func runAgenticStep(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI, mes
 		fmt.Print(response.Content)
 	}
 
-	return response, nil
+	// Return the final response and all conversation messages
+	return response, conversationMessages, nil
 }
 
 // runInteractiveLoop handles the interactive portion of the agentic loop
@@ -600,7 +778,7 @@ func runInteractiveLoop(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI,
 		tempMessages := append(messages, schema.UserMessage(prompt))
 
 		// Process the user input with tool calls
-		response, err := runAgenticStep(ctx, mcpAgent, cli, tempMessages, config)
+		response, conversationMessages, err := runAgenticStep(ctx, mcpAgent, cli, tempMessages, config)
 		if err != nil {
 			// Check if this was a user cancellation
 			if err.Error() == "generation cancelled by user" {
@@ -612,13 +790,39 @@ func runInteractiveLoop(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI,
 		}
 
 		// Only add to history after successful completion
-		messages = append(messages, schema.UserMessage(prompt))
+		userMsg := schema.UserMessage(prompt)
+		messages = append(messages, userMsg)
 		messages = append(messages, response)
+
+		// Save to session if session manager is available
+		if config.SessionManager != nil {
+			if err := config.SessionManager.AddMessage(userMsg); err != nil {
+				// Log error but don't fail the operation
+				cli.DisplayError(fmt.Errorf("failed to save user message to session: %v", err))
+			}
+			
+			// Save all conversation messages (includes tool calls and results)
+			// Find the messages that were generated during this conversation
+			if len(conversationMessages) > len(tempMessages) {
+				// Extract only the new messages generated during this step
+				newMessages := conversationMessages[len(tempMessages):]
+				if err := config.SessionManager.AddMessages(newMessages); err != nil {
+					// Log error but don't fail the operation
+					cli.DisplayError(fmt.Errorf("failed to save conversation messages to session: %v", err))
+				}
+			} else {
+				// No tool calls, just save the final response
+				if err := config.SessionManager.AddMessage(response); err != nil {
+					// Log error but don't fail the operation
+					cli.DisplayError(fmt.Errorf("failed to save assistant message to session: %v", err))
+				}
+			}
+		}
 	}
 }
 
 // runNonInteractiveMode handles the non-interactive mode execution
-func runNonInteractiveMode(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI, prompt, modelName string, messages []*schema.Message, quiet, noExit bool, mcpConfig *config.Config) error {
+func runNonInteractiveMode(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI, prompt, modelName string, messages []*schema.Message, quiet, noExit bool, mcpConfig *config.Config, sessionManager *session.Manager) error {
 	// Prepare data for slash commands (needed if continuing to interactive mode)
 	var serverNames []string
 	for name := range mcpConfig.MCPServers {
@@ -643,13 +847,14 @@ func runNonInteractiveMode(ctx context.Context, mcpAgent *agent.Agent, cli *ui.C
 		ToolNames:        toolNames,
 		ModelName:        modelName,
 		MCPConfig:        mcpConfig,
+		SessionManager:   sessionManager,
 	}
 
 	return runAgenticLoop(ctx, mcpAgent, cli, messages, config)
 }
 
 // runInteractiveMode handles the interactive mode execution
-func runInteractiveMode(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI, serverNames, toolNames []string, modelName string, messages []*schema.Message) error {
+func runInteractiveMode(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI, serverNames, toolNames []string, modelName string, messages []*schema.Message, sessionManager *session.Manager) error {
 	// Configure and run unified agentic loop
 	config := AgenticLoopConfig{
 		IsInteractive:    true,
@@ -660,6 +865,7 @@ func runInteractiveMode(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI,
 		ToolNames:        toolNames,
 		ModelName:        modelName,
 		MCPConfig:        nil, // Not needed for pure interactive mode
+		SessionManager:   sessionManager,
 	}
 
 	return runAgenticLoop(ctx, mcpAgent, cli, messages, config)

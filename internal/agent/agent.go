@@ -69,9 +69,15 @@ func NewAgent(ctx context.Context, config *AgentConfig) (*Agent, error) {
 	}, nil
 }
 
+// GenerateWithLoopResult contains the result and conversation history
+type GenerateWithLoopResult struct {
+	FinalResponse *schema.Message
+	ConversationMessages []*schema.Message // All messages in the conversation (including tool calls and results)
+}
+
 // GenerateWithLoop processes messages with a custom loop that displays tool calls in real-time
 func (a *Agent) GenerateWithLoop(ctx context.Context, messages []*schema.Message,
-	onToolCall ToolCallHandler, onToolExecution ToolExecutionHandler, onToolResult ToolResultHandler, onResponse ResponseHandler, onToolCallContent ToolCallContentHandler) (*schema.Message, error) {
+	onToolCall ToolCallHandler, onToolExecution ToolExecutionHandler, onToolResult ToolResultHandler, onResponse ResponseHandler, onToolCallContent ToolCallContentHandler) (*GenerateWithLoopResult, error) {
 
 	// Create a copy of messages to avoid modifying the original
 	workingMessages := make([]*schema.Message, len(messages))
@@ -127,6 +133,7 @@ func (a *Agent) GenerateWithLoop(ctx context.Context, messages []*schema.Message
 
 		// Check if this is a tool call or final response
 		if len(response.ToolCalls) > 0 {
+
 			// Display any content that accompanies the tool calls
 			if response.Content != "" && onToolCallContent != nil {
 				onToolCallContent(response.Content)
@@ -193,12 +200,19 @@ func (a *Agent) GenerateWithLoop(ctx context.Context, messages []*schema.Message
 			if onResponse != nil && response.Content != "" {
 				onResponse(response.Content)
 			}
-			return response, nil
+			return &GenerateWithLoopResult{
+				FinalResponse: response,
+				ConversationMessages: workingMessages,
+			}, nil
 		}
 	}
 
 	// If we reach here, we've exceeded max steps
-	return schema.AssistantMessage("Maximum number of steps reached.", nil), nil
+	finalResponse := schema.AssistantMessage("Maximum number of steps reached.", nil)
+	return &GenerateWithLoopResult{
+		FinalResponse: finalResponse,
+		ConversationMessages: workingMessages,
+	}, nil
 }
 
 // GetTools returns the list of available tools
