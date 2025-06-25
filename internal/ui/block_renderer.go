@@ -106,16 +106,13 @@ func renderContentBlock(content string, containerWidth int, options ...rendering
 		option(renderer)
 	}
 
-	// Define background colors - more visible gray for all messages
-	backgroundColor := lipgloss.AdaptiveColor{Light: "#E5E7EB", Dark: "#374151"}
-
+	theme := GetTheme()
 	style := lipgloss.NewStyle().
 		PaddingTop(renderer.paddingTop).
 		PaddingBottom(renderer.paddingBottom).
 		PaddingLeft(renderer.paddingLeft).
 		PaddingRight(renderer.paddingRight).
-		Background(backgroundColor).
-		Foreground(textColor).
+		Foreground(theme.Text).
 		BorderStyle(lipgloss.ThickBorder())
 
 	align := lipgloss.Left
@@ -123,9 +120,16 @@ func renderContentBlock(content string, containerWidth int, options ...rendering
 		align = *renderer.align
 	}
 
-	borderColor := backgroundColor
+	// Default to transparent/no border color
+	borderColor := lipgloss.AdaptiveColor{Light: "", Dark: ""}
 	if renderer.borderColor != nil {
 		borderColor = *renderer.borderColor
+	}
+
+	// Very muted color for the opposite border
+	mutedOppositeBorder := lipgloss.AdaptiveColor{
+		Light: "#F3F4F6", // Very light gray, barely visible
+		Dark:  "#1F2937", // Very dark gray, barely visible
 	}
 
 	switch align {
@@ -135,14 +139,14 @@ func renderContentBlock(content string, containerWidth int, options ...rendering
 			BorderRight(true).
 			AlignHorizontal(align).
 			BorderLeftForeground(borderColor).
-			BorderRightForeground(backgroundColor)
+			BorderRightForeground(mutedOppositeBorder)
 	case lipgloss.Right:
 		style = style.
 			BorderRight(true).
 			BorderLeft(true).
 			AlignHorizontal(align).
 			BorderRightForeground(borderColor).
-			BorderLeftForeground(backgroundColor)
+			BorderLeftForeground(mutedOppositeBorder)
 	}
 
 	if renderer.fullWidth {

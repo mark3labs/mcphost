@@ -6,62 +6,105 @@ import (
 
 // Enhanced styling utilities and theme definitions
 
-// Theme represents a complete UI theme
-type Theme struct {
-	Primary    lipgloss.AdaptiveColor
-	Secondary  lipgloss.AdaptiveColor
-	Success    lipgloss.AdaptiveColor
-	Warning    lipgloss.AdaptiveColor
-	Error      lipgloss.AdaptiveColor
-	Info       lipgloss.AdaptiveColor
-	Text       lipgloss.AdaptiveColor
-	Muted      lipgloss.AdaptiveColor
-	Background lipgloss.AdaptiveColor
-	Border     lipgloss.AdaptiveColor
+// Global theme instance
+var currentTheme = DefaultTheme()
+
+// GetTheme returns the current theme
+func GetTheme() Theme {
+	return currentTheme
 }
 
-// DefaultTheme returns the default MCPHost theme
+// SetTheme sets the current theme
+func SetTheme(theme Theme) {
+	currentTheme = theme
+}
+
+// Theme represents a complete UI theme
+type Theme struct {
+	Primary         lipgloss.AdaptiveColor
+	Secondary       lipgloss.AdaptiveColor
+	Success         lipgloss.AdaptiveColor
+	Warning         lipgloss.AdaptiveColor
+	Error           lipgloss.AdaptiveColor
+	Info            lipgloss.AdaptiveColor
+	Text            lipgloss.AdaptiveColor
+	Muted           lipgloss.AdaptiveColor
+	VeryMuted       lipgloss.AdaptiveColor
+	Background      lipgloss.AdaptiveColor
+	Border          lipgloss.AdaptiveColor
+	MutedBorder     lipgloss.AdaptiveColor
+	System          lipgloss.AdaptiveColor
+	Tool            lipgloss.AdaptiveColor
+	Accent          lipgloss.AdaptiveColor
+	Highlight       lipgloss.AdaptiveColor
+}
+
+// DefaultTheme returns the default MCPHost theme (Catppuccin Mocha)
 func DefaultTheme() Theme {
 	return Theme{
 		Primary: lipgloss.AdaptiveColor{
-			Light: "#7C3AED", // Purple
-			Dark:  "#A855F7",
+			Light: "#8839ef", // Latte Mauve
+			Dark:  "#cba6f7", // Mocha Mauve
 		},
 		Secondary: lipgloss.AdaptiveColor{
-			Light: "#06B6D4", // Cyan
-			Dark:  "#22D3EE",
+			Light: "#04a5e5", // Latte Sky
+			Dark:  "#89dceb", // Mocha Sky
 		},
 		Success: lipgloss.AdaptiveColor{
-			Light: "#059669", // Green
-			Dark:  "#10B981",
+			Light: "#40a02b", // Latte Green
+			Dark:  "#a6e3a1", // Mocha Green
 		},
 		Warning: lipgloss.AdaptiveColor{
-			Light: "#D97706", // Orange
-			Dark:  "#F59E0B",
+			Light: "#df8e1d", // Latte Yellow
+			Dark:  "#f9e2af", // Mocha Yellow
 		},
 		Error: lipgloss.AdaptiveColor{
-			Light: "#DC2626", // Red
-			Dark:  "#F87171",
+			Light: "#d20f39", // Latte Red
+			Dark:  "#f38ba8", // Mocha Red
 		},
 		Info: lipgloss.AdaptiveColor{
-			Light: "#2563EB", // Blue
-			Dark:  "#60A5FA",
+			Light: "#1e66f5", // Latte Blue
+			Dark:  "#89b4fa", // Mocha Blue
 		},
 		Text: lipgloss.AdaptiveColor{
-			Light: "#1F2937", // Dark gray
-			Dark:  "#F9FAFB", // Light gray
+			Light: "#4c4f69", // Latte Text
+			Dark:  "#cdd6f4", // Mocha Text
 		},
 		Muted: lipgloss.AdaptiveColor{
-			Light: "#6B7280", // Medium gray
-			Dark:  "#9CA3AF",
+			Light: "#6c6f85", // Latte Subtext 0
+			Dark:  "#a6adc8", // Mocha Subtext 0
+		},
+		VeryMuted: lipgloss.AdaptiveColor{
+			Light: "#9ca0b0", // Latte Overlay 0
+			Dark:  "#6c7086", // Mocha Overlay 0
 		},
 		Background: lipgloss.AdaptiveColor{
-			Light: "#FFFFFF", // White
-			Dark:  "#111827", // Dark gray
+			Light: "#eff1f5", // Latte Base
+			Dark:  "#1e1e2e", // Mocha Base
 		},
 		Border: lipgloss.AdaptiveColor{
-			Light: "#E5E7EB", // Light gray
-			Dark:  "#374151", // Medium gray
+			Light: "#acb0be", // Latte Surface 2
+			Dark:  "#585b70", // Mocha Surface 2
+		},
+		MutedBorder: lipgloss.AdaptiveColor{
+			Light: "#ccd0da", // Latte Surface 0
+			Dark:  "#313244", // Mocha Surface 0
+		},
+		System: lipgloss.AdaptiveColor{
+			Light: "#179299", // Latte Teal
+			Dark:  "#94e2d5", // Mocha Teal
+		},
+		Tool: lipgloss.AdaptiveColor{
+			Light: "#fe640b", // Latte Peach
+			Dark:  "#fab387", // Mocha Peach
+		},
+		Accent: lipgloss.AdaptiveColor{
+			Light: "#ea76cb", // Latte Pink
+			Dark:  "#f5c2e7", // Mocha Pink
+		},
+		Highlight: lipgloss.AdaptiveColor{
+			Light: "#df8e1d", // Latte Yellow (for highlights)
+			Dark:  "#45475a", // Mocha Surface 1 (subtle highlight)
 		},
 	}
 }

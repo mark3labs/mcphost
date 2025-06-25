@@ -54,19 +54,14 @@ func (m spinnerModel) View() string {
 
 	// Enhanced spinner display with better styling
 	baseStyle := lipgloss.NewStyle()
+	theme := GetTheme()
 
 	spinnerStyle := baseStyle.
-		Foreground(lipgloss.AdaptiveColor{
-			Light: "#7C3AED",
-			Dark:  "#A855F7",
-		}).
+		Foreground(theme.Primary).
 		Bold(true)
 
 	messageStyle := baseStyle.
-		Foreground(lipgloss.AdaptiveColor{
-			Light: "#374151",
-			Dark:  "#D1D5DB",
-		}).
+		Foreground(theme.Text).
 		Italic(true)
 
 	return fmt.Sprintf("%s %s",
@@ -81,10 +76,8 @@ type quitMsg struct{}
 func NewSpinner(message string) *Spinner {
 	s := spinner.New()
 	s.Spinner = spinner.Points // More modern spinner style
-	s.Style = s.Style.Foreground(lipgloss.AdaptiveColor{
-		Light: "#7C3AED", // Purple
-		Dark:  "#A855F7", // Lighter purple for dark backgrounds
-	})
+	theme := GetTheme()
+	s.Style = s.Style.Foreground(theme.Primary)
 
 	ctx, cancel := context.WithCancel(context.Background())
 

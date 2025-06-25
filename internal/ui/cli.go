@@ -59,34 +59,20 @@ func (c *CLI) GetPrompt() (string, error) {
 	}
 
 	// Create an enhanced divider with gradient effect
+	theme := GetTheme()
 	dividerStyle := lipgloss.NewStyle().
 		Width(c.width).
 		BorderTop(true).
 		BorderStyle(lipgloss.Border{
 			Top: "━",
 		}).
-		BorderForeground(lipgloss.AdaptiveColor{
-			Light: "#E5E7EB",
-			Dark:  "#374151",
-		}).
+		BorderForeground(theme.Border).
 		MarginTop(1).
 		MarginBottom(1).
 		PaddingLeft(2)
 
-	// Add input section header
-	inputHeader := lipgloss.NewStyle().
-		Foreground(lipgloss.AdaptiveColor{
-			Light: "#6366F1",
-			Dark:  "#818CF8",
-		}).
-		Bold(true).
-		MarginBottom(1).
-		PaddingLeft(2).
-		Render("Your Message")
-
 	// Render the enhanced input section
 	fmt.Print(dividerStyle.Render(""))
-	fmt.Print(inputHeader + "\n")
 
 	var prompt string
 	err := huh.NewForm(huh.NewGroup(huh.NewText().

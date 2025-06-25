@@ -153,12 +153,13 @@ func (ut *UsageTracker) RenderUsageInfo() string {
 		percentage := float64(totalTokens) / float64(ut.modelInfo.Limit.Context) * 100
 
 		// Color code based on usage percentage
+		theme := GetTheme()
 		if percentage >= 80 {
-			percentageColor = lipgloss.AdaptiveColor{Light: "#DC2626", Dark: "#F87171"} // Red
+			percentageColor = theme.Error // Red
 		} else if percentage >= 60 {
-			percentageColor = lipgloss.AdaptiveColor{Light: "#D97706", Dark: "#F59E0B"} // Orange
+			percentageColor = theme.Warning // Orange
 		} else {
-			percentageColor = lipgloss.AdaptiveColor{Light: "#059669", Dark: "#10B981"} // Green
+			percentageColor = theme.Success // Green
 		}
 
 		percentageStr = baseStyle.
@@ -167,29 +168,30 @@ func (ut *UsageTracker) RenderUsageInfo() string {
 	}
 
 	// Format cost with appropriate styling
+	theme := GetTheme()
 	var costStr string
 	if ut.isOAuth {
 		costStr = baseStyle.
-			Foreground(lipgloss.AdaptiveColor{Light: "#7C3AED", Dark: "#A855F7"}).
+			Foreground(theme.Primary).
 			Render("$0.00")
 	} else {
 		costStr = baseStyle.
-			Foreground(lipgloss.AdaptiveColor{Light: "#7C3AED", Dark: "#A855F7"}).
+			Foreground(theme.Primary).
 			Render(fmt.Sprintf("$%.4f", ut.sessionStats.TotalCost))
 	}
 
 	// Create styled components
 	tokensLabel := baseStyle.
-		Foreground(lipgloss.AdaptiveColor{Light: "#6B7280", Dark: "#9CA3AF"}).
+		Foreground(theme.Muted).
 		Render("Tokens: ")
 
 	tokensValue := baseStyle.
-		Foreground(lipgloss.AdaptiveColor{Light: "#1F2937", Dark: "#F9FAFB"}).
+		Foreground(theme.Text).
 		Bold(true).
 		Render(tokenStr)
 
 	costLabel := baseStyle.
-		Foreground(lipgloss.AdaptiveColor{Light: "#6B7280", Dark: "#9CA3AF"}).
+		Foreground(theme.Muted).
 		Render(" | Cost: ")
 
 	// Build the enhanced display

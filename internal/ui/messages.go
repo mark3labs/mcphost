@@ -32,60 +32,10 @@ type UIMessage struct {
 	Timestamp time.Time
 }
 
-// Enhanced color scheme with adaptive colors for better terminal compatibility
-var (
-	// Primary brand colors with adaptive variants
-	primaryColor = lipgloss.AdaptiveColor{
-		Light: "#7C3AED", // Purple
-		Dark:  "#A855F7", // Lighter purple for dark backgrounds
-	}
-	secondaryColor = lipgloss.AdaptiveColor{
-		Light: "#06B6D4", // Cyan
-		Dark:  "#22D3EE", // Lighter cyan for dark backgrounds
-	}
-	systemColor = lipgloss.AdaptiveColor{
-		Light: "#10B981", // Green
-		Dark:  "#34D399", // Lighter green for dark backgrounds
-	}
-
-	// Text colors with better contrast
-	textColor = lipgloss.AdaptiveColor{
-		Light: "#1F2937", // Dark gray for light backgrounds
-		Dark:  "#F9FAFB", // Light gray for dark backgrounds
-	}
-	mutedColor = lipgloss.AdaptiveColor{
-		Light: "#6B7280", // Medium gray
-		Dark:  "#9CA3AF", // Lighter gray for dark backgrounds
-	}
-
-	// Status colors
-	errorColor = lipgloss.AdaptiveColor{
-		Light: "#DC2626", // Red
-		Dark:  "#F87171", // Lighter red for dark backgrounds
-	}
-	successColor = lipgloss.AdaptiveColor{
-		Light: "#059669", // Green
-		Dark:  "#10B981", // Lighter green for dark backgrounds
-	}
-	warningColor = lipgloss.AdaptiveColor{
-		Light: "#D97706", // Orange
-		Dark:  "#F59E0B", // Lighter orange for dark backgrounds
-	}
-	toolColor = lipgloss.AdaptiveColor{
-		Light: "#7C2D12", // Dark orange
-		Dark:  "#FB923C", // Light orange for dark backgrounds
-	}
-
-	// Accent colors for highlights
-	accentColor = lipgloss.AdaptiveColor{
-		Light: "#8B5CF6", // Purple accent
-		Dark:  "#C084FC", // Lighter purple accent
-	}
-	highlightColor = lipgloss.AdaptiveColor{
-		Light: "#FEF3C7", // Light yellow
-		Dark:  "#374151", // Dark gray for dark backgrounds
-	}
-)
+// Helper functions to get theme colors
+func getTheme() Theme {
+	return GetTheme()
+}
 
 // MessageRenderer handles rendering of messages with proper styling
 type MessageRenderer struct {
@@ -134,15 +84,16 @@ func (r *MessageRenderer) RenderUserMessage(content string, timestamp time.Time)
 	info := fmt.Sprintf(" %s (%s)", username, timeStr)
 
 	// Combine content and info
+	theme := getTheme()
 	fullContent := strings.TrimSuffix(messageContent, "\n") + "\n" + 
-		lipgloss.NewStyle().Foreground(mutedColor).Render(info)
+		lipgloss.NewStyle().Foreground(theme.VeryMuted).Render(info)
 
 	// Use the new block renderer
 	rendered := renderContentBlock(
 		fullContent,
 		r.width,
 		WithAlign(lipgloss.Right),
-		WithBorderColor(secondaryColor),
+		WithBorderColor(theme.Secondary),
 		WithMarginBottom(1),
 	)
 
@@ -163,11 +114,12 @@ func (r *MessageRenderer) RenderAssistantMessage(content string, timestamp time.
 	}
 
 	// Handle empty content with better styling
+	theme := getTheme()
 	var messageContent string
 	if strings.TrimSpace(content) == "" {
 		messageContent = lipgloss.NewStyle().
 			Italic(true).
-			Foreground(mutedColor).
+			Foreground(theme.Muted).
 			Align(lipgloss.Center).
 			Render("Finished without output")
 	} else {
@@ -179,14 +131,14 @@ func (r *MessageRenderer) RenderAssistantMessage(content string, timestamp time.
 
 	// Combine content and info
 	fullContent := strings.TrimSuffix(messageContent, "\n") + "\n" + 
-		lipgloss.NewStyle().Foreground(mutedColor).Render(info)
+		lipgloss.NewStyle().Foreground(theme.VeryMuted).Render(info)
 
 	// Use the new block renderer
 	rendered := renderContentBlock(
 		fullContent,
 		r.width,
 		WithAlign(lipgloss.Left),
-		WithBorderColor(primaryColor),
+		WithBorderColor(theme.Primary),
 		WithMarginBottom(1),
 	)
 
@@ -204,11 +156,12 @@ func (r *MessageRenderer) RenderSystemMessage(content string, timestamp time.Tim
 	timeStr := timestamp.Local().Format("15:04")
 
 	// Handle empty content with better styling
+	theme := getTheme()
 	var messageContent string
 	if strings.TrimSpace(content) == "" {
 		messageContent = lipgloss.NewStyle().
 			Italic(true).
-			Foreground(mutedColor).
+			Foreground(theme.Muted).
 			Align(lipgloss.Center).
 			Render("No content available")
 	} else {
@@ -220,14 +173,14 @@ func (r *MessageRenderer) RenderSystemMessage(content string, timestamp time.Tim
 
 	// Combine content and info
 	fullContent := strings.TrimSuffix(messageContent, "\n") + "\n" + 
-		lipgloss.NewStyle().Foreground(mutedColor).Render(info)
+		lipgloss.NewStyle().Foreground(theme.VeryMuted).Render(info)
 
 	// Use the new block renderer
 	rendered := renderContentBlock(
 		fullContent,
 		r.width,
 		WithAlign(lipgloss.Left),
-		WithBorderColor(systemColor),
+		WithBorderColor(theme.System),
 		WithMarginBottom(1),
 	)
 
@@ -244,11 +197,12 @@ func (r *MessageRenderer) RenderDebugConfigMessage(config map[string]any, timest
 	baseStyle := lipgloss.NewStyle()
 
 	// Create the main message style with border using tool color
+	theme := getTheme()
 	style := baseStyle.
 		Width(r.width - 1).
 		BorderLeft(true).
-		Foreground(mutedColor).
-		BorderForeground(toolColor).
+		Foreground(theme.Muted).
+		BorderForeground(theme.Tool).
 		BorderStyle(lipgloss.ThickBorder()).
 		PaddingLeft(1)
 
@@ -257,7 +211,7 @@ func (r *MessageRenderer) RenderDebugConfigMessage(config map[string]any, timest
 
 	// Create header with debug icon
 	header := baseStyle.
-		Foreground(toolColor).
+		Foreground(theme.Tool).
 		Bold(true).
 		Render("🔧 Debug Configuration")
 
@@ -270,13 +224,13 @@ func (r *MessageRenderer) RenderDebugConfigMessage(config map[string]any, timest
 	}
 
 	configContent := baseStyle.
-		Foreground(mutedColor).
+		Foreground(theme.Muted).
 		Render(strings.Join(configLines, "\n"))
 
 	// Create info line
 	info := baseStyle.
 		Width(r.width - 1).
-		Foreground(mutedColor).
+		Foreground(theme.Muted).
 		Render(fmt.Sprintf(" MCPHost (%s)", timeStr))
 
 	// Combine parts
@@ -304,8 +258,9 @@ func (r *MessageRenderer) RenderErrorMessage(errorMsg string, timestamp time.Tim
 	timeStr := timestamp.Local().Format("15:04")
 
 	// Format error content
+	theme := getTheme()
 	errorContent := lipgloss.NewStyle().
-		Foreground(errorColor).
+		Foreground(theme.Error).
 		Bold(true).
 		Render(errorMsg)
 
@@ -314,14 +269,14 @@ func (r *MessageRenderer) RenderErrorMessage(errorMsg string, timestamp time.Tim
 
 	// Combine content and info
 	fullContent := errorContent + "\n" + 
-		lipgloss.NewStyle().Foreground(mutedColor).Render(info)
+		lipgloss.NewStyle().Foreground(theme.VeryMuted).Render(info)
 
 	// Use the new block renderer
 	rendered := renderContentBlock(
 		fullContent,
 		r.width,
 		WithAlign(lipgloss.Left),
-		WithBorderColor(errorColor),
+		WithBorderColor(theme.Error),
 		WithMarginBottom(1),
 	)
 
@@ -339,10 +294,11 @@ func (r *MessageRenderer) RenderToolCallMessage(toolName, toolArgs string, times
 	timeStr := timestamp.Local().Format("15:04")
 
 	// Format arguments with better presentation
+	theme := getTheme()
 	var argsContent string
 	if toolArgs != "" && toolArgs != "{}" {
 		argsContent = lipgloss.NewStyle().
-			Foreground(mutedColor).
+			Foreground(theme.Muted).
 			Italic(true).
 			Render(fmt.Sprintf("Arguments: %s", r.formatToolArgs(toolArgs)))
 	}
@@ -354,9 +310,9 @@ func (r *MessageRenderer) RenderToolCallMessage(toolName, toolArgs string, times
 	var fullContent string
 	if argsContent != "" {
 		fullContent = argsContent + "\n" + 
-			lipgloss.NewStyle().Foreground(mutedColor).Render(info)
+			lipgloss.NewStyle().Foreground(theme.VeryMuted).Render(info)
 	} else {
-		fullContent = lipgloss.NewStyle().Foreground(mutedColor).Render(info)
+		fullContent = lipgloss.NewStyle().Foreground(theme.VeryMuted).Render(info)
 	}
 
 	// Use the new block renderer
@@ -364,7 +320,7 @@ func (r *MessageRenderer) RenderToolCallMessage(toolName, toolArgs string, times
 		fullContent,
 		r.width,
 		WithAlign(lipgloss.Left),
-		WithBorderColor(toolColor),
+		WithBorderColor(theme.Tool),
 		WithMarginBottom(1),
 	)
 
@@ -379,12 +335,13 @@ func (r *MessageRenderer) RenderToolCallMessage(toolName, toolArgs string, times
 // RenderToolMessage renders a tool call message with proper styling
 func (r *MessageRenderer) RenderToolMessage(toolName, toolArgs, toolResult string, isError bool) UIMessage {
 	// Tool name and arguments header
+	theme := getTheme()
 	toolNameText := lipgloss.NewStyle().
-		Foreground(mutedColor).
+		Foreground(theme.Muted).
 		Render(fmt.Sprintf("%s: ", toolName))
 
 	argsText := lipgloss.NewStyle().
-		Foreground(mutedColor).
+		Foreground(theme.Muted).
 		Render(r.truncateText(toolArgs, r.width-8-lipgloss.Width(toolNameText)))
 
 	headerLine := lipgloss.JoinHorizontal(lipgloss.Left, toolNameText, argsText)
@@ -393,7 +350,7 @@ func (r *MessageRenderer) RenderToolMessage(toolName, toolArgs, toolResult strin
 	var resultContent string
 	if isError {
 		resultContent = lipgloss.NewStyle().
-			Foreground(errorColor).
+			Foreground(theme.Error).
 			Render(fmt.Sprintf("Error: %s", toolResult))
 	} else {
 		// Format result based on tool type
@@ -413,7 +370,7 @@ func (r *MessageRenderer) RenderToolMessage(toolName, toolArgs, toolResult strin
 		fullContent,
 		r.width,
 		WithAlign(lipgloss.Left),
-		WithBorderColor(mutedColor),
+		WithBorderColor(theme.Muted),
 		WithMarginBottom(1),
 	)
 
@@ -470,9 +427,10 @@ func (r *MessageRenderer) formatToolResult(toolName, result string, width int) s
 	}
 
 	// For other tools, render as muted text
+	theme := getTheme()
 	return baseStyle.
 		Width(width).
-		Foreground(mutedColor).
+		Foreground(theme.Muted).
 		Render(result)
 }
 
@@ -503,9 +461,7 @@ func (r *MessageRenderer) truncateText(text string, maxWidth int) string {
 
 // renderMarkdown renders markdown content using glamour
 func (r *MessageRenderer) renderMarkdown(content string, width int) string {
-	// Use the same background color as our message blocks
-	backgroundColor := lipgloss.AdaptiveColor{Light: "#E5E7EB", Dark: "#374151"}
-	rendered := toMarkdown(content, width, backgroundColor)
+	rendered := toMarkdown(content, width)
 	return strings.TrimSuffix(rendered, "\n")
 }
 
@@ -577,22 +533,23 @@ func (c *MessageContainer) renderEmptyState() string {
 	baseStyle := lipgloss.NewStyle()
 
 	// Create a welcome box with border
+	theme := getTheme()
 	welcomeBox := baseStyle.
 		Width(c.width-4).
 		Border(lipgloss.RoundedBorder()).
-		BorderForeground(systemColor).
+		BorderForeground(theme.System).
 		Padding(2, 4).
 		Align(lipgloss.Center)
 
 	// Main title
 	title := baseStyle.
-		Foreground(systemColor).
+		Foreground(theme.System).
 		Bold(true).
 		Render("MCPHost")
 
 	// Subtitle with better typography
 	subtitle := baseStyle.
-		Foreground(primaryColor).
+		Foreground(theme.Primary).
 		Bold(true).
 		MarginTop(1).
 		Render("AI Assistant with MCP Tools")
@@ -608,14 +565,14 @@ func (c *MessageContainer) renderEmptyState() string {
 	var featureList []string
 	for _, feature := range features {
 		featureList = append(featureList, baseStyle.
-			Foreground(mutedColor).
+			Foreground(theme.Muted).
 			MarginLeft(2).
 			Render("• "+feature))
 	}
 
 	// Getting started prompt
 	prompt := baseStyle.
-		Foreground(accentColor).
+		Foreground(theme.Accent).
 		Italic(true).
 		MarginTop(2).
 		Render("Start by typing your message below or use /help for commands")
