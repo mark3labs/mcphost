@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/charmbracelet/lipgloss"
 	"github.com/mark3labs/mcphost/internal/models"
 	"github.com/mark3labs/mcphost/internal/tokens"
 )
@@ -68,7 +69,7 @@ func (ut *UsageTracker) UpdateUsage(inputTokens, outputTokens, cacheReadTokens, 
 	// Calculate costs based on model pricing
 	// For OAuth credentials, costs are $0 for usage tracking purposes
 	var inputCost, outputCost, cacheReadCost, cacheWriteCost, totalCost float64
-	
+
 	if !ut.isOAuth {
 		inputCost = float64(inputTokens) * ut.modelInfo.Cost.Input / 1000000 // Cost is per million tokens
 		outputCost = float64(outputTokens) * ut.modelInfo.Cost.Output / 1000000
@@ -120,7 +121,7 @@ func (ut *UsageTracker) EstimateAndUpdateUsageFromText(inputText, outputText str
 	ut.UpdateUsage(inputTokens, outputTokens, 0, 0)
 }
 
-// RenderUsageInfo renders the current usage information in a single line format
+// RenderUsageInfo renders enhanced usage information with better styling
 func (ut *UsageTracker) RenderUsageInfo() string {
 	ut.mu.RLock()
 	defer ut.mu.RUnlock()
@@ -129,29 +130,71 @@ func (ut *UsageTracker) RenderUsageInfo() string {
 		return ""
 	}
 
+	// Import lipgloss for styling
+	baseStyle := lipgloss.NewStyle()
+
 	// Calculate total tokens
 	totalTokens := ut.sessionStats.TotalInputTokens + ut.sessionStats.TotalOutputTokens
 
-	// Format tokens with K suffix if >= 1000
+	// Format tokens with K/M suffix for better readability
 	var tokenStr string
-	if totalTokens >= 1000 {
+	if totalTokens >= 1000000 {
+		tokenStr = fmt.Sprintf("%.1fM", float64(totalTokens)/1000000)
+	} else if totalTokens >= 1000 {
 		tokenStr = fmt.Sprintf("%.1fK", float64(totalTokens)/1000)
 	} else {
 		tokenStr = fmt.Sprintf("%d", totalTokens)
 	}
 
-	// Calculate percentage based on context limit (if available)
+	// Calculate percentage based on context limit with color coding
 	var percentageStr string
+	var percentageColor lipgloss.AdaptiveColor
 	if ut.modelInfo.Limit.Context > 0 {
 		percentage := float64(totalTokens) / float64(ut.modelInfo.Limit.Context) * 100
-		percentageStr = fmt.Sprintf(" (%.0f%%)", percentage)
+
+		// Color code based on usage percentage
+		if percentage >= 80 {
+			percentageColor = lipgloss.AdaptiveColor{Light: "#DC2626", Dark: "#F87171"} // Red
+		} else if percentage >= 60 {
+			percentageColor = lipgloss.AdaptiveColor{Light: "#D97706", Dark: "#F59E0B"} // Orange
+		} else {
+			percentageColor = lipgloss.AdaptiveColor{Light: "#059669", Dark: "#10B981"} // Green
+		}
+
+		percentageStr = baseStyle.
+			Foreground(percentageColor).
+			Render(fmt.Sprintf(" (%.0f%%)", percentage))
 	}
 
-	// Format cost
-	costStr := fmt.Sprintf("$%.2f", ut.sessionStats.TotalCost)
+	// Format cost with appropriate styling
+	var costStr string
+	if ut.isOAuth {
+		costStr = baseStyle.
+			Foreground(lipgloss.AdaptiveColor{Light: "#7C3AED", Dark: "#A855F7"}).
+			Render("$0.00")
+	} else {
+		costStr = baseStyle.
+			Foreground(lipgloss.AdaptiveColor{Light: "#7C3AED", Dark: "#A855F7"}).
+			Render(fmt.Sprintf("$%.4f", ut.sessionStats.TotalCost))
+	}
 
-	// Build the single line display
-	return fmt.Sprintf("Tokens: %s%s, Cost: %s", tokenStr, percentageStr, costStr)
+	// Create styled components
+	tokensLabel := baseStyle.
+		Foreground(lipgloss.AdaptiveColor{Light: "#6B7280", Dark: "#9CA3AF"}).
+		Render("Tokens: ")
+
+	tokensValue := baseStyle.
+		Foreground(lipgloss.AdaptiveColor{Light: "#1F2937", Dark: "#F9FAFB"}).
+		Bold(true).
+		Render(tokenStr)
+
+	costLabel := baseStyle.
+		Foreground(lipgloss.AdaptiveColor{Light: "#6B7280", Dark: "#9CA3AF"}).
+		Render(" | Cost: ")
+
+	// Build the enhanced display
+	return fmt.Sprintf("%s%s%s%s%s\n",
+		tokensLabel, tokensValue, percentageStr, costLabel, costStr)
 }
 
 // GetSessionStats returns a copy of the current session statistics

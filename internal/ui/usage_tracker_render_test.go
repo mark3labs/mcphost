@@ -27,8 +27,8 @@ func TestUsageTracker_RenderUsageInfo_OAuth(t *testing.T) {
 	oauthTracker.UpdateUsage(1500, 500, 0, 0) // 2000 total tokens
 
 	rendered := oauthTracker.RenderUsageInfo()
-	
-	// Should show tokens and percentage, but cost should be $0.00
+
+	// Should show tokens and percentage, but cost should show "$0.00"
 	if !strings.Contains(rendered, "Tokens: 2.0K") {
 		t.Errorf("Expected rendered output to contain 'Tokens: 2.0K', got: %s", rendered)
 	}
@@ -44,16 +44,16 @@ func TestUsageTracker_RenderUsageInfo_OAuth(t *testing.T) {
 	regularTracker.UpdateUsage(1500, 500, 0, 0) // Same token usage
 
 	regularRendered := regularTracker.RenderUsageInfo()
-	
+
 	// Should show tokens and actual cost
 	if !strings.Contains(regularRendered, "Tokens: 2.0K") {
 		t.Errorf("Expected regular rendered output to contain 'Tokens: 2.0K', got: %s", regularRendered)
 	}
 	if strings.Contains(regularRendered, "Cost: $0.00") {
-		t.Errorf("Expected regular rendered output to NOT show $0.00 cost, got: %s", regularRendered)
+		t.Errorf("Expected regular rendered output to NOT show $0.00, got: %s", regularRendered)
 	}
 	// Should show actual calculated cost (1500*3 + 500*15)/1000000 = 0.0120
-	if !strings.Contains(regularRendered, "Cost: $0.01") { // Rounded to 2 decimal places
+	if !strings.Contains(regularRendered, "Cost: $0.0120") { // Now showing 4 decimal places
 		t.Errorf("Expected regular rendered output to show actual cost, got: %s", regularRendered)
 	}
 }

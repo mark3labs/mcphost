@@ -19,36 +19,67 @@ func BaseStyle() lipgloss.Style {
 }
 
 // GetMarkdownRenderer returns a glamour TermRenderer configured for our use
-func GetMarkdownRenderer(width int) *glamour.TermRenderer {
+func GetMarkdownRenderer(width int, backgroundColor lipgloss.AdaptiveColor) *glamour.TermRenderer {
 	r, _ := glamour.NewTermRenderer(
-		glamour.WithStyles(generateMarkdownStyleConfig()),
+		glamour.WithStyles(generateMarkdownStyleConfig(backgroundColor)),
 		glamour.WithWordWrap(width),
 	)
 	return r
 }
 
 // generateMarkdownStyleConfig creates an ansi.StyleConfig for markdown rendering
-func generateMarkdownStyleConfig() ansi.StyleConfig {
-	// Define colors - using simple colors since we're not implementing theming
-	textColor := "#ffffff"
-	mutedColor := "#888888"
-	headingColor := "#00d7ff"
-	emphColor := "#ffff87"
-	strongColor := "#ffffff"
-	linkColor := "#5fd7ff"
-	codeColor := "#d7d7af"
-	errorColor := "#ff5f5f"
-	keywordColor := "#ff87d7"
-	stringColor := "#87ff87"
-	numberColor := "#ffaf87"
-	commentColor := "#5f5f87"
+func generateMarkdownStyleConfig(backgroundColor lipgloss.AdaptiveColor) ansi.StyleConfig {
+	// Define adaptive colors based on terminal background
+	var textColor, mutedColor string
+	if lipgloss.HasDarkBackground() {
+		textColor = "#F9FAFB"   // Light text for dark backgrounds
+		mutedColor = "#9CA3AF"  // Light muted for dark backgrounds
+	} else {
+		textColor = "#1F2937"   // Dark text for light backgrounds
+		mutedColor = "#6B7280"  // Dark muted for light backgrounds
+	}
+	var headingColor, emphColor, strongColor, linkColor, codeColor, errorColor, keywordColor, stringColor, numberColor, commentColor string
+	if lipgloss.HasDarkBackground() {
+		// Dark background colors
+		headingColor = "#22D3EE"   // Cyan
+		emphColor = "#FDE047"      // Yellow
+		strongColor = "#F9FAFB"    // Light gray
+		linkColor = "#60A5FA"      // Blue
+		codeColor = "#D1D5DB"      // Light gray
+		errorColor = "#F87171"     // Red
+		keywordColor = "#C084FC"   // Purple
+		stringColor = "#34D399"    // Green
+		numberColor = "#FBBF24"    // Orange
+		commentColor = "#9CA3AF"   // Muted gray
+	} else {
+		// Light background colors
+		headingColor = "#0891B2"   // Dark cyan
+		emphColor = "#D97706"      // Orange
+		strongColor = "#1F2937"    // Dark gray
+		linkColor = "#2563EB"      // Blue
+		codeColor = "#374151"      // Dark gray
+		errorColor = "#DC2626"     // Red
+		keywordColor = "#7C3AED"   // Purple
+		stringColor = "#059669"    // Green
+		numberColor = "#D97706"    // Orange
+		commentColor = "#6B7280"   // Muted gray
+	}
+
+	// Convert adaptive background color to appropriate string based on terminal
+	var bgColor string
+	if lipgloss.HasDarkBackground() {
+		bgColor = backgroundColor.Dark
+	} else {
+		bgColor = backgroundColor.Light
+	}
 
 	return ansi.StyleConfig{
 		Document: ansi.StyleBlock{
 			StylePrimitive: ansi.StylePrimitive{
-				BlockPrefix: "",
-				BlockSuffix: "",
-				Color:       stringPtr(textColor),
+				BlockPrefix:     "",
+				BlockSuffix:     "",
+				Color:           stringPtr(textColor),
+				BackgroundColor: stringPtr(bgColor),
 			},
 			Margin: uintPtr(defaultMargin),
 		},
@@ -279,19 +310,21 @@ func generateMarkdownStyleConfig() ansi.StyleConfig {
 			Color:       stringPtr(linkColor),
 		},
 		Text: ansi.StylePrimitive{
-			Color: stringPtr(textColor),
+			Color:           stringPtr(textColor),
+			BackgroundColor: stringPtr(bgColor),
 		},
 		Paragraph: ansi.StyleBlock{
 			StylePrimitive: ansi.StylePrimitive{
-				Color: stringPtr(textColor),
+				Color:           stringPtr(textColor),
+				BackgroundColor: stringPtr(bgColor),
 			},
 		},
 	}
 }
 
 // toMarkdown renders markdown content using glamour
-func toMarkdown(content string, width int) string {
-	r := GetMarkdownRenderer(width)
+func toMarkdown(content string, width int, backgroundColor lipgloss.AdaptiveColor) string {
+	r := GetMarkdownRenderer(width, backgroundColor)
 	rendered, _ := r.Render(content)
 	return rendered
 }

@@ -27,8 +27,8 @@ func TestUsageTracker_OAuthCosts(t *testing.T) {
 	}
 
 	// Check that costs are calculated for regular API key
-	expectedInputCost := float64(1000) * 3.0 / 1000000  // $0.003
-	expectedOutputCost := float64(500) * 15.0 / 1000000 // $0.0075
+	expectedInputCost := float64(1000) * 3.0 / 1000000          // $0.003
+	expectedOutputCost := float64(500) * 15.0 / 1000000         // $0.0075
 	expectedTotalCost := expectedInputCost + expectedOutputCost // $0.0105
 
 	if stats.InputCost != expectedInputCost {
@@ -83,7 +83,7 @@ func TestUsageTracker_OAuthSessionStats(t *testing.T) {
 
 	// Test OAuth session stats accumulation
 	oauthTracker := NewUsageTracker(modelInfo, "anthropic", 80, true)
-	
+
 	// Make multiple requests
 	oauthTracker.UpdateUsage(1000, 500, 0, 0)
 	oauthTracker.UpdateUsage(2000, 1000, 0, 0)
