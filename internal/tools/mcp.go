@@ -249,8 +249,6 @@ func (m *MCPToolManager) createMCPClient(ctx context.Context, serverName string,
 			}
 		}
 
-
-		
 		stdioClient, err := client.NewStdioMCPClient(command, env, args...)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create stdio client: %v", err)

@@ -5,6 +5,8 @@ go 1.23.4
 toolchain go1.23.9
 
 require (
+	github.com/JohannesKaufmann/html-to-markdown v1.6.0
+	github.com/PuerkitoBio/goquery v1.10.3
 	github.com/bytedance/sonic v1.13.3
 	github.com/charmbracelet/huh v0.3.0
 	github.com/charmbracelet/lipgloss v1.1.1-0.20250404203927-76690c660834
@@ -27,8 +29,6 @@ require (
 	cloud.google.com/go v0.116.0 // indirect
 	cloud.google.com/go/auth v0.15.0 // indirect
 	cloud.google.com/go/compute/metadata v0.6.0 // indirect
-	github.com/JohannesKaufmann/html-to-markdown v1.6.0 // indirect
-	github.com/PuerkitoBio/goquery v1.10.3 // indirect
 	github.com/alecthomas/chroma/v2 v2.14.0 // indirect
 	github.com/andybalholm/cascadia v1.3.3 // indirect
 	github.com/anthropics/anthropic-sdk-go v0.2.0-alpha.8 // indirect

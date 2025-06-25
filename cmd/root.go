@@ -183,6 +183,9 @@ func init() {
 	viper.BindPFlag("main-gpu", rootCmd.PersistentFlags().Lookup("main-gpu"))
 
 	// Defaults are already set in flag definitions, no need to duplicate in viper
+
+	// Add subcommands
+	rootCmd.AddCommand(authCmd)
 }
 
 func runMCPHost(ctx context.Context) error {

@@ -1,8 +1,12 @@
 package models
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
 	"os"
 	"strings"
 
@@ -13,8 +17,45 @@ import (
 	"github.com/ollama/ollama/api"
 	"google.golang.org/genai"
 
+	"github.com/mark3labs/mcphost/internal/auth"
 	"github.com/mark3labs/mcphost/internal/models/gemini"
 )
+
+const (
+	// ClaudeCodePrompt is the required system prompt for OAuth authentication
+	ClaudeCodePrompt = "You are Claude Code, Anthropic's official CLI for Claude."
+)
+
+// resolveModelAlias resolves model aliases to their full names using the registry
+func resolveModelAlias(provider, modelName string) string {
+	registry := GetGlobalRegistry()
+	
+	// Common alias patterns for Anthropic models - using Claude 4 as the latest/default
+	aliasMap := map[string]string{
+		// Claude 4 models (latest and most capable)
+		"claude-opus-latest":       "claude-opus-4-20250514",
+		"claude-sonnet-latest":     "claude-sonnet-4-20250514",
+		"claude-4-opus-latest":     "claude-opus-4-20250514",
+		"claude-4-sonnet-latest":   "claude-sonnet-4-20250514",
+		
+		// Claude 3.x models for backward compatibility
+		"claude-3-5-haiku-latest":  "claude-3-5-haiku-20241022",
+		"claude-3-5-sonnet-latest": "claude-3-5-sonnet-20241022", 
+		"claude-3-7-sonnet-latest": "claude-3-7-sonnet-20250219",
+		"claude-3-opus-latest":     "claude-3-opus-20240229",
+	}
+	
+	// Check if it's a known alias
+	if resolved, exists := aliasMap[modelName]; exists {
+		// Verify the resolved model exists in the registry
+		if _, err := registry.ValidateModel(provider, resolved); err == nil {
+			return resolved
+		}
+	}
+	
+	// Return original if no alias found or resolved model doesn't exist
+	return modelName
+}
 
 // ProviderConfig holds configuration for creating LLM providers
 type ProviderConfig struct {
@@ -44,6 +85,11 @@ func CreateProvider(ctx context.Context, config *ProviderConfig) (model.ToolCall
 
 	provider := parts[0]
 	modelName := parts[1]
+
+	// Resolve model aliases before validation (for OAuth compatibility)
+	if provider == "anthropic" {
+		modelName = resolveModelAlias(provider, modelName)
+	}
 
 	// Get the global registry for validation
 	registry := GetGlobalRegistry()
@@ -148,13 +194,17 @@ func createAzureOpenAIProvider(ctx context.Context, config *ProviderConfig, mode
 }
 
 func createAnthropicProvider(ctx context.Context, config *ProviderConfig, modelName string) (model.ToolCallingChatModel, error) {
-	apiKey := config.ProviderAPIKey
-	if apiKey == "" {
-		apiKey = os.Getenv("ANTHROPIC_API_KEY")
+	apiKey, source, err := auth.GetAnthropicAPIKey(config.ProviderAPIKey)
+	if err != nil {
+		return nil, err
 	}
-	if apiKey == "" {
-		return nil, fmt.Errorf("Anthropic API key not provided. Use --provider-api-key flag or ANTHROPIC_API_KEY environment variable")
+
+	// Log the source of the API key in debug mode (without revealing the key)
+	if os.Getenv("DEBUG") != "" || os.Getenv("MCPHOST_DEBUG") != "" {
+		fmt.Fprintf(os.Stderr, "Using Anthropic API key from: %s\n", source)
 	}
+
+	// Model alias resolution is handled in CreateProvider
 
 	maxTokens := config.MaxTokens
 	if maxTokens == 0 {
@@ -162,9 +212,20 @@ func createAnthropicProvider(ctx context.Context, config *ProviderConfig, modelN
 	}
 
 	claudeConfig := &claude.Config{
-		APIKey:    apiKey,
 		Model:     modelName,
 		MaxTokens: maxTokens,
+	}
+
+	// Handle OAuth vs API key authentication
+	if strings.HasPrefix(source, "stored OAuth") {
+		// For OAuth tokens, we need to use Authorization: Bearer header
+		// Create a custom HTTP client that adds the proper headers
+		claudeConfig.HTTPClient = createOAuthHTTPClient(apiKey)
+		// Set a dummy API key to prevent the library from failing validation
+		claudeConfig.APIKey = "oauth-placeholder"
+	} else {
+		// For API keys, use the standard x-api-key header
+		claudeConfig.APIKey = apiKey
 	}
 
 	if config.ProviderURL != "" {
@@ -345,4 +406,98 @@ func createOllamaProvider(ctx context.Context, config *ProviderConfig, modelName
 	ollamaConfig.Options = options
 
 	return ollama.NewChatModel(ctx, ollamaConfig)
+}
+
+// createOAuthHTTPClient creates an HTTP client that adds OAuth headers for Anthropic API
+func createOAuthHTTPClient(accessToken string) *http.Client {
+	return &http.Client{
+		Transport: &oauthTransport{
+			accessToken: accessToken,
+			base:        http.DefaultTransport,
+		},
+	}
+}
+
+// oauthTransport is an HTTP transport that adds OAuth headers
+type oauthTransport struct {
+	accessToken string
+	base        http.RoundTripper
+}
+
+func (t *oauthTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	// Clone the request to avoid modifying the original
+	newReq := req.Clone(req.Context())
+
+	// Remove any existing x-api-key header (from the dummy API key)
+	newReq.Header.Del("x-api-key")
+
+	// Add OAuth headers as required by Anthropic's OAuth API
+	newReq.Header.Set("Authorization", "Bearer "+t.accessToken)
+	newReq.Header.Set("anthropic-beta", "oauth-2025-04-20")
+	newReq.Header.Set("anthropic-version", "2023-06-01")
+
+	// Inject Claude Code system prompt for /v1/messages endpoint
+	if req.Method == "POST" && strings.Contains(req.URL.Path, "/v1/messages") && req.Body != nil {
+		body, err := io.ReadAll(req.Body)
+		if err == nil {
+			modifiedBody, err := t.injectClaudeCodePrompt(body)
+			if err == nil {
+				newReq.Body = io.NopCloser(bytes.NewReader(modifiedBody))
+				newReq.ContentLength = int64(len(modifiedBody))
+			}
+		}
+	}
+
+	// Use the base transport to make the request
+	return t.base.RoundTrip(newReq)
+}
+
+// injectClaudeCodePrompt modifies the request body to inject Claude Code system prompt
+func (t *oauthTransport) injectClaudeCodePrompt(body []byte) ([]byte, error) {
+	var data map[string]interface{}
+	if err := json.Unmarshal(body, &data); err != nil {
+		return body, nil // Return original if not JSON
+	}
+
+	// Check if request has a system prompt
+	systemRaw, hasSystem := data["system"]
+	if !hasSystem {
+		// No system prompt, inject Claude Code identification
+		data["system"] = ClaudeCodePrompt
+		return json.Marshal(data)
+	}
+
+	switch system := systemRaw.(type) {
+	case string:
+		// Handle string system prompt
+		if system == ClaudeCodePrompt {
+			// Already correct, leave as-is
+			return body, nil
+		}
+		// Convert to array with Claude Code first
+		data["system"] = []interface{}{
+			map[string]interface{}{"type": "text", "text": ClaudeCodePrompt},
+			map[string]interface{}{"type": "text", "text": system},
+		}
+
+	case []interface{}:
+		// Handle array system prompt
+		if len(system) > 0 {
+			// Check if first element has correct text
+			if first, ok := system[0].(map[string]interface{}); ok {
+				if text, ok := first["text"].(string); ok && text == ClaudeCodePrompt {
+					// Already has Claude Code first, return as-is
+					return body, nil
+				}
+			}
+		}
+		// Prepend Claude Code identification
+		newSystem := []interface{}{
+			map[string]interface{}{"type": "text", "text": ClaudeCodePrompt},
+		}
+		data["system"] = append(newSystem, system...)
+	}
+
+	// Re-marshal the modified data
+	return json.Marshal(data)
 }
