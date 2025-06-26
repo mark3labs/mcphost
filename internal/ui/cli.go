@@ -162,6 +162,21 @@ func (c *CLI) DisplayStreamingMessage(reader *schema.StreamReader[*schema.Messag
 	return c.DisplayAssistantMessage(content.String())
 }
 
+// StartStreamingMessage starts a streaming assistant message
+func (c *CLI) StartStreamingMessage(modelName string) {
+	// Add an empty assistant message that we'll update during streaming
+	msg := c.messageRenderer.RenderAssistantMessage("", time.Now(), modelName)
+	c.messageContainer.AddMessage(msg)
+	c.displayContainer()
+}
+
+// UpdateStreamingMessage updates the streaming message with new content
+func (c *CLI) UpdateStreamingMessage(content string) {
+	// Update the last message (which should be the streaming assistant message)
+	c.messageContainer.UpdateLastMessage(content)
+	c.displayContainer()
+}
+
 // DisplayStreamedContent displays pre-collected streaming content
 func (c *CLI) DisplayStreamedContent(content string) error {
 	return c.DisplayAssistantMessageWithModel(content, "")

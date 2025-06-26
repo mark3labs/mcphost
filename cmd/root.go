@@ -643,6 +643,8 @@ func runAgenticStep(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI, mes
 	// Create streaming callback for real-time display
 	var streamingCallback agent.StreamingResponseHandler
 	var streamingUsed bool
+	var streamingContent strings.Builder
+	var streamingStarted bool
 	if cli != nil && !config.Quiet {
 		streamingCallback = func(chunk string) {
 			// Stop spinner before first chunk if still running
@@ -652,8 +654,16 @@ func runAgenticStep(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI, mes
 			}
 			// Mark that streaming was used
 			streamingUsed = true
-			// Display the chunk immediately
-			fmt.Print(chunk)
+			
+			// Start streaming message on first chunk
+			if !streamingStarted {
+				cli.StartStreamingMessage("")
+				streamingStarted = true
+			}
+			
+			// Accumulate content and update message
+			streamingContent.WriteString(chunk)
+			cli.UpdateStreamingMessage(streamingContent.String())
 		}
 	}
 
@@ -773,10 +783,8 @@ func runAgenticStep(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI, mes
 			return nil, nil, err
 		}
 	} else if streamingUsed {
-		// Add a newline after streaming completes
-		fmt.Println()
-
-		// Update usage tracking with the last user message and response
+		// Streaming was used - the message is already displayed in the message component
+		// Just update usage tracking with the last user message and response
 		if len(messages) > 0 {
 			lastUserMessage := ""
 			// Find the last user message
