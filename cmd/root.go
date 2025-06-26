@@ -642,7 +642,8 @@ func runAgenticStep(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI, mes
 
 	// Create streaming callback for real-time display
 	var streamingCallback agent.StreamingResponseHandler
-	var streamingUsed bool
+	var responseWasStreamed bool
+	var lastDisplayedContent string
 	var streamingContent strings.Builder
 	var streamingStarted bool
 	if cli != nil && !config.Quiet {
@@ -652,12 +653,12 @@ func runAgenticStep(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI, mes
 				currentSpinner.Stop()
 				currentSpinner = nil
 			}
-			// Mark that streaming was used
-			streamingUsed = true
+			// Mark that this response is being streamed
+			responseWasStreamed = true
 			
 			// Start streaming message on first chunk
 			if !streamingStarted {
-				cli.StartStreamingMessage("")
+				cli.StartStreamingMessage(config.ModelName)
 				streamingStarted = true
 			}
 			
@@ -666,6 +667,11 @@ func runAgenticStep(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI, mes
 			cli.UpdateStreamingMessage(streamingContent.String())
 		}
 	}
+
+	// Reset streaming state before each agent execution
+	responseWasStreamed = false
+	streamingStarted = false
+	streamingContent.Reset()
 
 	result, err := mcpAgent.GenerateWithLoopAndStreaming(ctx, messages,
 		// Tool call handler - called when a tool is about to be executed
@@ -752,6 +758,7 @@ func runAgenticStep(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI, mes
 					currentSpinner = nil
 				}
 				cli.DisplayAssistantMessageWithModel(content, config.ModelName)
+				lastDisplayedContent = content
 				// Start spinner again for tool calls
 				currentSpinner = ui.NewSpinner("Thinking...")
 				currentSpinner.Start()
@@ -776,13 +783,13 @@ func runAgenticStep(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI, mes
 	response := result.FinalResponse
 	conversationMessages := result.ConversationMessages
 
-	// Display assistant response with model name (skip if quiet or if streaming was used)
-	if !config.Quiet && cli != nil && !streamingUsed {
+	// Display assistant response with model name (skip if quiet, streaming was used, or if the same content was already displayed)
+	if !config.Quiet && cli != nil && !responseWasStreamed && response.Content != lastDisplayedContent && response.Content != "" {
 		if err := cli.DisplayAssistantMessageWithModel(response.Content, config.ModelName); err != nil {
 			cli.DisplayError(fmt.Errorf("display error: %v", err))
 			return nil, nil, err
 		}
-	} else if streamingUsed {
+	} else if responseWasStreamed {
 		// Streaming was used - the message is already displayed in the message component
 		// Just update usage tracking with the last user message and response
 		if len(messages) > 0 {
