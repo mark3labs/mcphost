@@ -47,13 +47,13 @@ type ToolCallContentHandler func(content string)
 
 // Agent is the agent with real-time tool call display.
 type Agent struct {
-	toolManager    *tools.MCPToolManager
-	model          model.ToolCallingChatModel
-	maxSteps       int
-	systemPrompt   string
-	loadingMessage string // Message from provider loading (e.g., GPU fallback info)
-	providerType   string // Provider type for streaming behavior
-	streamingEnabled bool // Whether streaming is enabled
+	toolManager      *tools.MCPToolManager
+	model            model.ToolCallingChatModel
+	maxSteps         int
+	systemPrompt     string
+	loadingMessage   string // Message from provider loading (e.g., GPU fallback info)
+	providerType     string // Provider type for streaming behavior
+	streamingEnabled bool   // Whether streaming is enabled
 }
 
 // NewAgent creates an agent with MCP tool integration and real-time tool call display
@@ -99,7 +99,7 @@ type GenerateWithLoopResult struct {
 // GenerateWithLoop processes messages with a custom loop that displays tool calls in real-time
 func (a *Agent) GenerateWithLoop(ctx context.Context, messages []*schema.Message,
 	onToolCall ToolCallHandler, onToolExecution ToolExecutionHandler, onToolResult ToolResultHandler, onResponse ResponseHandler, onToolCallContent ToolCallContentHandler) (*GenerateWithLoopResult, error) {
-	
+
 	return a.GenerateWithLoopAndStreaming(ctx, messages, onToolCall, onToolExecution, onToolResult, onResponse, onToolCallContent, nil)
 }
 

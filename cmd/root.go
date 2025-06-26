@@ -32,8 +32,8 @@ var (
 	quietFlag        bool
 	noExitFlag       bool
 	maxSteps         int
-	streamFlag       bool             // Enable streaming output
-	scriptMCPConfig  *config.Config   // Used to override config in script mode
+	streamFlag       bool           // Enable streaming output
+	scriptMCPConfig  *config.Config // Used to override config in script mode
 
 	// Session management
 	saveSessionPath string
@@ -655,13 +655,13 @@ func runAgenticStep(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI, mes
 			}
 			// Mark that this response is being streamed
 			responseWasStreamed = true
-			
+
 			// Start streaming message on first chunk
 			if !streamingStarted {
 				cli.StartStreamingMessage(config.ModelName)
 				streamingStarted = true
 			}
-			
+
 			// Accumulate content and update message
 			streamingContent.WriteString(chunk)
 			cli.UpdateStreamingMessage(streamingContent.String())
@@ -794,7 +794,7 @@ func runAgenticStep(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI, mes
 	response := result.FinalResponse
 	conversationMessages := result.ConversationMessages
 
-	// Display assistant response with model name 
+	// Display assistant response with model name
 	// Skip if: quiet mode, same content already displayed, or if streaming completed the full response
 	streamedFullResponse := responseWasStreamed && streamingContent.String() == response.Content
 	if !config.Quiet && cli != nil && response.Content != lastDisplayedContent && response.Content != "" && !streamedFullResponse {
