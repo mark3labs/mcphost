@@ -407,17 +407,16 @@ func loadOllamaModelWithFallback(ctx context.Context, baseURL, modelName string,
 				return nil, fmt.Errorf("failed to load model on GPU (%v) and CPU fallback failed (%v)", err, cpuErr)
 			}
 
-			return &OllamaLoadingResult{
-				Options: &cpuOptions,
-				Message: "⚠️ Insufficient GPU memory, falling back to CPU inference",
-			}, nil
-		}
+		return &OllamaLoadingResult{
+			Options: &cpuOptions,
+			Message: "Insufficient GPU memory, falling back to CPU inference",
+		}, nil		}
 		return nil, err
 	}
 
 	return &OllamaLoadingResult{
 		Options: options,
-		Message: "✅ Model loaded successfully on GPU",
+		Message: "Model loaded successfully on GPU",
 	}, nil
 }
 

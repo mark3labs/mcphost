@@ -182,8 +182,9 @@ func init() {
 	flags.StringSliceVar(&stopSequences, "stop-sequences", nil, "custom stop sequences (comma-separated)")
 
 	// Ollama-specific parameters
-	flags.Int32Var(&numGPU, "num-gpu", 1, "number of GPUs to use for Ollama models")
-	flags.Int32Var(&mainGPU, "main-gpu", 0, "main GPU to use for Ollama models")
+	flags.Int32Var(&numGPU, "num-gpu-layers", -1, "number of model layers to offload to GPU for Ollama models (-1 for auto-detect)")
+	flags.MarkHidden("num-gpu-layers")  // Advanced option, hidden from help
+	flags.Int32Var(&mainGPU, "main-gpu", 0, "main GPU device to use for Ollama models")
 
 	// Bind flags to viper for config file support
 	viper.BindPFlag("system-prompt", rootCmd.PersistentFlags().Lookup("system-prompt"))
@@ -198,7 +199,7 @@ func init() {
 	viper.BindPFlag("top-p", rootCmd.PersistentFlags().Lookup("top-p"))
 	viper.BindPFlag("top-k", rootCmd.PersistentFlags().Lookup("top-k"))
 	viper.BindPFlag("stop-sequences", rootCmd.PersistentFlags().Lookup("stop-sequences"))
-	viper.BindPFlag("num-gpu", rootCmd.PersistentFlags().Lookup("num-gpu"))
+	viper.BindPFlag("num-gpu-layers", rootCmd.PersistentFlags().Lookup("num-gpu-layers"))
 	viper.BindPFlag("main-gpu", rootCmd.PersistentFlags().Lookup("main-gpu"))
 
 	// Defaults are already set in flag definitions, no need to duplicate in viper
@@ -265,7 +266,7 @@ func runNormalMode(ctx context.Context) error {
 	temperature := float32(viper.GetFloat64("temperature"))
 	topP := float32(viper.GetFloat64("top-p"))
 	topK := int32(viper.GetInt("top-k"))
-	numGPU := int32(viper.GetInt("num-gpu"))
+	numGPU := int32(viper.GetInt("num-gpu-layers"))
 	mainGPU := int32(viper.GetInt("main-gpu"))
 
 	modelConfig := &models.ProviderConfig{
@@ -385,7 +386,7 @@ func runNormalMode(ctx context.Context) error {
 
 			// Add Ollama-specific parameters if using Ollama
 			if strings.HasPrefix(viper.GetString("model"), "ollama:") {
-				debugConfig["num-gpu"] = viper.GetInt("num-gpu")
+				debugConfig["num-gpu-layers"] = viper.GetInt("num-gpu-layers")
 				debugConfig["main-gpu"] = viper.GetInt("main-gpu")
 			}
 
