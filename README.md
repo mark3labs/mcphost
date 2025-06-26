@@ -573,6 +573,7 @@ mcphost -p "Generate a random UUID" --quiet | tr '[:lower:]' '[:upper:]'
 - `-m, --model string`: Model to use (format: provider:model) (default "anthropic:claude-sonnet-4-20250514")
 - `-p, --prompt string`: **Run in non-interactive mode with the given prompt**
 - `--quiet`: **Suppress all output except the AI response (only works with --prompt)**
+- `--stream`: Enable streaming responses (default: true, use `--stream=false` to disable)
 
 ### Authentication Subcommands
 - `mcphost auth login anthropic`: Authenticate with Anthropic using OAuth (alternative to API keys)
@@ -624,6 +625,9 @@ temperature: 0.7
 top-p: 0.95
 top-k: 40
 stop-sequences: ["Human:", "Assistant:"]
+
+# Streaming configuration
+stream: false  # Disable streaming (default: true)
 
 # API Configuration
 provider-api-key: "your-api-key"      # For OpenAI, Anthropic, or Google
