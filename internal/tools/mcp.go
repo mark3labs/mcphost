@@ -121,6 +121,13 @@ func (m *MCPToolManager) loadServerTools(ctx context.Context, serverName string,
 			return fmt.Errorf("conv mcp tool input schema fail(unmarshal): %w, tool name: %s", err, mcpTool.Name)
 		}
 
+		// Fix for issue #89: Ensure object schemas have a properties field
+		// OpenAI function calling requires object schemas to have a "properties" field
+		// even if it's empty, otherwise it throws "object schema missing properties" error
+		if inputSchema.Type == "object" && inputSchema.Properties == nil {
+			inputSchema.Properties = make(openapi3.Schemas)
+		}
+
 		// Create prefixed tool name
 		prefixedName := fmt.Sprintf("%s__%s", serverName, mcpTool.Name)
 

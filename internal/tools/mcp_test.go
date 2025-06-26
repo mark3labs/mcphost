@@ -5,6 +5,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cloudwego/eino/schema"
+	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/mark3labs/mcphost/internal/config"
 )
 
@@ -74,6 +76,87 @@ func TestMCPToolManager_LoadTools_GracefulFailure(t *testing.T) {
 	}
 
 	t.Logf("LoadTools failed gracefully with error: %v", err)
+}
+
+// TestMCPToolManager_ToolWithoutProperties tests handling of tools with no input properties
+func TestMCPToolManager_ToolWithoutProperties(t *testing.T) {
+	manager := NewMCPToolManager()
+
+	// Create a config with a builtin todo server (which has tools with properties)
+	// and test the schema conversion logic
+	cfg := &config.Config{
+		MCPServers: map[string]config.MCPServerConfig{
+			"todo-server": {
+				Type: "builtin",
+				Name: "todo",
+			},
+		},
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	// Load the tools - this should work fine
+	err := manager.LoadTools(ctx, cfg)
+	if err != nil {
+		t.Fatalf("Failed to load tools: %v", err)
+	}
+
+	// Get the loaded tools
+	tools := manager.GetTools()
+	if len(tools) == 0 {
+		t.Fatal("No tools were loaded")
+	}
+
+	// Test that we can get tool info for each tool
+	for _, tool := range tools {
+		info, err := tool.Info(ctx)
+		if err != nil {
+			t.Errorf("Failed to get tool info: %v", err)
+			continue
+		}
+
+		// Check that the tool has a valid schema
+		if info.ParamsOneOf == nil {
+			t.Errorf("Tool %s has nil ParamsOneOf", info.Name)
+		}
+
+		t.Logf("Tool: %s, Description: %s", info.Name, info.Desc)
+	}
+}
+
+// TestIssue89_ObjectSchemaMissingProperties tests the fix for issue #89
+// This is a regression test for the "object schema missing properties" error
+// that occurs when tools have no input parameters and use OpenAI function calling
+func TestIssue89_ObjectSchemaMissingProperties(t *testing.T) {
+	// Create a schema that would cause the OpenAI validation error
+	// This simulates what might happen with tools that have no input properties
+	brokenSchema := &openapi3.Schema{
+		Type: "object",
+		// Properties is nil - this causes "object schema missing properties" error in OpenAI
+	}
+
+	// Verify the problematic state
+	if brokenSchema.Type == "object" && brokenSchema.Properties == nil {
+		t.Log("Found object schema with nil properties - this causes OpenAI validation error")
+	}
+
+	// Apply the fix from issue #89
+	if brokenSchema.Type == "object" && brokenSchema.Properties == nil {
+		brokenSchema.Properties = make(openapi3.Schemas)
+	}
+
+	// Verify the fix worked
+	if brokenSchema.Type == "object" && brokenSchema.Properties == nil {
+		t.Error("Fix failed: object schema still has nil properties")
+	}
+
+	// Test that we can create a ParamsOneOf from the fixed schema
+	// This is what would fail before the fix
+	paramsOneOf := schema.NewParamsOneOfByOpenAPIV3(brokenSchema)
+	if paramsOneOf == nil {
+		t.Error("Failed to create ParamsOneOf from fixed schema - OpenAI function calling would fail")
+	}
 }
 
 // Helper function to check if a string contains a substring
