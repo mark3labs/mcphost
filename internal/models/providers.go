@@ -15,6 +15,7 @@ import (
 	"github.com/cloudwego/eino-ext/components/model/ollama"
 	"github.com/cloudwego/eino-ext/components/model/openai"
 	"github.com/cloudwego/eino/components/model"
+	"github.com/mark3labs/mcphost/internal/progress"
 	"github.com/ollama/ollama/api"
 	"google.golang.org/genai"
 
@@ -449,6 +450,11 @@ func checkOllamaModelExists(client *http.Client, baseURL, modelName string) erro
 
 // pullOllamaModel pulls a model from the registry
 func pullOllamaModel(ctx context.Context, client *http.Client, baseURL, modelName string) error {
+	return pullOllamaModelWithProgress(ctx, client, baseURL, modelName, true)
+}
+
+// pullOllamaModelWithProgress pulls a model from the registry with optional progress display
+func pullOllamaModelWithProgress(ctx context.Context, client *http.Client, baseURL, modelName string, showProgress bool) error {
 	reqBody := map[string]string{"name": modelName}
 	jsonBody, _ := json.Marshal(reqBody)
 
@@ -473,8 +479,14 @@ func pullOllamaModel(ctx context.Context, client *http.Client, baseURL, modelNam
 		return fmt.Errorf("failed to pull model (status %d): %s", resp.StatusCode, string(body))
 	}
 
-	// Read the streaming response to completion
-	_, err = io.ReadAll(resp.Body)
+	// Read the streaming response with optional progress display
+	if showProgress {
+		progressReader := progress.NewProgressReader(resp.Body)
+		defer progressReader.Close()
+		_, err = io.ReadAll(progressReader)
+	} else {
+		_, err = io.ReadAll(resp.Body)
+	}
 	return err
 }
 

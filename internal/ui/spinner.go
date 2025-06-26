@@ -64,7 +64,7 @@ func (m spinnerModel) View() string {
 		Foreground(theme.Text).
 		Italic(true)
 
-	return fmt.Sprintf("%s %s",
+	return fmt.Sprintf("  %s %s",
 		spinnerStyle.Render(m.spinner.View()),
 		messageStyle.Render(m.message))
 }
