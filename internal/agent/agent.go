@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
+	"strings"
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -18,10 +20,11 @@ import (
 
 // AgentConfig is the config for agent.
 type AgentConfig struct {
-	ModelConfig  *models.ProviderConfig
-	MCPConfig    *config.Config
-	SystemPrompt string
-	MaxSteps     int
+	ModelConfig      *models.ProviderConfig
+	MCPConfig        *config.Config
+	SystemPrompt     string
+	MaxSteps         int
+	StreamingEnabled bool
 }
 
 // ToolCallHandler is a function type for handling tool calls as they happen
@@ -36,6 +39,9 @@ type ToolResultHandler func(toolName, toolArgs, result string, isError bool)
 // ResponseHandler is a function type for handling LLM responses
 type ResponseHandler func(content string)
 
+// StreamingResponseHandler is a function type for handling streaming LLM responses
+type StreamingResponseHandler func(content string)
+
 // ToolCallContentHandler is a function type for handling content that accompanies tool calls
 type ToolCallContentHandler func(content string)
 
@@ -46,6 +52,8 @@ type Agent struct {
 	maxSteps       int
 	systemPrompt   string
 	loadingMessage string // Message from provider loading (e.g., GPU fallback info)
+	providerType   string // Provider type for streaming behavior
+	streamingEnabled bool // Whether streaming is enabled
 }
 
 // NewAgent creates an agent with MCP tool integration and real-time tool call display
@@ -62,12 +70,23 @@ func NewAgent(ctx context.Context, config *AgentConfig) (*Agent, error) {
 		return nil, fmt.Errorf("failed to load MCP tools: %v", err)
 	}
 
+	// Determine provider type from model string
+	providerType := "default"
+	if config.ModelConfig != nil && config.ModelConfig.ModelString != "" {
+		parts := strings.SplitN(config.ModelConfig.ModelString, ":", 2)
+		if len(parts) >= 1 {
+			providerType = parts[0]
+		}
+	}
+
 	return &Agent{
-		toolManager:    toolManager,
-		model:          providerResult.Model,
-		maxSteps:       config.MaxSteps, // Keep 0 for infinite, handle in loop
-		systemPrompt:   config.SystemPrompt,
-		loadingMessage: providerResult.Message,
+		toolManager:      toolManager,
+		model:            providerResult.Model,
+		maxSteps:         config.MaxSteps, // Keep 0 for infinite, handle in loop
+		systemPrompt:     config.SystemPrompt,
+		loadingMessage:   providerResult.Message,
+		providerType:     providerType,
+		streamingEnabled: config.StreamingEnabled,
 	}, nil
 }
 
@@ -80,6 +99,13 @@ type GenerateWithLoopResult struct {
 // GenerateWithLoop processes messages with a custom loop that displays tool calls in real-time
 func (a *Agent) GenerateWithLoop(ctx context.Context, messages []*schema.Message,
 	onToolCall ToolCallHandler, onToolExecution ToolExecutionHandler, onToolResult ToolResultHandler, onResponse ResponseHandler, onToolCallContent ToolCallContentHandler) (*GenerateWithLoopResult, error) {
+	
+	return a.GenerateWithLoopAndStreaming(ctx, messages, onToolCall, onToolExecution, onToolResult, onResponse, onToolCallContent, nil)
+}
+
+// GenerateWithLoopAndStreaming processes messages with a custom loop that displays tool calls in real-time and supports streaming callbacks
+func (a *Agent) GenerateWithLoopAndStreaming(ctx context.Context, messages []*schema.Message,
+	onToolCall ToolCallHandler, onToolExecution ToolExecutionHandler, onToolResult ToolResultHandler, onResponse ResponseHandler, onToolCallContent ToolCallContentHandler, onStreamingResponse StreamingResponseHandler) (*GenerateWithLoopResult, error) {
 
 	// Create a copy of messages to avoid modifying the original
 	workingMessages := make([]*schema.Message, len(messages))
@@ -125,7 +151,7 @@ func (a *Agent) GenerateWithLoop(ctx context.Context, messages []*schema.Message
 		}
 
 		// Call the LLM with cancellation support
-		response, err := a.generateWithCancellation(ctx, workingMessages, toolInfos)
+		response, err := a.generateWithCancellationAndStreaming(ctx, workingMessages, toolInfos, onStreamingResponse)
 		if err != nil {
 			return nil, err
 		}
@@ -229,6 +255,224 @@ func (a *Agent) GetLoadingMessage() string {
 
 // generateWithCancellation calls the LLM with ESC key cancellation support
 func (a *Agent) generateWithCancellation(ctx context.Context, messages []*schema.Message, toolInfos []*schema.ToolInfo) (*schema.Message, error) {
+	return a.generateWithCancellationAndStreaming(ctx, messages, toolInfos, nil)
+}
+
+// generateWithCancellationAndStreaming calls the LLM with ESC key cancellation support and streaming callbacks
+func (a *Agent) generateWithCancellationAndStreaming(ctx context.Context, messages []*schema.Message, toolInfos []*schema.ToolInfo, streamingCallback StreamingResponseHandler) (*schema.Message, error) {
+	// Check if streaming is enabled
+	if !a.streamingEnabled {
+		// Use traditional non-streaming approach
+		return a.generateWithoutStreaming(ctx, messages, toolInfos)
+	}
+
+	// Try streaming first if no tools are expected or if we can detect tool calls early
+	if len(toolInfos) == 0 {
+		// No tools available, use streaming directly
+		return a.generateWithStreamingAndCallback(ctx, messages, toolInfos, streamingCallback)
+	}
+
+	// Try streaming with tool call detection
+	return a.generateWithStreamingFirstAndCallback(ctx, messages, toolInfos, streamingCallback)
+}
+
+// generateWithStreamingFirst attempts streaming first with provider-aware tool call detection
+func (a *Agent) generateWithStreamingFirst(ctx context.Context, messages []*schema.Message, toolInfos []*schema.ToolInfo) (*schema.Message, error) {
+	// Create a cancellable context for just this LLM call
+	llmCtx, cancel := context.WithCancel(ctx)
+	defer cancel()
+
+	// Channel to receive the LLM result
+	resultChan := make(chan struct {
+		message *schema.Message
+		err     error
+	}, 1)
+
+	// Start ESC key listener first and wait for it to be ready
+	escChan := make(chan bool, 1)
+	stopListening := make(chan bool, 1)
+	escReady := make(chan bool, 1)
+
+	go func() {
+		if a.listenForESC(stopListening, escReady) {
+			escChan <- true
+		} else {
+			escChan <- false
+		}
+	}()
+
+	// Wait for ESC listener to be ready before starting LLM
+	select {
+	case <-escReady:
+		// ESC listener is ready, proceed
+	case <-time.After(100 * time.Millisecond):
+		// Timeout waiting for ESC listener, proceed anyway
+	case <-ctx.Done():
+		close(stopListening)
+		return nil, ctx.Err()
+	}
+
+	// Now start the streaming generation with tool call detection
+	go func() {
+		message, err := a.tryStreamingWithToolDetection(llmCtx, messages, toolInfos)
+		if err != nil {
+			err = fmt.Errorf("failed to generate response: %v", err)
+		}
+		resultChan <- struct {
+			message *schema.Message
+			err     error
+		}{message, err}
+	}()
+
+	// Wait for either LLM completion or ESC key
+	select {
+	case result := <-resultChan:
+		// Stop the ESC listener
+		close(stopListening)
+		return result.message, result.err
+	case escPressed := <-escChan:
+		if escPressed {
+			cancel() // Cancel the LLM context
+			return nil, fmt.Errorf("generation cancelled by user")
+		}
+		// ESC listener stopped normally, wait for LLM result
+		result := <-resultChan
+		return result.message, result.err
+	case <-ctx.Done():
+		// Stop the ESC listener
+		close(stopListening)
+		return nil, ctx.Err()
+	}
+}
+
+// generateWithStreaming uses streaming for responses without tool calls
+func (a *Agent) generateWithStreaming(ctx context.Context, messages []*schema.Message, toolInfos []*schema.ToolInfo) (*schema.Message, error) {
+	// Try streaming first
+	reader, err := a.model.Stream(ctx, messages, model.WithTools(toolInfos))
+	if err != nil {
+		// Fallback to non-streaming if streaming fails
+		return a.model.Generate(ctx, messages, model.WithTools(toolInfos))
+	}
+
+	// Collect streaming content
+	var content strings.Builder
+	for {
+		msg, err := reader.Recv()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			// Fallback to non-streaming on error
+			reader.Close()
+			return a.model.Generate(ctx, messages, model.WithTools(toolInfos))
+		}
+		content.WriteString(msg.Content)
+	}
+	reader.Close()
+
+	return &schema.Message{
+		Role:    schema.Assistant,
+		Content: content.String(),
+	}, nil
+}
+
+// generateWithStreamingAndCallback uses streaming for responses without tool calls with real-time callbacks
+func (a *Agent) generateWithStreamingAndCallback(ctx context.Context, messages []*schema.Message, toolInfos []*schema.ToolInfo, callback StreamingResponseHandler) (*schema.Message, error) {
+	// Try streaming first
+	reader, err := a.model.Stream(ctx, messages, model.WithTools(toolInfos))
+	if err != nil {
+		// Fallback to non-streaming if streaming fails
+		return a.model.Generate(ctx, messages, model.WithTools(toolInfos))
+	}
+
+	// Use streaming with callback for real-time display
+	hasToolCalls, content, err := StreamWithCallback(ctx, reader, func(chunk string) {
+		if callback != nil {
+			callback(chunk)
+		}
+	})
+	if err != nil {
+		// Fallback to non-streaming on error
+		reader.Close()
+		return a.model.Generate(ctx, messages, model.WithTools(toolInfos))
+	}
+
+	if hasToolCalls {
+		// This shouldn't happen for no-tools case, but handle it
+		return a.model.Generate(ctx, messages, model.WithTools(toolInfos))
+	}
+
+	return &schema.Message{
+		Role:    schema.Assistant,
+		Content: content,
+	}, nil
+}
+
+// generateWithStreamingFirstAndCallback attempts streaming first with provider-aware tool call detection and callbacks
+func (a *Agent) generateWithStreamingFirstAndCallback(ctx context.Context, messages []*schema.Message, toolInfos []*schema.ToolInfo, callback StreamingResponseHandler) (*schema.Message, error) {
+	// Try streaming first
+	reader, err := a.model.Stream(ctx, messages, model.WithTools(toolInfos))
+	if err != nil {
+		// Fallback to non-streaming if streaming fails
+		return a.model.Generate(ctx, messages, model.WithTools(toolInfos))
+	}
+
+	// Use streaming with callback for real-time display
+	hasToolCalls, content, err := StreamWithCallback(ctx, reader, func(chunk string) {
+		if callback != nil {
+			callback(chunk)
+		}
+	})
+	if err != nil {
+		// Fallback to non-streaming on error
+		return a.model.Generate(ctx, messages, model.WithTools(toolInfos))
+	}
+
+	if hasToolCalls && len(toolInfos) > 0 {
+		// Tool calls detected - restart with non-streaming for proper tool handling
+		return a.model.Generate(ctx, messages, model.WithTools(toolInfos))
+	}
+
+	// No tool calls - return the streamed content
+	return &schema.Message{
+		Role:    schema.Assistant,
+		Content: content,
+	}, nil
+}
+
+// tryStreamingWithToolDetection attempts streaming with provider-aware tool call detection
+func (a *Agent) tryStreamingWithToolDetection(ctx context.Context, messages []*schema.Message, toolInfos []*schema.ToolInfo) (*schema.Message, error) {
+	// Try streaming first
+	reader, err := a.model.Stream(ctx, messages, model.WithTools(toolInfos))
+	if err != nil {
+		// Fallback to non-streaming if streaming fails
+		return a.model.Generate(ctx, messages, model.WithTools(toolInfos))
+	}
+
+	// Get provider-specific tool call checker
+	checker := a.getProviderToolCallChecker()
+
+	// Check if stream contains tool calls using provider-specific logic
+	hasToolCalls, content, err := checker(ctx, reader)
+	if err != nil {
+		// Fallback to non-streaming on error
+		return a.model.Generate(ctx, messages, model.WithTools(toolInfos))
+	}
+
+	if hasToolCalls && len(toolInfos) > 0 {
+		// Tool calls detected - restart with non-streaming for proper tool handling
+		return a.model.Generate(ctx, messages, model.WithTools(toolInfos))
+	}
+
+	// No tool calls - return the streamed content
+	return &schema.Message{
+		Role:    schema.Assistant,
+		Content: content,
+	}, nil
+}
+
+// generateWithoutStreaming uses the traditional non-streaming approach
+func (a *Agent) generateWithoutStreaming(ctx context.Context, messages []*schema.Message, toolInfos []*schema.ToolInfo) (*schema.Message, error) {
 	// Create a cancellable context for just this LLM call
 	llmCtx, cancel := context.WithCancel(ctx)
 	defer cancel()

@@ -486,6 +486,24 @@ func (c *MessageContainer) AddMessage(msg UIMessage) {
 	c.messages = append(c.messages, msg)
 }
 
+// UpdateLastMessage updates the content of the last message efficiently
+func (c *MessageContainer) UpdateLastMessage(content string) {
+	if len(c.messages) == 0 {
+		return
+	}
+
+	lastIdx := len(c.messages) - 1
+	lastMsg := &c.messages[lastIdx]
+
+	// Only re-render if content actually changed and it's an assistant message
+	if lastMsg.Type == AssistantMessage {
+		// Create a new renderer to update the message
+		renderer := NewMessageRenderer(c.width, false)
+		newMsg := renderer.RenderAssistantMessage(content, lastMsg.Timestamp, "")
+		c.messages[lastIdx] = newMsg
+	}
+}
+
 // Clear clears all messages from the container
 func (c *MessageContainer) Clear() {
 	c.messages = make([]UIMessage, 0)

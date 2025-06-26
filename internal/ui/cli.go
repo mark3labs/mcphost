@@ -162,6 +162,31 @@ func (c *CLI) DisplayStreamingMessage(reader *schema.StreamReader[*schema.Messag
 	return c.DisplayAssistantMessage(content.String())
 }
 
+// DisplayStreamedContent displays pre-collected streaming content
+func (c *CLI) DisplayStreamedContent(content string) error {
+	return c.DisplayAssistantMessageWithModel(content, "")
+}
+
+// DisplayStreamingMessageLive displays streaming content with real-time updates (future enhancement)
+func (c *CLI) DisplayStreamingMessageLive(reader *schema.StreamReader[*schema.Message], modelName string) error {
+	// For now, collect all content and display at once
+	// This could be enhanced in the future to show real-time streaming
+	var content strings.Builder
+
+	for {
+		msg, err := reader.Recv()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return fmt.Errorf("stream receive error: %v", err)
+		}
+		content.WriteString(msg.Content)
+	}
+
+	return c.DisplayAssistantMessageWithModel(content.String(), modelName)
+}
+
 // DisplayError displays an error message using the message component
 func (c *CLI) DisplayError(err error) {
 	msg := c.messageRenderer.RenderErrorMessage(err.Error(), time.Now())
