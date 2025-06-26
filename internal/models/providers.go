@@ -408,10 +408,11 @@ func loadOllamaModelWithFallback(ctx context.Context, baseURL, modelName string,
 				return nil, fmt.Errorf("failed to load model on GPU (%v) and CPU fallback failed (%v)", err, cpuErr)
 			}
 
-		return &OllamaLoadingResult{
-			Options: &cpuOptions,
-			Message: "Insufficient GPU memory, falling back to CPU inference",
-		}, nil		}
+			return &OllamaLoadingResult{
+				Options: &cpuOptions,
+				Message: "Insufficient GPU memory, falling back to CPU inference",
+			}, nil
+		}
 		return nil, err
 	}
 
@@ -495,7 +496,7 @@ func loadOllamaModelWithOptions(ctx context.Context, client *http.Client, baseUR
 	// Create a copy of options for warmup to avoid modifying the original
 	warmupOptions := *options
 	warmupOptions.NumPredict = 1 // Limit response length for warmup
-	
+
 	reqBody := map[string]interface{}{
 		"model":   modelName,
 		"prompt":  "Hello",
@@ -592,12 +593,12 @@ func createOllamaProviderWithResult(ctx context.Context, config *ProviderConfig,
 	// Create a clean copy of options for the final model
 	finalOptions := &api.Options{}
 	*finalOptions = *options // Copy all fields
-	
+
 	// Try to pre-load the model with GPU settings and automatic CPU fallback
 	// If this fails, fall back to the original behavior
 	loadingResult, err := loadOllamaModelWithFallback(ctx, baseURL, modelName, options)
 	var loadingMessage string
-	
+
 	if err != nil {
 		// Pre-loading failed, use original options and no message
 		loadingMessage = ""
@@ -624,8 +625,6 @@ func createOllamaProviderWithResult(ctx context.Context, config *ProviderConfig,
 		Message: loadingMessage,
 	}, nil
 }
-
-
 
 // createOAuthHTTPClient creates an HTTP client that adds OAuth headers for Anthropic API
 func createOAuthHTTPClient(accessToken string) *http.Client {

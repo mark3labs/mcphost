@@ -183,7 +183,7 @@ func init() {
 
 	// Ollama-specific parameters
 	flags.Int32Var(&numGPU, "num-gpu-layers", -1, "number of model layers to offload to GPU for Ollama models (-1 for auto-detect)")
-	flags.MarkHidden("num-gpu-layers")  // Advanced option, hidden from help
+	flags.MarkHidden("num-gpu-layers") // Advanced option, hidden from help
 	flags.Int32Var(&mainGPU, "main-gpu", 0, "main GPU device to use for Ollama models")
 
 	// Bind flags to viper for config file support
@@ -293,7 +293,7 @@ func runNormalMode(ctx context.Context) error {
 
 	// Create the agent with spinner for Ollama models
 	var mcpAgent *agent.Agent
-	
+
 	if strings.HasPrefix(viper.GetString("model"), "ollama:") && !quietFlag {
 		// Create a temporary CLI for the spinner
 		tempCli, tempErr := ui.NewCLI(viper.GetBool("debug"))
@@ -311,7 +311,7 @@ func runNormalMode(ctx context.Context) error {
 		// No spinner for other providers
 		mcpAgent, err = agent.NewAgent(ctx, agentConfig)
 	}
-	
+
 	if err != nil {
 		return fmt.Errorf("failed to create agent: %v", err)
 	}
@@ -364,13 +364,13 @@ func runNormalMode(ctx context.Context) error {
 		if len(parts) == 2 {
 			cli.DisplayInfo(fmt.Sprintf("Model loaded: %s (%s)", parts[0], parts[1]))
 		}
-		
+
 		// Display loading message if available (e.g., GPU fallback info)
 		if loadingMessage := mcpAgent.GetLoadingMessage(); loadingMessage != "" {
 			cli.DisplayInfo(loadingMessage)
 		}
-		
-	cli.DisplayInfo(fmt.Sprintf("Loaded %d tools from MCP servers", len(tools)))
+
+		cli.DisplayInfo(fmt.Sprintf("Loaded %d tools from MCP servers", len(tools)))
 		// Display debug configuration if debug mode is enabled
 		if viper.GetBool("debug") {
 			debugConfig := map[string]any{

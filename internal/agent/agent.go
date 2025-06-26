@@ -41,10 +41,10 @@ type ToolCallContentHandler func(content string)
 
 // Agent is the agent with real-time tool call display.
 type Agent struct {
-	toolManager   *tools.MCPToolManager
-	model         model.ToolCallingChatModel
-	maxSteps      int
-	systemPrompt  string
+	toolManager    *tools.MCPToolManager
+	model          model.ToolCallingChatModel
+	maxSteps       int
+	systemPrompt   string
 	loadingMessage string // Message from provider loading (e.g., GPU fallback info)
 }
 

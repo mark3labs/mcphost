@@ -209,12 +209,12 @@ func (pr *ProgressReader) parseProgressLine(line string) {
 	// Calculate progress percentage if we have total and completed
 	if progress.Total > 0 && progress.Completed >= 0 {
 		percent = float64(progress.Completed) / float64(progress.Total)
-		
+
 		// Format status with progress info
 		if progress.Digest != "" {
 			status = fmt.Sprintf("%s (%s)", progress.Status, progress.Digest[:12])
 		}
-		
+
 		// Add size information
 		if progress.Total > 0 {
 			totalMB := float64(progress.Total) / (1024 * 1024)
@@ -243,18 +243,18 @@ func (pr *ProgressReader) parseProgressLine(line string) {
 func (pr *ProgressReader) Close() error {
 	// Send completion message to trigger quit
 	pr.program.Send(progressCompleteMsg{})
-	
+
 	// Wait for the program to finish with timeout
 	done := make(chan struct{})
 	go func() {
 		pr.wg.Wait()
 		close(done)
 	}()
-	
+
 	// Wait for completion or timeout after 2 seconds
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
-	
+
 	select {
 	case <-done:
 		// Program finished normally
@@ -262,6 +262,6 @@ func (pr *ProgressReader) Close() error {
 		// Timeout - force kill the program
 		pr.program.Kill()
 	}
-	
+
 	return nil
 }
