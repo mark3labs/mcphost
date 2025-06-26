@@ -751,7 +751,8 @@ func runAgenticStep(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI, mes
 		},
 		// Tool call content handler - called when content accompanies tool calls
 		func(content string) {
-			if !config.Quiet && cli != nil {
+			if !config.Quiet && cli != nil && !responseWasStreamed {
+				// Only display if content wasn't already streamed
 				// Stop spinner before displaying content
 				if currentSpinner != nil {
 					currentSpinner.Stop()
@@ -759,6 +760,16 @@ func runAgenticStep(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI, mes
 				}
 				cli.DisplayAssistantMessageWithModel(content, config.ModelName)
 				lastDisplayedContent = content
+				// Start spinner again for tool calls
+				currentSpinner = ui.NewSpinner("Thinking...")
+				currentSpinner.Start()
+			} else if responseWasStreamed {
+				// Content was already streamed, just track it and manage spinner
+				lastDisplayedContent = content
+				if currentSpinner != nil {
+					currentSpinner.Stop()
+					currentSpinner = nil
+				}
 				// Start spinner again for tool calls
 				currentSpinner = ui.NewSpinner("Thinking...")
 				currentSpinner.Start()
