@@ -158,9 +158,8 @@ func (a *Agent) GenerateWithLoopAndStreaming(ctx context.Context, messages []*sc
 		// Add response to working messages
 		workingMessages = append(workingMessages, response)
 
-		// Check if this is a tool call or final response
-		if len(response.ToolCalls) > 0 {
-
+	// Check if this is a tool call or final response
+	if len(response.ToolCalls) > 0 {
 			// Display any content that accompanies the tool calls
 			if response.Content != "" && onToolCallContent != nil {
 				onToolCallContent(response.Content)
@@ -286,26 +285,18 @@ func (a *Agent) generateWithStreamingAndCallback(ctx context.Context, messages [
 	}
 
 	// Use streaming with callback for real-time display
-	hasToolCalls, content, err := StreamWithCallback(ctx, reader, func(chunk string) {
+	response, err := StreamWithCallback(ctx, reader, func(chunk string) {
 		if callback != nil {
 			callback(chunk)
 		}
 	})
 	if err != nil {
 		// Fallback to non-streaming on error
-		reader.Close()
 		return a.model.Generate(ctx, messages, model.WithTools(toolInfos))
 	}
 
-	if hasToolCalls {
-		// This shouldn't happen for no-tools case, but handle it
-		return a.model.Generate(ctx, messages, model.WithTools(toolInfos))
-	}
-
-	return &schema.Message{
-		Role:    schema.Assistant,
-		Content: content,
-	}, nil
+	// Return the complete streamed response (with tool calls if any)
+	return response, nil
 }
 
 // generateWithStreamingFirstAndCallback attempts streaming first with provider-aware tool call detection and callbacks
@@ -318,7 +309,7 @@ func (a *Agent) generateWithStreamingFirstAndCallback(ctx context.Context, messa
 	}
 
 	// Use streaming with callback for real-time display
-	hasToolCalls, content, err := StreamWithCallback(ctx, reader, func(chunk string) {
+	response, err := StreamWithCallback(ctx, reader, func(chunk string) {
 		if callback != nil {
 			callback(chunk)
 		}
@@ -328,16 +319,9 @@ func (a *Agent) generateWithStreamingFirstAndCallback(ctx context.Context, messa
 		return a.model.Generate(ctx, messages, model.WithTools(toolInfos))
 	}
 
-	if hasToolCalls && len(toolInfos) > 0 {
-		// Tool calls detected - restart with non-streaming for proper tool handling
-		return a.model.Generate(ctx, messages, model.WithTools(toolInfos))
-	}
-
-	// No tool calls - return the streamed content
-	return &schema.Message{
-		Role:    schema.Assistant,
-		Content: content,
-	}, nil
+	// Return the complete streamed response (with tool calls if any)
+	// No need to restart - we have everything we need!
+	return response, nil
 }
 
 
