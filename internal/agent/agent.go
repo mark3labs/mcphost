@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"strings"
 	"time"
 
@@ -253,10 +252,7 @@ func (a *Agent) GetLoadingMessage() string {
 	return a.loadingMessage
 }
 
-// generateWithCancellation calls the LLM with ESC key cancellation support
-func (a *Agent) generateWithCancellation(ctx context.Context, messages []*schema.Message, toolInfos []*schema.ToolInfo) (*schema.Message, error) {
-	return a.generateWithCancellationAndStreaming(ctx, messages, toolInfos, nil)
-}
+
 
 // generateWithCancellationAndStreaming calls the LLM with ESC key cancellation support and streaming callbacks
 func (a *Agent) generateWithCancellationAndStreaming(ctx context.Context, messages []*schema.Message, toolInfos []*schema.ToolInfo, streamingCallback StreamingResponseHandler) (*schema.Message, error) {
@@ -276,105 +272,9 @@ func (a *Agent) generateWithCancellationAndStreaming(ctx context.Context, messag
 	return a.generateWithStreamingFirstAndCallback(ctx, messages, toolInfos, streamingCallback)
 }
 
-// generateWithStreamingFirst attempts streaming first with provider-aware tool call detection
-func (a *Agent) generateWithStreamingFirst(ctx context.Context, messages []*schema.Message, toolInfos []*schema.ToolInfo) (*schema.Message, error) {
-	// Create a cancellable context for just this LLM call
-	llmCtx, cancel := context.WithCancel(ctx)
-	defer cancel()
 
-	// Channel to receive the LLM result
-	resultChan := make(chan struct {
-		message *schema.Message
-		err     error
-	}, 1)
 
-	// Start ESC key listener first and wait for it to be ready
-	escChan := make(chan bool, 1)
-	stopListening := make(chan bool, 1)
-	escReady := make(chan bool, 1)
 
-	go func() {
-		if a.listenForESC(stopListening, escReady) {
-			escChan <- true
-		} else {
-			escChan <- false
-		}
-	}()
-
-	// Wait for ESC listener to be ready before starting LLM
-	select {
-	case <-escReady:
-		// ESC listener is ready, proceed
-	case <-time.After(100 * time.Millisecond):
-		// Timeout waiting for ESC listener, proceed anyway
-	case <-ctx.Done():
-		close(stopListening)
-		return nil, ctx.Err()
-	}
-
-	// Now start the streaming generation with tool call detection
-	go func() {
-		message, err := a.tryStreamingWithToolDetection(llmCtx, messages, toolInfos)
-		if err != nil {
-			err = fmt.Errorf("failed to generate response: %v", err)
-		}
-		resultChan <- struct {
-			message *schema.Message
-			err     error
-		}{message, err}
-	}()
-
-	// Wait for either LLM completion or ESC key
-	select {
-	case result := <-resultChan:
-		// Stop the ESC listener
-		close(stopListening)
-		return result.message, result.err
-	case escPressed := <-escChan:
-		if escPressed {
-			cancel() // Cancel the LLM context
-			return nil, fmt.Errorf("generation cancelled by user")
-		}
-		// ESC listener stopped normally, wait for LLM result
-		result := <-resultChan
-		return result.message, result.err
-	case <-ctx.Done():
-		// Stop the ESC listener
-		close(stopListening)
-		return nil, ctx.Err()
-	}
-}
-
-// generateWithStreaming uses streaming for responses without tool calls
-func (a *Agent) generateWithStreaming(ctx context.Context, messages []*schema.Message, toolInfos []*schema.ToolInfo) (*schema.Message, error) {
-	// Try streaming first
-	reader, err := a.model.Stream(ctx, messages, model.WithTools(toolInfos))
-	if err != nil {
-		// Fallback to non-streaming if streaming fails
-		return a.model.Generate(ctx, messages, model.WithTools(toolInfos))
-	}
-
-	// Collect streaming content
-	var content strings.Builder
-	for {
-		msg, err := reader.Recv()
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			// Fallback to non-streaming on error
-			reader.Close()
-			return a.model.Generate(ctx, messages, model.WithTools(toolInfos))
-		}
-		content.WriteString(msg.Content)
-	}
-	reader.Close()
-
-	return &schema.Message{
-		Role:    schema.Assistant,
-		Content: content.String(),
-	}, nil
-}
 
 // generateWithStreamingAndCallback uses streaming for responses without tool calls with real-time callbacks
 func (a *Agent) generateWithStreamingAndCallback(ctx context.Context, messages []*schema.Message, toolInfos []*schema.ToolInfo, callback StreamingResponseHandler) (*schema.Message, error) {

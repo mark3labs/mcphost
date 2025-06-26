@@ -12,15 +12,7 @@ import (
 // Returns: hasToolCalls, content, error
 type StreamToolCallChecker func(ctx context.Context, reader *schema.StreamReader[*schema.Message]) (bool, string, error)
 
-// StreamingCallback is called for each chunk of streaming content
-type StreamingCallback func(chunk string)
 
-// StreamingConfig holds configuration for streaming behavior
-type StreamingConfig struct {
-	ToolCallChecker StreamToolCallChecker
-	BufferSize      int
-	UpdateInterval  int // milliseconds
-}
 
 // getProviderType determines the provider type from the stored provider type
 func (a *Agent) getProviderType() string {
@@ -239,7 +231,7 @@ func defaultStreamToolCallChecker(ctx context.Context, reader *schema.StreamRead
 }
 
 // StreamWithCallback streams content with real-time callbacks
-func StreamWithCallback(ctx context.Context, reader *schema.StreamReader[*schema.Message], callback StreamingCallback) (bool, string, error) {
+func StreamWithCallback(ctx context.Context, reader *schema.StreamReader[*schema.Message], callback func(string)) (bool, string, error) {
 	defer reader.Close()
 
 	var content strings.Builder
