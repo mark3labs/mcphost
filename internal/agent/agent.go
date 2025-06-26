@@ -340,36 +340,7 @@ func (a *Agent) generateWithStreamingFirstAndCallback(ctx context.Context, messa
 	}, nil
 }
 
-// tryStreamingWithToolDetection attempts streaming with provider-aware tool call detection
-func (a *Agent) tryStreamingWithToolDetection(ctx context.Context, messages []*schema.Message, toolInfos []*schema.ToolInfo) (*schema.Message, error) {
-	// Try streaming first
-	reader, err := a.model.Stream(ctx, messages, model.WithTools(toolInfos))
-	if err != nil {
-		// Fallback to non-streaming if streaming fails
-		return a.model.Generate(ctx, messages, model.WithTools(toolInfos))
-	}
 
-	// Get provider-specific tool call checker
-	checker := a.getProviderToolCallChecker()
-
-	// Check if stream contains tool calls using provider-specific logic
-	hasToolCalls, content, err := checker(ctx, reader)
-	if err != nil {
-		// Fallback to non-streaming on error
-		return a.model.Generate(ctx, messages, model.WithTools(toolInfos))
-	}
-
-	if hasToolCalls && len(toolInfos) > 0 {
-		// Tool calls detected - restart with non-streaming for proper tool handling
-		return a.model.Generate(ctx, messages, model.WithTools(toolInfos))
-	}
-
-	// No tool calls - return the streamed content
-	return &schema.Message{
-		Role:    schema.Assistant,
-		Content: content,
-	}, nil
-}
 
 // generateWithoutStreaming uses the traditional non-streaming approach
 func (a *Agent) generateWithoutStreaming(ctx context.Context, messages []*schema.Message, toolInfos []*schema.ToolInfo) (*schema.Message, error) {
