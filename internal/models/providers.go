@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/cloudwego/eino-ext/components/model/claude"
 	"github.com/cloudwego/eino-ext/components/model/ollama"
@@ -76,8 +77,14 @@ type ProviderConfig struct {
 	MainGPU *int32
 }
 
+// ProviderResult contains the result of provider creation
+type ProviderResult struct {
+	Model   model.ToolCallingChatModel
+	Message string // Optional message for user feedback (e.g., GPU fallback info)
+}
+
 // CreateProvider creates an eino ToolCallingChatModel based on the provider configuration
-func CreateProvider(ctx context.Context, config *ProviderConfig) (model.ToolCallingChatModel, error) {
+func CreateProvider(ctx context.Context, config *ProviderConfig) (*ProviderResult, error) {
 	parts := strings.SplitN(config.ModelString, ":", 2)
 	if len(parts) < 2 {
 		return nil, fmt.Errorf("invalid model format. Expected provider:model, got %s", config.ModelString)
@@ -119,15 +126,31 @@ func CreateProvider(ctx context.Context, config *ProviderConfig) (model.ToolCall
 
 	switch provider {
 	case "anthropic":
-		return createAnthropicProvider(ctx, config, modelName)
+		model, err := createAnthropicProvider(ctx, config, modelName)
+		if err != nil {
+			return nil, err
+		}
+		return &ProviderResult{Model: model, Message: ""}, nil
 	case "openai":
-		return createOpenAIProvider(ctx, config, modelName)
+		model, err := createOpenAIProvider(ctx, config, modelName)
+		if err != nil {
+			return nil, err
+		}
+		return &ProviderResult{Model: model, Message: ""}, nil
 	case "google":
-		return createGoogleProvider(ctx, config, modelName)
+		model, err := createGoogleProvider(ctx, config, modelName)
+		if err != nil {
+			return nil, err
+		}
+		return &ProviderResult{Model: model, Message: ""}, nil
 	case "ollama":
-		return createOllamaProvider(ctx, config, modelName)
+		return createOllamaProviderWithResult(ctx, config, modelName)
 	case "azure":
-		return createAzureOpenAIProvider(ctx, config, modelName)
+		model, err := createAzureOpenAIProvider(ctx, config, modelName)
+		if err != nil {
+			return nil, err
+		}
+		return &ProviderResult{Model: model, Message: ""}, nil
 	default:
 		return nil, fmt.Errorf("unsupported provider: %s", provider)
 	}
@@ -353,7 +376,164 @@ func createGoogleProvider(ctx context.Context, config *ProviderConfig, modelName
 	return gemini.NewChatModel(ctx, geminiConfig)
 }
 
-func createOllamaProvider(ctx context.Context, config *ProviderConfig, modelName string) (model.ToolCallingChatModel, error) {
+// OllamaLoadingResult contains the result of model loading with actual settings used
+type OllamaLoadingResult struct {
+	Options *api.Options
+	Message string
+}
+
+// loadOllamaModelWithFallback loads an Ollama model with GPU settings and automatic CPU fallback
+func loadOllamaModelWithFallback(ctx context.Context, baseURL, modelName string, options *api.Options) (*OllamaLoadingResult, error) {
+	client := &http.Client{}
+
+	// Phase 1: Check if model exists locally
+	if err := checkOllamaModelExists(client, baseURL, modelName); err != nil {
+		// Phase 2: Pull model if not found
+		if err := pullOllamaModel(ctx, client, baseURL, modelName); err != nil {
+			return nil, fmt.Errorf("failed to pull model %s: %v", modelName, err)
+		}
+	}
+
+	// Phase 3: Load model with GPU settings
+	_, err := loadOllamaModelWithOptions(ctx, client, baseURL, modelName, options)
+	if err != nil {
+		// Phase 4: Fallback to CPU if GPU memory insufficient
+		if isGPUMemoryError(err) {
+			cpuOptions := *options
+			cpuOptions.NumGPU = 0
+
+			_, cpuErr := loadOllamaModelWithOptions(ctx, client, baseURL, modelName, &cpuOptions)
+			if cpuErr != nil {
+				return nil, fmt.Errorf("failed to load model on GPU (%v) and CPU fallback failed (%v)", err, cpuErr)
+			}
+
+			return &OllamaLoadingResult{
+				Options: &cpuOptions,
+				Message: "⚠️ Insufficient GPU memory, falling back to CPU inference",
+			}, nil
+		}
+		return nil, err
+	}
+
+	return &OllamaLoadingResult{
+		Options: options,
+		Message: "✅ Model loaded successfully on GPU",
+	}, nil
+}
+
+// checkOllamaModelExists checks if a model exists locally
+func checkOllamaModelExists(client *http.Client, baseURL, modelName string) error {
+	reqBody := map[string]string{"model": modelName}
+	jsonBody, _ := json.Marshal(reqBody)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(ctx, "POST", baseURL+"/api/show", bytes.NewBuffer(jsonBody))
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("model not found locally")
+	}
+
+	return nil
+}
+
+// pullOllamaModel pulls a model from the registry
+func pullOllamaModel(ctx context.Context, client *http.Client, baseURL, modelName string) error {
+	reqBody := map[string]string{"name": modelName}
+	jsonBody, _ := json.Marshal(reqBody)
+
+	// Use a longer timeout for pulling models (5 minutes)
+	pullCtx, cancel := context.WithTimeout(ctx, 5*time.Minute)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(pullCtx, "POST", baseURL+"/api/pull", bytes.NewBuffer(jsonBody))
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return fmt.Errorf("failed to pull model (status %d): %s", resp.StatusCode, string(body))
+	}
+
+	// Read the streaming response to completion
+	_, err = io.ReadAll(resp.Body)
+	return err
+}
+
+// loadOllamaModelWithOptions loads a model with specific options using a warmup request
+func loadOllamaModelWithOptions(ctx context.Context, client *http.Client, baseURL, modelName string, options *api.Options) (*api.Options, error) {
+	// Create a copy of options for warmup to avoid modifying the original
+	warmupOptions := *options
+	warmupOptions.NumPredict = 1 // Limit response length for warmup
+	
+	reqBody := map[string]interface{}{
+		"model":   modelName,
+		"prompt":  "Hello",
+		"stream":  false,
+		"options": &warmupOptions,
+	}
+
+	jsonBody, _ := json.Marshal(reqBody)
+
+	// Use medium timeout for warmup (30 seconds)
+	warmupCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(warmupCtx, "POST", baseURL+"/api/generate", bytes.NewBuffer(jsonBody))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("warmup request failed (status %d): %s", resp.StatusCode, string(body))
+	}
+
+	// Read response to completion
+	_, err = io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return options, nil
+}
+
+// isGPUMemoryError checks if an error indicates insufficient GPU memory
+func isGPUMemoryError(err error) bool {
+	errStr := strings.ToLower(err.Error())
+	return strings.Contains(errStr, "out of memory") ||
+		strings.Contains(errStr, "insufficient memory") ||
+		strings.Contains(errStr, "cuda out of memory") ||
+		strings.Contains(errStr, "gpu memory")
+}
+
+func createOllamaProviderWithResult(ctx context.Context, config *ProviderConfig, modelName string) (*ProviderResult, error) {
 	baseURL := "http://localhost:11434" // Default Ollama URL
 
 	// Check for custom Ollama host from environment
@@ -364,11 +544,6 @@ func createOllamaProvider(ctx context.Context, config *ProviderConfig, modelName
 	// Override with ProviderURL if provided
 	if config.ProviderURL != "" {
 		baseURL = config.ProviderURL
-	}
-
-	ollamaConfig := &ollama.ChatModelConfig{
-		BaseURL: baseURL,
-		Model:   modelName,
 	}
 
 	// Set up options for Ollama using the api.Options struct
@@ -403,10 +578,43 @@ func createOllamaProvider(ctx context.Context, config *ProviderConfig, modelName
 		options.MainGPU = int(*config.MainGPU)
 	}
 
-	ollamaConfig.Options = options
+	// Create a clean copy of options for the final model
+	finalOptions := &api.Options{}
+	*finalOptions = *options // Copy all fields
+	
+	// Try to pre-load the model with GPU settings and automatic CPU fallback
+	// If this fails, fall back to the original behavior
+	loadingResult, err := loadOllamaModelWithFallback(ctx, baseURL, modelName, options)
+	var loadingMessage string
+	
+	if err != nil {
+		// Pre-loading failed, use original options and no message
+		loadingMessage = ""
+	} else {
+		// Pre-loading succeeded, update GPU settings that worked
+		finalOptions.NumGPU = loadingResult.Options.NumGPU
+		finalOptions.MainGPU = loadingResult.Options.MainGPU
+		loadingMessage = loadingResult.Message
+	}
 
-	return ollama.NewChatModel(ctx, ollamaConfig)
+	ollamaConfig := &ollama.ChatModelConfig{
+		BaseURL: baseURL,
+		Model:   modelName,
+		Options: finalOptions,
+	}
+
+	chatModel, err := ollama.NewChatModel(ctx, ollamaConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	return &ProviderResult{
+		Model:   chatModel,
+		Message: loadingMessage,
+	}, nil
 }
+
+
 
 // createOAuthHTTPClient creates an HTTP client that adds OAuth headers for Anthropic API
 func createOAuthHTTPClient(accessToken string) *http.Client {

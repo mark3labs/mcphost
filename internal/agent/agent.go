@@ -41,16 +41,17 @@ type ToolCallContentHandler func(content string)
 
 // Agent is the agent with real-time tool call display.
 type Agent struct {
-	toolManager  *tools.MCPToolManager
-	model        model.ToolCallingChatModel
-	maxSteps     int
-	systemPrompt string
+	toolManager   *tools.MCPToolManager
+	model         model.ToolCallingChatModel
+	maxSteps      int
+	systemPrompt  string
+	loadingMessage string // Message from provider loading (e.g., GPU fallback info)
 }
 
 // NewAgent creates an agent with MCP tool integration and real-time tool call display
 func NewAgent(ctx context.Context, config *AgentConfig) (*Agent, error) {
 	// Create the LLM provider
-	model, err := models.CreateProvider(ctx, config.ModelConfig)
+	providerResult, err := models.CreateProvider(ctx, config.ModelConfig)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create model provider: %v", err)
 	}
@@ -62,10 +63,11 @@ func NewAgent(ctx context.Context, config *AgentConfig) (*Agent, error) {
 	}
 
 	return &Agent{
-		toolManager:  toolManager,
-		model:        model,
-		maxSteps:     config.MaxSteps, // Keep 0 for infinite, handle in loop
-		systemPrompt: config.SystemPrompt,
+		toolManager:    toolManager,
+		model:          providerResult.Model,
+		maxSteps:       config.MaxSteps, // Keep 0 for infinite, handle in loop
+		systemPrompt:   config.SystemPrompt,
+		loadingMessage: providerResult.Message,
 	}, nil
 }
 
@@ -218,6 +220,11 @@ func (a *Agent) GenerateWithLoop(ctx context.Context, messages []*schema.Message
 // GetTools returns the list of available tools
 func (a *Agent) GetTools() []tool.BaseTool {
 	return a.toolManager.GetTools()
+}
+
+// GetLoadingMessage returns the loading message from provider creation (e.g., GPU fallback info)
+func (a *Agent) GetLoadingMessage() string {
+	return a.loadingMessage
 }
 
 // generateWithCancellation calls the LLM with ESC key cancellation support

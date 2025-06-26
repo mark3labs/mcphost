@@ -290,8 +290,27 @@ func runNormalMode(ctx context.Context) error {
 		MaxSteps:     viper.GetInt("max-steps"), // Pass 0 for infinite, agent will handle it
 	}
 
-	// Create the agent
-	mcpAgent, err := agent.NewAgent(ctx, agentConfig)
+	// Create the agent with spinner for Ollama models
+	var mcpAgent *agent.Agent
+	
+	if strings.HasPrefix(viper.GetString("model"), "ollama:") && !quietFlag {
+		// Create a temporary CLI for the spinner
+		tempCli, tempErr := ui.NewCLI(viper.GetBool("debug"))
+		if tempErr == nil {
+			err = tempCli.ShowSpinner("Loading Ollama model...", func() error {
+				var agentErr error
+				mcpAgent, agentErr = agent.NewAgent(ctx, agentConfig)
+				return agentErr
+			})
+		} else {
+			// Fallback without spinner
+			mcpAgent, err = agent.NewAgent(ctx, agentConfig)
+		}
+	} else {
+		// No spinner for other providers
+		mcpAgent, err = agent.NewAgent(ctx, agentConfig)
+	}
+	
 	if err != nil {
 		return fmt.Errorf("failed to create agent: %v", err)
 	}
@@ -344,8 +363,13 @@ func runNormalMode(ctx context.Context) error {
 		if len(parts) == 2 {
 			cli.DisplayInfo(fmt.Sprintf("Model loaded: %s (%s)", parts[0], parts[1]))
 		}
-		cli.DisplayInfo(fmt.Sprintf("Loaded %d tools from MCP servers", len(tools)))
-
+		
+		// Display loading message if available (e.g., GPU fallback info)
+		if loadingMessage := mcpAgent.GetLoadingMessage(); loadingMessage != "" {
+			cli.DisplayInfo(loadingMessage)
+		}
+		
+	cli.DisplayInfo(fmt.Sprintf("Loaded %d tools from MCP servers", len(tools)))
 		// Display debug configuration if debug mode is enabled
 		if viper.GetBool("debug") {
 			debugConfig := map[string]any{
