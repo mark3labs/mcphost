@@ -668,7 +668,7 @@ func runAgenticStep(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI, mes
 		}
 	}
 
-	// Reset streaming state before each agent execution
+	// Reset streaming state before agent execution
 	responseWasStreamed = false
 	streamingStarted = false
 	streamingContent.Reset()
@@ -794,13 +794,15 @@ func runAgenticStep(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI, mes
 	response := result.FinalResponse
 	conversationMessages := result.ConversationMessages
 
-	// Display assistant response with model name (skip if quiet, streaming was used, or if the same content was already displayed)
-	if !config.Quiet && cli != nil && !responseWasStreamed && response.Content != lastDisplayedContent && response.Content != "" {
+	// Display assistant response with model name 
+	// Skip if: quiet mode, same content already displayed, or if streaming completed the full response
+	streamedFullResponse := responseWasStreamed && streamingContent.String() == response.Content
+	if !config.Quiet && cli != nil && response.Content != lastDisplayedContent && response.Content != "" && !streamedFullResponse {
 		if err := cli.DisplayAssistantMessageWithModel(response.Content, config.ModelName); err != nil {
 			cli.DisplayError(fmt.Errorf("display error: %v", err))
 			return nil, nil, err
 		}
-	} else if responseWasStreamed {
+	} else if streamedFullResponse {
 		// Streaming was used - the message is already displayed in the message component
 		// Just update usage tracking with the last user message and response
 		if len(messages) > 0 {
