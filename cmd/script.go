@@ -203,25 +203,19 @@ func runScriptCommand(ctx context.Context, scriptFile string, variables map[stri
 	// Get MCP config - use script servers if available, otherwise use global viper config
 	var mcpConfig *config.Config
 	if len(scriptConfig.MCPServers) > 0 {
-		// Use MCP servers from script, but get other config values from viper
-		// First, unmarshal all config from viper
-		mcpConfig = &config.Config{}
-		if err := viper.Unmarshal(mcpConfig); err != nil {
-			return fmt.Errorf("failed to unmarshal config: %v", err)
+		// Load base config and merge with script config
+		baseConfig, err := config.LoadAndValidateConfig()
+		if err != nil {
+			return fmt.Errorf("failed to load base config: %v", err)
 		}
-		// Then completely override MCPServers with script's servers
-		mcpConfig.MCPServers = scriptConfig.MCPServers
+		mcpConfig = config.MergeConfigs(baseConfig, scriptConfig)
 	} else {
-		// Get MCP config from the global viper instance (already loaded by initConfig)
-		mcpConfig = &config.Config{}
-		if err := viper.Unmarshal(mcpConfig); err != nil {
-			return fmt.Errorf("failed to unmarshal MCP config: %v", err)
+		// Use the new config loader
+		var err error
+		mcpConfig, err = config.LoadAndValidateConfig()
+		if err != nil {
+			return fmt.Errorf("failed to load MCP config: %v", err)
 		}
-	}
-
-	// Validate the config
-	if err := mcpConfig.Validate(); err != nil {
-		return fmt.Errorf("invalid MCP config: %v", err)
 	}
 
 	// Get final prompt - prioritize command line flag, then script content
@@ -550,17 +544,17 @@ func runScriptMode(ctx context.Context, mcpConfig *config.Config, prompt string,
 		StopSequences:  finalStopSequences,
 	}
 
-	// Create agent configuration
-	agentConfig := &agent.AgentConfig{
+	// Create the agent using the factory (scripts don't need spinners)
+	mcpAgent, err := agent.CreateAgent(ctx, &agent.AgentCreationOptions{
 		ModelConfig:      modelConfig,
 		MCPConfig:        mcpConfig,
 		SystemPrompt:     systemPrompt,
 		MaxSteps:         finalMaxSteps,
 		StreamingEnabled: viper.GetBool("stream"),
-	}
-
-	// Create the agent
-	mcpAgent, err := agent.NewAgent(ctx, agentConfig)
+		ShowSpinner:      false, // Scripts don't need spinners
+		Quiet:            quietFlag,
+		SpinnerFunc:      nil, // No spinner function needed
+	})
 	if err != nil {
 		return fmt.Errorf("failed to create agent: %v", err)
 	}
@@ -573,47 +567,47 @@ func runScriptMode(ctx context.Context, mcpConfig *config.Config, prompt string,
 		modelName = parts[1]
 	}
 
-	// Create CLI interface (skip if quiet mode)
-	var cli *ui.CLI
-	if !quietFlag {
-		cli, err = ui.NewCLI(finalDebug, finalCompact)
-		if err != nil {
-			return fmt.Errorf("failed to create CLI: %v", err)
+	// Create an adapter for the agent to match the UI interface
+	agentAdapter := &agentUIAdapter{agent: mcpAgent}
+
+	// Create CLI interface using the factory
+	cli, err := ui.SetupCLI(&ui.CLISetupOptions{
+		Agent:          agentAdapter,
+		ModelString:    finalModel,
+		Debug:          finalDebug,
+		Compact:        finalCompact,
+		Quiet:          quietFlag,
+		ShowDebug:      false, // Will be handled separately below
+		ProviderAPIKey: finalProviderAPIKey,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to setup CLI: %v", err)
+	}
+
+	// Display debug configuration if debug mode is enabled
+	if !quietFlag && cli != nil && finalDebug {
+		debugConfig := map[string]any{
+			"model":         finalModel,
+			"max-steps":     finalMaxSteps,
+			"max-tokens":    finalMaxTokens,
+			"temperature":   finalTemperature,
+			"top-p":         finalTopP,
+			"top-k":         finalTopK,
+			"provider-url":  finalProviderURL,
+			"system-prompt": finalSystemPrompt,
 		}
 
-		// Log successful initialization
-		if len(parts) == 2 {
-			cli.DisplayInfo(fmt.Sprintf("Model loaded: %s (%s)", parts[0], parts[1]))
+		// Only include non-empty stop sequences
+		if len(finalStopSequences) > 0 {
+			debugConfig["stop-sequences"] = finalStopSequences
 		}
 
-		tools := mcpAgent.GetTools()
-		cli.DisplayInfo(fmt.Sprintf("Loaded %d tools from MCP servers", len(tools)))
-
-		// Display debug configuration if debug mode is enabled
-		if finalDebug {
-			debugConfig := map[string]any{
-				"model":         finalModel,
-				"max-steps":     finalMaxSteps,
-				"max-tokens":    finalMaxTokens,
-				"temperature":   finalTemperature,
-				"top-p":         finalTopP,
-				"top-k":         finalTopK,
-				"provider-url":  finalProviderURL,
-				"system-prompt": finalSystemPrompt,
-			}
-
-			// Only include non-empty stop sequences
-			if len(finalStopSequences) > 0 {
-				debugConfig["stop-sequences"] = finalStopSequences
-			}
-
-			// Only include API keys if they're set (but don't show the actual values for security)
-			if finalProviderAPIKey != "" {
-				debugConfig["provider-api-key"] = "[SET]"
-			}
-
-			cli.DisplayDebugConfig(debugConfig)
+		// Only include API keys if they're set (but don't show the actual values for security)
+		if finalProviderAPIKey != "" {
+			debugConfig["provider-api-key"] = "[SET]"
 		}
+
+		cli.DisplayDebugConfig(debugConfig)
 	}
 
 	// Prepare data for slash commands

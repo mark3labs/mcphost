@@ -12,7 +12,6 @@ import (
 
 	"github.com/cloudwego/eino/schema"
 	"github.com/mark3labs/mcphost/internal/agent"
-	"github.com/mark3labs/mcphost/internal/auth"
 	"github.com/mark3labs/mcphost/internal/config"
 	"github.com/mark3labs/mcphost/internal/models"
 	"github.com/mark3labs/mcphost/internal/session"
@@ -52,6 +51,28 @@ var (
 	numGPU  int32
 	mainGPU int32
 )
+
+// agentUIAdapter adapts agent.Agent to ui.AgentInterface
+type agentUIAdapter struct {
+	agent *agent.Agent
+}
+
+func (a *agentUIAdapter) GetLoadingMessage() string {
+	return a.agent.GetLoadingMessage()
+}
+
+func (a *agentUIAdapter) GetTools() []any {
+	tools := a.agent.GetTools()
+	result := make([]any, len(tools))
+	for i, tool := range tools {
+		result[i] = tool
+	}
+	return result
+}
+
+func (a *agentUIAdapter) GetLoadedServerNames() []string {
+	return a.agent.GetLoadedServerNames()
+}
 
 var rootCmd = &cobra.Command{
 	Use:   "mcphost",
@@ -285,17 +306,10 @@ func runNormalMode(ctx context.Context) error {
 		// Use script-provided config
 		mcpConfig = scriptMCPConfig
 	} else {
-		// Get MCP config from the global viper instance (already loaded by initConfig)
-		mcpConfig = &config.Config{
-			MCPServers: make(map[string]config.MCPServerConfig),
-		}
-		if err := viper.Unmarshal(mcpConfig); err != nil {
-			return fmt.Errorf("failed to unmarshal MCP config: %v", err)
-		}
-
-		// Validate the config
-		if err := mcpConfig.Validate(); err != nil {
-			return fmt.Errorf("invalid MCP config: %v", err)
+		// Use the new config loader
+		mcpConfig, err = config.LoadAndValidateConfig()
+		if err != nil {
+			return fmt.Errorf("failed to load MCP config: %v", err)
 		}
 	}
 
@@ -331,36 +345,30 @@ func runNormalMode(ctx context.Context) error {
 		MainGPU:        &mainGPU,
 	}
 
-	// Create agent configuration
-	agentConfig := &agent.AgentConfig{
+	// Create spinner function for agent creation
+	var spinnerFunc agent.SpinnerFunc
+	if !quietFlag {
+		spinnerFunc = func(message string, fn func() error) error {
+			tempCli, tempErr := ui.NewCLI(viper.GetBool("debug"), viper.GetBool("compact"))
+			if tempErr == nil {
+				return tempCli.ShowSpinner(message, fn)
+			}
+			// Fallback without spinner
+			return fn()
+		}
+	}
+
+	// Create the agent using the factory
+	mcpAgent, err := agent.CreateAgent(ctx, &agent.AgentCreationOptions{
 		ModelConfig:      modelConfig,
 		MCPConfig:        mcpConfig,
 		SystemPrompt:     systemPrompt,
-		MaxSteps:         viper.GetInt("max-steps"), // Pass 0 for infinite, agent will handle it
+		MaxSteps:         viper.GetInt("max-steps"),
 		StreamingEnabled: viper.GetBool("stream"),
-	}
-
-	// Create the agent with spinner for Ollama models
-	var mcpAgent *agent.Agent
-
-	if strings.HasPrefix(viper.GetString("model"), "ollama:") && !quietFlag {
-		// Create a temporary CLI for the spinner
-		tempCli, tempErr := ui.NewCLI(viper.GetBool("debug"), viper.GetBool("compact"))
-		if tempErr == nil {
-			err = tempCli.ShowSpinner("Loading Ollama model...", func() error {
-				var agentErr error
-				mcpAgent, agentErr = agent.NewAgent(ctx, agentConfig)
-				return agentErr
-			})
-		} else {
-			// Fallback without spinner
-			mcpAgent, err = agent.NewAgent(ctx, agentConfig)
-		}
-	} else {
-		// No spinner for other providers
-		mcpAgent, err = agent.NewAgent(ctx, agentConfig)
-	}
-
+		ShowSpinner:      true,
+		Quiet:            quietFlag,
+		SpinnerFunc:      spinnerFunc,
+	})
 	if err != nil {
 		return fmt.Errorf("failed to create agent: %v", err)
 	}
@@ -374,137 +382,101 @@ func runNormalMode(ctx context.Context) error {
 		modelName = parts[1]
 	}
 
-	// Get tools
-	tools := mcpAgent.GetTools()
+	// Create an adapter for the agent to match the UI interface
+	agentAdapter := &agentUIAdapter{agent: mcpAgent}
 
-	// Create CLI interface (skip if quiet mode)
-	var cli *ui.CLI
-	if !quietFlag {
-		cli, err = ui.NewCLI(viper.GetBool("debug"), viper.GetBool("compact"))
-		if err != nil {
-			return fmt.Errorf("failed to create CLI: %v", err)
+	// Create CLI interface using the factory
+	cli, err := ui.SetupCLI(&ui.CLISetupOptions{
+		Agent:          agentAdapter,
+		ModelString:    modelString,
+		Debug:          viper.GetBool("debug"),
+		Compact:        viper.GetBool("compact"),
+		Quiet:          quietFlag,
+		ShowDebug:      false, // Will be handled separately below
+		ProviderAPIKey: viper.GetString("provider-api-key"),
+	})
+	if err != nil {
+		return fmt.Errorf("failed to setup CLI: %v", err)
+	}
+
+	// Display debug configuration if debug mode is enabled
+	if !quietFlag && cli != nil && viper.GetBool("debug") {
+		debugConfig := map[string]any{
+			"model":         viper.GetString("model"),
+			"max-steps":     viper.GetInt("max-steps"),
+			"max-tokens":    viper.GetInt("max-tokens"),
+			"temperature":   viper.GetFloat64("temperature"),
+			"top-p":         viper.GetFloat64("top-p"),
+			"top-k":         viper.GetInt("top-k"),
+			"provider-url":  viper.GetString("provider-url"),
+			"system-prompt": viper.GetString("system-prompt"),
 		}
 
-		// Set the model name for consistent display
-		cli.SetModelName(modelName)
+		// Add Ollama-specific parameters if using Ollama
+		if strings.HasPrefix(viper.GetString("model"), "ollama:") {
+			debugConfig["num-gpu-layers"] = viper.GetInt("num-gpu-layers")
+			debugConfig["main-gpu"] = viper.GetInt("main-gpu")
+		}
 
-		// Set the model name for consistent display
-		cli.SetModelName(modelName)
+		// Only include non-empty stop sequences
+		stopSequences := viper.GetStringSlice("stop-sequences")
+		if len(stopSequences) > 0 {
+			debugConfig["stop-sequences"] = stopSequences
+		}
 
-		// Set up usage tracking for supported providers
-		if len(parts) == 2 {
-			provider := parts[0]
-			modelID := parts[1]
+		// Only include API keys if they're set (but don't show the actual values for security)
+		if viper.GetString("provider-api-key") != "" {
+			debugConfig["provider-api-key"] = "[SET]"
+		}
 
-			// Skip usage tracking for ollama as it's not in models.dev
-			if provider != "ollama" {
-				registry := models.GetGlobalRegistry()
-				if modelInfo, err := registry.ValidateModel(provider, modelID); err == nil {
-					// Check if OAuth credentials are being used for Anthropic models
-					isOAuth := false
-					if provider == "anthropic" {
-						_, source, err := auth.GetAnthropicAPIKey(viper.GetString("provider-api-key"))
-						if err == nil && strings.HasPrefix(source, "stored OAuth") {
-							isOAuth = true
+		// Add MCP server configuration for debugging
+		if len(mcpConfig.MCPServers) > 0 {
+			mcpServers := make(map[string]any)
+			loadedServers := mcpAgent.GetLoadedServerNames()
+			loadedServerSet := make(map[string]bool)
+			for _, name := range loadedServers {
+				loadedServerSet[name] = true
+			}
+
+			for name, server := range mcpConfig.MCPServers {
+				serverInfo := map[string]any{
+					"type":   server.Type,
+					"status": "failed", // Default to failed
+				}
+
+				// Mark as loaded if it's in the loaded servers list
+				if loadedServerSet[name] {
+					serverInfo["status"] = "loaded"
+				}
+
+				if len(server.Command) > 0 {
+					serverInfo["command"] = server.Command
+				}
+				if len(server.Environment) > 0 {
+					// Mask sensitive environment variables
+					maskedEnv := make(map[string]string)
+					for k, v := range server.Environment {
+						if strings.Contains(strings.ToLower(k), "token") ||
+							strings.Contains(strings.ToLower(k), "key") ||
+							strings.Contains(strings.ToLower(k), "secret") {
+							maskedEnv[k] = "[MASKED]"
+						} else {
+							maskedEnv[k] = v
 						}
 					}
-
-					usageTracker := ui.NewUsageTracker(modelInfo, provider, 80, isOAuth) // Will be updated with actual width
-					cli.SetUsageTracker(usageTracker)
+					serverInfo["environment"] = maskedEnv
 				}
-			}
-		}
-
-		// Log successful initialization
-		if len(parts) == 2 {
-			cli.DisplayInfo(fmt.Sprintf("Model loaded: %s (%s)", parts[0], parts[1]))
-		}
-
-		// Display loading message if available (e.g., GPU fallback info)
-		if loadingMessage := mcpAgent.GetLoadingMessage(); loadingMessage != "" {
-			cli.DisplayInfo(loadingMessage)
-		}
-
-		cli.DisplayInfo(fmt.Sprintf("Loaded %d tools from MCP servers", len(tools)))
-		// Display debug configuration if debug mode is enabled
-		if viper.GetBool("debug") {
-			debugConfig := map[string]any{
-				"model":         viper.GetString("model"),
-				"max-steps":     viper.GetInt("max-steps"),
-				"max-tokens":    viper.GetInt("max-tokens"),
-				"temperature":   viper.GetFloat64("temperature"),
-				"top-p":         viper.GetFloat64("top-p"),
-				"top-k":         viper.GetInt("top-k"),
-				"provider-url":  viper.GetString("provider-url"),
-				"system-prompt": viper.GetString("system-prompt"),
-			}
-
-			// Add Ollama-specific parameters if using Ollama
-			if strings.HasPrefix(viper.GetString("model"), "ollama:") {
-				debugConfig["num-gpu-layers"] = viper.GetInt("num-gpu-layers")
-				debugConfig["main-gpu"] = viper.GetInt("main-gpu")
-			}
-
-			// Only include non-empty stop sequences
-			stopSequences := viper.GetStringSlice("stop-sequences")
-			if len(stopSequences) > 0 {
-				debugConfig["stop-sequences"] = stopSequences
-			}
-
-			// Only include API keys if they're set (but don't show the actual values for security)
-			if viper.GetString("provider-api-key") != "" {
-				debugConfig["provider-api-key"] = "[SET]"
-			}
-
-			// Add MCP server configuration for debugging
-			if len(mcpConfig.MCPServers) > 0 {
-				mcpServers := make(map[string]any)
-				loadedServers := mcpAgent.GetLoadedServerNames()
-				loadedServerSet := make(map[string]bool)
-				for _, name := range loadedServers {
-					loadedServerSet[name] = true
+				if server.URL != "" {
+					serverInfo["url"] = server.URL
 				}
-
-				for name, server := range mcpConfig.MCPServers {
-					serverInfo := map[string]any{
-						"type":   server.Type,
-						"status": "failed", // Default to failed
-					}
-
-					// Mark as loaded if it's in the loaded servers list
-					if loadedServerSet[name] {
-						serverInfo["status"] = "loaded"
-					}
-
-					if len(server.Command) > 0 {
-						serverInfo["command"] = server.Command
-					}
-					if len(server.Environment) > 0 {
-						// Mask sensitive environment variables
-						maskedEnv := make(map[string]string)
-						for k, v := range server.Environment {
-							if strings.Contains(strings.ToLower(k), "token") ||
-								strings.Contains(strings.ToLower(k), "key") ||
-								strings.Contains(strings.ToLower(k), "secret") {
-								maskedEnv[k] = "[MASKED]"
-							} else {
-								maskedEnv[k] = v
-							}
-						}
-						serverInfo["environment"] = maskedEnv
-					}
-					if server.URL != "" {
-						serverInfo["url"] = server.URL
-					}
-					if server.Name != "" {
-						serverInfo["name"] = server.Name
-					}
-					mcpServers[name] = serverInfo
+				if server.Name != "" {
+					serverInfo["name"] = server.Name
 				}
-				debugConfig["mcpServers"] = mcpServers
+				mcpServers[name] = serverInfo
 			}
-			cli.DisplayDebugConfig(debugConfig)
+			debugConfig["mcpServers"] = mcpServers
 		}
+		cli.DisplayDebugConfig(debugConfig)
 	}
 
 	// Prepare data for slash commands
@@ -513,6 +485,7 @@ func runNormalMode(ctx context.Context) error {
 		serverNames = append(serverNames, name)
 	}
 
+	tools := mcpAgent.GetTools()
 	var toolNames []string
 	for _, tool := range tools {
 		if info, err := tool.Info(ctx); err == nil {
