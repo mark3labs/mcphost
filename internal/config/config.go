@@ -16,8 +16,8 @@ type MCPServerConfig struct {
 	URL           string            `json:"url,omitempty"`
 	Name          string            `json:"name,omitempty"`    // For builtin servers
 	Options       map[string]any    `json:"options,omitempty"` // For builtin servers
-	AllowedTools  []string          `json:"allowedTools,omitempty"`
-	ExcludedTools []string          `json:"excludedTools,omitempty"`
+	AllowedTools  []string          `json:"allowedTools,omitempty" yaml:"allowedTools,omitempty"`
+	ExcludedTools []string          `json:"excludedTools,omitempty" yaml:"excludedTools,omitempty"`
 
 	// Legacy fields for backward compatibility
 	Transport string         `json:"transport,omitempty"`
@@ -37,8 +37,8 @@ func (s *MCPServerConfig) UnmarshalJSON(data []byte) error {
 		Headers       []string          `json:"headers,omitempty"`
 		Name          string            `json:"name,omitempty"`
 		Options       map[string]any    `json:"options,omitempty"`
-		AllowedTools  []string          `json:"allowedTools,omitempty"`
-		ExcludedTools []string          `json:"excludedTools,omitempty"`
+		AllowedTools  []string          `json:"allowedTools,omitempty" yaml:"allowedTools,omitempty"`
+		ExcludedTools []string          `json:"excludedTools,omitempty" yaml:"excludedTools,omitempty"`
 	}
 
 	// Also try legacy format
@@ -49,8 +49,8 @@ func (s *MCPServerConfig) UnmarshalJSON(data []byte) error {
 		Env           map[string]any `json:"env,omitempty"`
 		URL           string         `json:"url,omitempty"`
 		Headers       []string       `json:"headers,omitempty"`
-		AllowedTools  []string       `json:"allowedTools,omitempty"`
-		ExcludedTools []string       `json:"excludedTools,omitempty"`
+		AllowedTools  []string       `json:"allowedTools,omitempty" yaml:"allowedTools,omitempty"`
+		ExcludedTools []string       `json:"excludedTools,omitempty" yaml:"excludedTools,omitempty"`
 	}
 
 	// Try new format first
