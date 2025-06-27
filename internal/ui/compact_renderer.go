@@ -45,9 +45,8 @@ func (r *CompactRenderer) RenderUserMessage(content string, timestamp time.Time)
 			// First line includes symbol and label
 			formattedLines = append(formattedLines, fmt.Sprintf("%s  %s %s", symbol, label, line))
 		} else {
-			// Subsequent lines are indented to align with content
-			indent := strings.Repeat(" ", 3+len("User")+1) // symbol + spaces + label + space
-			formattedLines = append(formattedLines, indent+line)
+			// Subsequent lines without indentation for compact mode
+			formattedLines = append(formattedLines, line)
 		}
 	}
 	
@@ -85,10 +84,8 @@ func (r *CompactRenderer) RenderAssistantMessage(content string, timestamp time.
 			// First line includes symbol and label
 			formattedLines = append(formattedLines, fmt.Sprintf("%s  %s %s", symbol, label, line))
 		} else {
-			// Subsequent lines are indented to align with content
-			// Calculate indent based on actual model name length
-			indent := strings.Repeat(" ", 3+len(modelName)+1) // symbol + spaces + label + space
-			formattedLines = append(formattedLines, indent+line)
+			// Subsequent lines without indentation for compact mode
+			formattedLines = append(formattedLines, line)
 		}
 	}
 	
@@ -156,9 +153,8 @@ func (r *CompactRenderer) RenderToolMessage(toolName, toolArgs, toolResult strin
 			// First line includes symbol and label
 			formattedLines = append(formattedLines, fmt.Sprintf("%s  %s %s", symbol, label, line))
 		} else {
-			// Subsequent lines are indented to align with content
-			indent := strings.Repeat(" ", 3+len(labelText)+1) // symbol + spaces + label + space
-			formattedLines = append(formattedLines, indent+line)
+			// Subsequent lines without indentation for compact mode
+			formattedLines = append(formattedLines, line)
 		}
 	}
 	
@@ -303,13 +299,13 @@ func (r *CompactRenderer) formatToolResult(result string) string {
 		return ""
 	}
 	
-	// Preserve formatting but limit to 3 lines
+	// Preserve formatting but limit to 5 lines
 	lines := strings.Split(result, "\n")
-	if len(lines) > 3 {
-		lines = lines[:3]
+	if len(lines) > 5 {
+		lines = lines[:5]
 		// Add truncation indicator
-		if len(lines) == 3 && lines[2] != "" {
-			lines[2] = lines[2] + "..."
+		if len(lines) == 5 && lines[4] != "" {
+			lines[4] = lines[4] + "..."
 		} else {
 			lines = append(lines, "...")
 		}
