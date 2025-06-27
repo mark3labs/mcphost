@@ -248,7 +248,10 @@ func (r *CompactRenderer) formatCompactContent(content string) string {
 	content = strings.TrimSpace(content)
 	
 	// Truncate if too long (unless in debug mode)
-	maxLen := r.width - 20 // Reserve space for symbol and label
+	maxLen := r.width - 28 // Reserve space for symbol and label more conservatively
+	if maxLen < 40 {
+		maxLen = 40 // Minimum width for readability
+	}
 	if !r.debug && len(content) > maxLen {
 		content = content[:maxLen-3] + "..."
 	}
@@ -256,17 +259,67 @@ func (r *CompactRenderer) formatCompactContent(content string) string {
 	return content
 }
 
-// formatUserAssistantContent formats user and assistant content preserving formatting
+// formatUserAssistantContent formats user and assistant content using glamour markdown rendering
 func (r *CompactRenderer) formatUserAssistantContent(content string) string {
 	if content == "" {
 		return ""
 	}
-	
-	// For user and assistant messages, preserve the content as-is
-	// Just trim leading/trailing whitespace
-	return strings.TrimSpace(content)
+
+	// Calculate available width more conservatively
+	// Account for: symbol (1) + spaces (2) + label (up to 20 chars) + space (1) + margin (4)
+	availableWidth := r.width - 28
+	if availableWidth < 40 {
+		availableWidth = 40 // Minimum width for readability
+	}
+
+	// Use glamour to render markdown content with proper width
+	rendered := toMarkdown(content, availableWidth)
+	return strings.TrimSuffix(rendered, "\n")
 }
 
+// wrapText wraps text to the specified width, preserving existing line breaks
+func (r *CompactRenderer) wrapText(text string, width int) string {
+	if width <= 0 {
+		return text
+	}
+
+	lines := strings.Split(text, "\n")
+	var wrappedLines []string
+
+	for _, line := range lines {
+		if len(line) <= width {
+			wrappedLines = append(wrappedLines, line)
+			continue
+		}
+
+		// Wrap long lines
+		words := strings.Fields(line)
+		if len(words) == 0 {
+			wrappedLines = append(wrappedLines, line)
+			continue
+		}
+
+		currentLine := ""
+		for _, word := range words {
+			// If adding this word would exceed the width, start a new line
+			if len(currentLine)+len(word)+1 > width && currentLine != "" {
+				wrappedLines = append(wrappedLines, currentLine)
+				currentLine = word
+			} else {
+				if currentLine == "" {
+					currentLine = word
+				} else {
+					currentLine += " " + word
+				}
+			}
+		}
+		if currentLine != "" {
+			wrappedLines = append(wrappedLines, currentLine)
+		}
+	}
+
+	return strings.Join(wrappedLines, "\n")
+}
 // formatToolArgs formats tool arguments for compact display
 func (r *CompactRenderer) formatToolArgs(args string) string {
 	if args == "" || args == "{}" {
@@ -293,14 +346,23 @@ func (r *CompactRenderer) formatToolArgs(args string) string {
 	return r.formatCompactContent(args)
 }
 
-// formatToolResult formats tool results preserving formatting but limiting to 3 lines
+// formatToolResult formats tool results preserving formatting but limiting to 5 lines
 func (r *CompactRenderer) formatToolResult(result string) string {
 	if result == "" {
 		return ""
 	}
-	
-	// Preserve formatting but limit to 5 lines
-	lines := strings.Split(result, "\n")
+
+	// Calculate available width more conservatively
+	availableWidth := r.width - 28
+	if availableWidth < 40 {
+		availableWidth = 40 // Minimum width for readability
+	}
+
+	// First wrap the text to prevent long lines (tool results are usually plain text, not markdown)
+	wrappedResult := r.wrapText(result, availableWidth)
+
+	// Then limit to 5 lines
+	lines := strings.Split(wrappedResult, "\n")
 	if len(lines) > 5 {
 		lines = lines[:5]
 		// Add truncation indicator
@@ -310,10 +372,9 @@ func (r *CompactRenderer) formatToolResult(result string) string {
 			lines = append(lines, "...")
 		}
 	}
-	
+
 	return strings.Join(lines, "\n")
 }
-
 // determineResultType determines the display type for tool results
 func (r *CompactRenderer) determineResultType(toolName, result string) string {
 	toolName = strings.ToLower(toolName)
