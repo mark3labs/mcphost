@@ -667,6 +667,7 @@ func runAgenticStep(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI, mes
 			if !streamingStarted {
 				cli.StartStreamingMessage(config.ModelName)
 				streamingStarted = true
+				streamingContent.Reset() // Reset content for new streaming session
 			}
 
 			// Accumulate content and update message
@@ -741,6 +742,9 @@ func runAgenticStep(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI, mes
 				}
 
 				cli.DisplayToolMessage(toolName, toolArgs, resultContent, isError)
+				// Reset streaming state for next LLM call
+				responseWasStreamed = false
+				streamingStarted = false
 				// Start spinner again for next LLM call
 				currentSpinner = ui.NewSpinner("Thinking...")
 				currentSpinner.Start()
