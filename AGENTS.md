@@ -8,6 +8,31 @@
 - **Format**: `go fmt ./...`
 - **Dependencies**: `go mod tidy`
 
+## UI and Output Modes
+MCPHost supports multiple output modes for different use cases:
+
+### Standard Mode (Default)
+- Full-featured terminal UI with rich styling and formatting
+- Interactive message display with proper spacing and visual hierarchy
+- Suitable for regular interactive usage
+
+### Compact Mode (`--compact`)
+- **Location**: `internal/ui/compact_renderer.go`, `internal/ui/cli.go`
+- **Purpose**: Simplified output format without fancy styling for better readability in automation contexts
+- **Features**: 
+  - Single-line message format where possible
+  - Minimal visual styling and spacing
+  - Consistent symbol-based prefixes (🧑, 🤖, 🔧, etc.)
+  - Optimized for scripting and log parsing
+- **Usage**: Add `--compact` flag to any mcphost command
+- **Note**: Has no effect when combined with `--quiet` (mutually exclusive)
+
+### Quiet Mode (`--quiet`)
+- Suppresses all UI elements except the AI response
+- Only works with `--prompt` (non-interactive mode)
+- Ideal for shell scripting and piping output to other commands
+- **Note**: When `--quiet` is used, `--compact` has no effect since no UI elements are shown
+
 ## Code Style Guidelines
 - **Package structure**: `pkg/` for reusable packages, `cmd/` for CLI commands
 - **Imports**: Standard library first, then third-party, then local packages with blank lines between groups
@@ -83,33 +108,57 @@ MCPHost includes several builtin MCP servers for common functionality:
 - **Features**: HTTP/HTTPS support, HTML parsing, markdown conversion, size limits
 - **Security**: 5MB response limit, configurable timeouts, localhost-aware HTTPS upgrade
 
+## Environment Variable Substitution System
+MCPHost includes a comprehensive environment variable substitution system for secure configuration management.
+
+### Implementation Details
+- **Location**: `internal/config/substitution.go` (core logic), `internal/config/substitution_test.go` (unit tests)
+- **Purpose**: Replace `${env://VAR}` and `${env://VAR:-default}` patterns with environment variable values
+- **Integration**: Works in both config files and script frontmatter/prompts
+
+### Substitution Components
+- **EnvSubstituter**: Handles environment variable substitution
+- **ArgsSubstituter**: Handles script argument substitution (refactored from existing code)
+- **Shared Parsing Logic**: `parseVariableWithDefault()` function used by both substituters
+
+### Processing Order
+1. **Config Loading**: `cmd/root.go` → `loadConfigWithEnvSubstitution()` → env substitution → YAML/JSON parsing
+2. **Script Mode**: `cmd/script.go` → `parseScriptContent()` → env substitution → YAML parsing → args substitution
+
+### Security Features
+- **No Shell Execution**: Direct environment variable lookup using `os.Getenv()`
+- **Error Handling**: Clear error messages for missing required variables
+- **Validation**: Regex-based pattern matching with comprehensive validation
+
 ## Script System
 MCPHost includes a powerful script system for automation and reusable workflows.
 
 ### Script Features
 - **Location**: `cmd/script.go` (main implementation), `cmd/script_test.go` (comprehensive tests)
-- **Purpose**: Execute YAML-based automation scripts with variable substitution
+- **Purpose**: Execute YAML-based automation scripts with dual variable substitution
 - **Format**: YAML frontmatter + prompt content in single executable files
 
 ### Variable Substitution System
-- **Required Variables**: `${variable}` - Must be provided via `--args:variable value`
-- **Optional Variables**: `${variable:-default}` - Uses default if not provided
+- **Environment Variables**: `${env://VAR}` and `${env://VAR:-default}` - Processed first
+- **Script Arguments**: `${variable}` and `${variable:-default}` - Processed after environment variables
 - **Features**: 
   - Bash-style default syntax for familiarity
-  - Empty defaults supported: `${var:-}`
+  - Empty defaults supported: `${var:-}` and `${env://VAR:-}`
   - Complex defaults: paths, URLs, commands with spaces
   - Full backward compatibility with existing scripts
-- **Implementation**: Regex-based parsing with comprehensive validation
+- **Implementation**: Dual-phase substitution with shared parsing logic
 
 ### Script Examples
 - **Location**: `examples/scripts/` directory
-- **Demo Script**: `default-values-demo.sh` - Showcases new default values feature
-- **Usage Examples**: Multiple scenarios from simple defaults to complex overrides
+- **Demo Script**: `default-values-demo.sh` - Showcases script argument default values
+- **Env Substitution Script**: `env-substitution-script.sh` - Demonstrates environment variable usage
+- **Usage Examples**: Multiple scenarios from simple defaults to complex environment/args combinations
 
 ### Testing
-- **Test Coverage**: 25+ test cases covering all variable scenarios
-- **Edge Cases**: Empty defaults, complex values, mixed required/optional variables
-- **Backward Compatibility**: Ensures existing scripts continue working unchanged
+- **Unit Tests**: 25+ test cases in `internal/config/substitution_test.go` covering all substitution scenarios
+- **Integration Tests**: `internal/config/integration_test.go` and `cmd/script_integration_test.go`
+- **Edge Cases**: Empty defaults, complex values, mixed required/optional variables, processing order
+- **Backward Compatibility**: Ensures existing scripts and configs continue working unchanged
 
 ## Authentication System
 MCPHost includes optional OAuth authentication for Anthropic Claude as an alternative to API keys.
@@ -123,6 +172,22 @@ MCPHost includes optional OAuth authentication for Anthropic Claude as an altern
 - **Location**: `internal/auth/oauth.go` (OAuth client), `internal/auth/credentials.go` (credential management)
 - **Features**: PKCE security, automatic token refresh, encrypted storage, browser-based flow
 - **Priority**: OAuth credentials > API keys (environment variables/flags)
+
+## Recent Features
+
+### Environment Variable Substitution (New)
+- **Feature**: Added support for `${env://VAR}` and `${env://VAR:-default}` syntax in config files and scripts
+- **Implementation**: 
+  - `internal/config/substitution.go`: Core substitution logic with shared parsing
+  - `cmd/root.go`: Config loading integration with `loadConfigWithEnvSubstitution()`
+  - `cmd/script.go`: Script parsing integration with dual-phase substitution
+- **Security**: Environment variables processed safely without shell execution
+- **Compatibility**: Full backward compatibility with existing configurations and scripts
+- **Testing**: Comprehensive test suite with 25+ unit tests and integration tests
+
+### Processing Flow
+1. **Config Files**: Raw content → Env substitution → YAML/JSON parsing → Viper config
+2. **Scripts**: Raw content → Env substitution → YAML parsing → Args substitution → Final config
 
 ## Recent Bug Fixes
 

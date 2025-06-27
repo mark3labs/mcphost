@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/cloudwego/eino/schema"
@@ -98,10 +99,7 @@ func Execute(v string) {
 func initConfig() {
 	if configFile != "" {
 		// Use config file from the flag
-		viper.SetConfigFile(configFile)
-
-		// Try to read the specified config file
-		if err := viper.ReadInConfig(); err != nil {
+		if err := loadConfigWithEnvSubstitution(configFile); err != nil {
 			fmt.Fprintf(os.Stderr, "Error reading config file '%s': %v\n", configFile, err)
 			os.Exit(1)
 		}
@@ -119,29 +117,71 @@ func initConfig() {
 			os.Exit(1)
 		}
 
-		// Search config in home directory with name ".mcphost" (without extension)
-		viper.AddConfigPath(home)
-		viper.SetConfigName(".mcphost")
-		viper.SetConfigType("yaml")
+		// Try to load config files with environment variable substitution
+		configLoaded := false
+		configPaths := []struct {
+			name  string
+			types []string
+		}{
+			{".mcphost", []string{"yml", "yaml", "json"}},
+			{".mcp", []string{"yml", "yaml", "json"}},
+		}
 
-		// Also try JSON format
-		if err := viper.ReadInConfig(); err != nil {
-			viper.SetConfigType("json")
-			if err := viper.ReadInConfig(); err != nil {
-				// Try legacy .mcp files
-				viper.SetConfigName(".mcp")
-				viper.SetConfigType("yaml")
-				if err := viper.ReadInConfig(); err != nil {
-					viper.SetConfigType("json")
-					viper.ReadInConfig() // Ignore error if no config found
+		for _, configPath := range configPaths {
+			for _, configType := range configPath.types {
+				fullPath := filepath.Join(home, configPath.name+"."+configType)
+				if _, err := os.Stat(fullPath); err == nil {
+					if err := loadConfigWithEnvSubstitution(fullPath); err != nil {
+						// Only exit on environment variable substitution errors
+						// Other errors should be handled gracefully
+						if strings.Contains(err.Error(), "environment variable substitution failed") {
+							fmt.Fprintf(os.Stderr, "Error reading config file '%s': %v\n", fullPath, err)
+							os.Exit(1)
+						}
+						// For other errors, continue trying other config files
+						continue
+					}
+					configLoaded = true
+					break
 				}
 			}
+			if configLoaded {
+				break
+			}
 		}
+
+		// If no config file was loaded, continue without error (optional config)
 	}
 
 	// Set environment variable prefix
 	viper.SetEnvPrefix("MCPHOST")
 	viper.AutomaticEnv()
+}
+
+// loadConfigWithEnvSubstitution loads a config file with environment variable substitution
+func loadConfigWithEnvSubstitution(configPath string) error {
+	// Read raw config file content
+	rawContent, err := os.ReadFile(configPath)
+	if err != nil {
+		return fmt.Errorf("failed to read config file: %v", err)
+	}
+
+	// Apply environment variable substitution
+	substituter := &config.EnvSubstituter{}
+	processedContent, err := substituter.SubstituteEnvVars(string(rawContent))
+	if err != nil {
+		return fmt.Errorf("config env substitution failed: %v", err)
+	}
+
+	// Determine config type from file extension
+	configType := "yaml"
+	if strings.HasSuffix(configPath, ".json") {
+		configType = "json"
+	}
+
+	// Use viper to parse the processed content
+	viper.SetConfigType(configType)
+	return viper.ReadConfig(strings.NewReader(processedContent))
 }
 
 func init() {
@@ -344,7 +384,7 @@ func runNormalMode(ctx context.Context) error {
 		if err != nil {
 			return fmt.Errorf("failed to create CLI: %v", err)
 		}
-		
+
 		// Set the model name for consistent display
 		cli.SetModelName(modelName)
 
@@ -413,6 +453,53 @@ func runNormalMode(ctx context.Context) error {
 				debugConfig["provider-api-key"] = "[SET]"
 			}
 
+			// Add MCP server configuration for debugging
+			if len(mcpConfig.MCPServers) > 0 {
+				mcpServers := make(map[string]any)
+				loadedServers := mcpAgent.GetLoadedServerNames()
+				loadedServerSet := make(map[string]bool)
+				for _, name := range loadedServers {
+					loadedServerSet[name] = true
+				}
+
+				for name, server := range mcpConfig.MCPServers {
+					serverInfo := map[string]any{
+						"type":   server.Type,
+						"status": "failed", // Default to failed
+					}
+
+					// Mark as loaded if it's in the loaded servers list
+					if loadedServerSet[name] {
+						serverInfo["status"] = "loaded"
+					}
+
+					if len(server.Command) > 0 {
+						serverInfo["command"] = server.Command
+					}
+					if len(server.Environment) > 0 {
+						// Mask sensitive environment variables
+						maskedEnv := make(map[string]string)
+						for k, v := range server.Environment {
+							if strings.Contains(strings.ToLower(k), "token") ||
+								strings.Contains(strings.ToLower(k), "key") ||
+								strings.Contains(strings.ToLower(k), "secret") {
+								maskedEnv[k] = "[MASKED]"
+							} else {
+								maskedEnv[k] = v
+							}
+						}
+						serverInfo["environment"] = maskedEnv
+					}
+					if server.URL != "" {
+						serverInfo["url"] = server.URL
+					}
+					if server.Name != "" {
+						serverInfo["name"] = server.Name
+					}
+					mcpServers[name] = serverInfo
+				}
+				debugConfig["mcpServers"] = mcpServers
+			}
 			cli.DisplayDebugConfig(debugConfig)
 		}
 	}

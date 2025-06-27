@@ -251,6 +251,11 @@ func (a *Agent) GetLoadingMessage() string {
 	return a.loadingMessage
 }
 
+// GetLoadedServerNames returns the names of successfully loaded MCP servers
+func (a *Agent) GetLoadedServerNames() []string {
+	return a.toolManager.GetLoadedServerNames()
+}
+
 // generateWithCancellationAndStreaming calls the LLM with ESC key cancellation support and streaming callbacks
 func (a *Agent) generateWithCancellationAndStreaming(ctx context.Context, messages []*schema.Message, toolInfos []*schema.ToolInfo, streamingCallback StreamingResponseHandler) (*schema.Message, error) {
 	// Check if streaming is enabled

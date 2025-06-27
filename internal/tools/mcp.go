@@ -196,6 +196,15 @@ func (m *MCPToolManager) GetTools() []tool.BaseTool {
 	return m.tools
 }
 
+// GetLoadedServerNames returns the names of successfully loaded MCP servers
+func (m *MCPToolManager) GetLoadedServerNames() []string {
+	var names []string
+	for serverName := range m.clients {
+		names = append(names, serverName)
+	}
+	return names
+}
+
 // Close closes all MCP clients
 func (m *MCPToolManager) Close() error {
 	for name, client := range m.clients {

@@ -21,13 +21,13 @@ var (
 // CLI handles the command line interface with improved message rendering
 type CLI struct {
 	messageRenderer  *MessageRenderer
-	compactRenderer  *CompactRenderer  // Add compact renderer
+	compactRenderer  *CompactRenderer // Add compact renderer
 	messageContainer *MessageContainer
 	usageTracker     *UsageTracker
 	width            int
 	height           int
-	compactMode      bool              // Add compact mode flag
-	modelName        string            // Store current model name
+	compactMode      bool   // Add compact mode flag
+	modelName        string // Store current model name
 }
 
 // NewCLI creates a new CLI instance with message container

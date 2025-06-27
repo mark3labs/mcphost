@@ -2,7 +2,7 @@ package ui
 
 import (
 	"fmt"
-	
+
 	"github.com/charmbracelet/lipgloss"
 )
 
@@ -241,6 +241,6 @@ func FormatCompactLine(symbol, label, content string, symbolColor, labelColor, c
 	styledSymbol := StyleCompactSymbol(symbol, symbolColor).Render(symbol)
 	styledLabel := StyleCompactLabel(labelColor).Render(label)
 	styledContent := StyleCompactContent(contentColor).Render(content)
-	
+
 	return fmt.Sprintf("%s  %-8s %s", styledSymbol, styledLabel, styledContent)
 }

@@ -94,6 +94,42 @@ MCPHost will automatically create a configuration file in your home directory if
 
 You can also specify a custom location using the `--config` flag.
 
+### Environment Variable Substitution
+
+MCPHost supports environment variable substitution in both config files and script frontmatter using the syntax:
+- **`${env://VAR}`** - Required environment variable (fails if not set)
+- **`${env://VAR:-default}`** - Optional environment variable with default value
+
+This allows you to keep sensitive information like API keys in environment variables while maintaining flexible configuration.
+
+**Example:**
+```yaml
+mcpServers:
+  github:
+    type: local
+    command: ["docker", "run", "-i", "--rm", "-e", "GITHUB_PERSONAL_ACCESS_TOKEN=${env://GITHUB_TOKEN}", "ghcr.io/github/github-mcp-server"]
+    environment:
+      DEBUG: "${env://DEBUG:-false}"
+      LOG_LEVEL: "${env://LOG_LEVEL:-info}"
+
+model: "${env://MODEL:-anthropic:claude-sonnet-4-20250514}"
+provider-api-key: "${env://OPENAI_API_KEY}"  # Required - will fail if not set
+```
+
+**Usage:**
+```bash
+# Set required environment variables
+export GITHUB_TOKEN="ghp_your_token_here"
+export OPENAI_API_KEY="your_openai_key"
+
+# Optionally override defaults
+export DEBUG="true"
+export MODEL="openai:gpt-4"
+
+# Run mcphost
+mcphost
+```
+
 ### Simplified Configuration Schema
 
 MCPHost now supports a simplified configuration schema with three server types:
@@ -105,19 +141,28 @@ For local MCP servers that run commands on your machine:
   "mcpServers": {
     "filesystem": {
       "type": "local",
-      "command": ["npx", "@modelcontextprotocol/server-filesystem", "/tmp"],
+      "command": ["npx", "@modelcontextprotocol/server-filesystem", "${env://WORK_DIR:-/tmp}"],
       "environment": {
-        "DEBUG": "true",
-        "LOG_LEVEL": "info"
+        "DEBUG": "${env://DEBUG:-false}",
+        "LOG_LEVEL": "${env://LOG_LEVEL:-info}",
+        "API_TOKEN": "${env://FS_API_TOKEN}"
       },
       "allowedTools": ["read_file", "write_file"],
       "excludedTools": ["delete_file"]
     },
+    "github": {
+      "type": "local",
+      "command": ["docker", "run", "-i", "--rm", "-e", "GITHUB_PERSONAL_ACCESS_TOKEN=${env://GITHUB_TOKEN}", "ghcr.io/github/github-mcp-server"],
+      "environment": {
+        "DEBUG": "${env://DEBUG:-false}"
+      }
+    },
     "sqlite": {
       "type": "local",
-      "command": ["uvx", "mcp-server-sqlite", "--db-path", "/tmp/foo.db"],
+      "command": ["uvx", "mcp-server-sqlite", "--db-path", "${env://DB_PATH:-/tmp/foo.db}"],
       "environment": {
-        "SQLITE_DEBUG": "1"
+        "SQLITE_DEBUG": "${env://DEBUG:-0}",
+        "DATABASE_URL": "${env://DATABASE_URL:-sqlite:///tmp/foo.db}"
       }
     }
   }
@@ -138,12 +183,12 @@ For remote MCP servers accessible via HTTP:
   "mcpServers": {
     "websearch": {
       "type": "remote",
-      "url": "https://api.example.com/mcp",
-      "headers": ["Authorization: Bearer your-api-token"]
+      "url": "${env://WEBSEARCH_URL:-https://api.example.com/mcp}",
+      "headers": ["Authorization: Bearer ${env://WEBSEARCH_TOKEN}"]
     },
     "weather": {
       "type": "remote", 
-      "url": "https://weather-mcp.example.com"
+      "url": "${env://WEATHER_URL:-https://weather-mcp.example.com}"
     }
   }
 }
@@ -165,7 +210,7 @@ For builtin MCP servers that run in-process for optimal performance:
       "type": "builtin",
       "name": "fs",
       "options": {
-        "allowed_directories": ["/tmp", "/home/user/documents"]
+        "allowed_directories": ["${env://WORK_DIR:-/tmp}", "${env://HOME}/documents"]
       },
       "allowedTools": ["read_file", "write_file", "list_directory"]
     },
@@ -414,7 +459,12 @@ Each in their own environment. Give me the URL of each app
 
 #### Variable Substitution
 
-Scripts support variable substitution using `${variable}` syntax with optional default values. Variables can be provided via command line arguments:
+Scripts support both environment variable substitution and script argument substitution:
+
+1. **Environment Variables**: `${env://VAR}` and `${env://VAR:-default}` - Processed first
+2. **Script Arguments**: `${variable}` and `${variable:-default}` - Processed after environment variables
+
+Variables can be provided via command line arguments:
 
 ```bash
 # Script with variables
@@ -423,38 +473,55 @@ mcphost script myscript.sh --args:directory /tmp --args:name "John"
 
 ##### Variable Syntax
 
-MCPHost supports two variable syntaxes:
+MCPHost supports these variable syntaxes:
 
-1. **Required Variables**: `${variable}` - Must be provided via `--args:variable value`
-2. **Optional Variables with Defaults**: `${variable:-default}` - Uses default if not provided
+1. **Required Environment Variables**: `${env://VAR}` - Must be set in environment
+2. **Optional Environment Variables**: `${env://VAR:-default}` - Uses default if not set
+3. **Required Script Arguments**: `${variable}` - Must be provided via `--args:variable value`
+4. **Optional Script Arguments**: `${variable:-default}` - Uses default if not provided
 
-Example script with mixed variables:
+Example script with mixed environment variables and script arguments:
 ```yaml
 #!/usr/bin/env -S mcphost script
 ---
 mcpServers:
+  github:
+    type: "local"
+    command: ["gh", "api"]
+    environment:
+      GITHUB_TOKEN: "${env://GITHUB_TOKEN}"
+      DEBUG: "${env://DEBUG:-false}"
+  
   filesystem:
     type: "local"
-    command: ["npx", "-y", "@modelcontextprotocol/server-filesystem", "${directory:-/tmp}"]
+    command: ["npx", "-y", "@modelcontextprotocol/server-filesystem", "${env://WORK_DIR:-/tmp}"]
+
+model: "${env://MODEL:-anthropic:claude-sonnet-4-20250514}"
 ---
-Hello ${name:-World}! Please list the files in ${directory:-/tmp} and tell me about them.
-Use the ${command:-ls} command to show file details.
+Hello ${name:-World}! Please list ${repo_type:-public} repositories for user ${username}.
+Working directory is ${env://WORK_DIR:-/tmp}.
+Use the ${command:-gh} command to fetch ${count:-10} repositories.
 ```
 
 ##### Usage Examples
 
 ```bash
-# Uses all defaults: name="World", directory="/tmp", command="ls"
+# Set environment variables first
+export GITHUB_TOKEN="ghp_your_token_here"
+export DEBUG="true"
+export WORK_DIR="/home/user/projects"
+
+# Uses env vars and defaults: name="World", repo_type="public", command="gh", count="10"
 mcphost script myscript.sh
 
-# Override specific variables
-mcphost script myscript.sh --args:name "John"
+# Override specific script arguments
+mcphost script myscript.sh --args:name "John" --args:username "alice"
 
-# Override multiple variables  
-mcphost script myscript.sh --args:name "John" --args:directory "/home/john"
+# Override multiple script arguments  
+mcphost script myscript.sh --args:name "John" --args:username "alice" --args:repo_type "private"
 
-# Mix of provided and default values
-mcphost script myscript.sh --args:name "Alice" --args:command "ls -la"
+# Mix of env vars, provided args, and default values
+mcphost script myscript.sh --args:name "Alice" --args:command "gh api" --args:count "5"
 ```
 
 ##### Default Value Features
@@ -464,7 +531,11 @@ mcphost script myscript.sh --args:name "Alice" --args:command "ls -la"
 - **Spaces in defaults**: `${msg:-Hello World}` - Supports spaces in default values
 - **Backward compatibility**: Existing `${variable}` syntax continues to work unchanged
 
-**Important**: Only variables without defaults (e.g., `${directory}`, `${name}`) are required. Variables with defaults are optional and will use their default value if not provided via `--args:variable value` syntax.
+**Important**: 
+- Environment variables without defaults (e.g., `${env://GITHUB_TOKEN}`) are required and must be set in the environment
+- Script arguments without defaults (e.g., `${username}`) are required and must be provided via `--args:variable value` syntax
+- Variables with defaults are optional and will use their default value if not provided
+- Environment variables are processed first, then script arguments
 
 #### Script Features
 
@@ -552,7 +623,10 @@ mcphost --model openai:<your-model-name> \
 # Single prompt with full UI
 mcphost -p "List files in the current directory"
 
-# Quiet mode for scripting (only AI response output)
+# Compact mode for cleaner output without fancy styling
+mcphost -p "List files in the current directory" --compact
+
+# Quiet mode for scripting (only AI response output, no UI elements)
 mcphost -p "What is the capital of France?" --quiet
 
 # Use in shell scripts
@@ -573,6 +647,7 @@ mcphost -p "Generate a random UUID" --quiet | tr '[:lower:]' '[:upper:]'
 - `-m, --model string`: Model to use (format: provider:model) (default "anthropic:claude-sonnet-4-20250514")
 - `-p, --prompt string`: **Run in non-interactive mode with the given prompt**
 - `--quiet`: **Suppress all output except the AI response (only works with --prompt)**
+- `--compact`: **Enable compact output mode without fancy styling (ideal for scripting and automation)**
 - `--stream`: Enable streaming responses (default: true, use `--stream=false` to disable)
 
 ### Authentication Subcommands
@@ -704,11 +779,33 @@ curl -X POST http://localhost:8080/process \
 ```
 
 ### Tips for Scripting
-- Use `--quiet` flag to get clean output suitable for parsing
+- Use `--quiet` flag to get clean output suitable for parsing (only AI response, no UI)
+- Use `--compact` flag for simplified output without fancy styling (when you want to see UI elements)
+- Note: `--compact` and `--quiet` are mutually exclusive - `--compact` has no effect with `--quiet`
+- **Use environment variables for sensitive data** like API keys instead of hardcoding them
+- **Use `${env://VAR}` syntax** in config files and scripts for environment variable substitution
 - Combine with standard Unix tools (`grep`, `awk`, `sed`, etc.)
 - Set appropriate timeouts for long-running operations
 - Handle errors appropriately in your scripts
 - Use environment variables for API keys in production
+
+#### Environment Variable Best Practices
+```bash
+# Set sensitive variables in environment
+export GITHUB_TOKEN="ghp_your_token_here"
+export OPENAI_API_KEY="your_openai_key"
+export DATABASE_URL="postgresql://user:pass@localhost/db"
+
+# Use in config files
+mcpServers:
+  github:
+    environment:
+      GITHUB_TOKEN: "${env://GITHUB_TOKEN}"
+      DEBUG: "${env://DEBUG:-false}"
+
+# Use in scripts
+mcphost script my-script.sh --args:username alice
+```
 
 ## MCP Server Compatibility 🔌
 

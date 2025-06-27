@@ -32,14 +32,14 @@ func (r *CompactRenderer) RenderUserMessage(content string, timestamp time.Time)
 	theme := getTheme()
 	symbol := lipgloss.NewStyle().Foreground(theme.Secondary).Render(">")
 	label := lipgloss.NewStyle().Foreground(theme.Secondary).Bold(true).Render("User")
-	
+
 	// Format content for user messages (preserve formatting, no truncation)
 	compactContent := r.formatUserAssistantContent(content)
-	
+
 	// Handle multi-line content
 	lines := strings.Split(compactContent, "\n")
 	var formattedLines []string
-	
+
 	for i, line := range lines {
 		if i == 0 {
 			// First line includes symbol and label
@@ -49,7 +49,7 @@ func (r *CompactRenderer) RenderUserMessage(content string, timestamp time.Time)
 			formattedLines = append(formattedLines, line)
 		}
 	}
-	
+
 	return UIMessage{
 		Type:      UserMessage,
 		Content:   strings.Join(formattedLines, "\n"),
@@ -62,23 +62,23 @@ func (r *CompactRenderer) RenderUserMessage(content string, timestamp time.Time)
 func (r *CompactRenderer) RenderAssistantMessage(content string, timestamp time.Time, modelName string) UIMessage {
 	theme := getTheme()
 	symbol := lipgloss.NewStyle().Foreground(theme.Primary).Render("<")
-	
+
 	// Use the full model name, fallback to "Assistant" if empty
 	if modelName == "" {
 		modelName = "Assistant"
 	}
 	label := lipgloss.NewStyle().Foreground(theme.Primary).Bold(true).Render(modelName)
-	
+
 	// Format content for assistant messages (preserve formatting, no truncation)
 	compactContent := r.formatUserAssistantContent(content)
 	if compactContent == "" {
 		compactContent = lipgloss.NewStyle().Foreground(theme.Muted).Italic(true).Render("(no output)")
 	}
-	
+
 	// Handle multi-line content
 	lines := strings.Split(compactContent, "\n")
 	var formattedLines []string
-	
+
 	for i, line := range lines {
 		if i == 0 {
 			// First line includes symbol and label
@@ -88,7 +88,7 @@ func (r *CompactRenderer) RenderAssistantMessage(content string, timestamp time.
 			formattedLines = append(formattedLines, line)
 		}
 	}
-	
+
 	return UIMessage{
 		Type:      AssistantMessage,
 		Content:   strings.Join(formattedLines, "\n"),
@@ -102,15 +102,15 @@ func (r *CompactRenderer) RenderToolCallMessage(toolName, toolArgs string, times
 	theme := getTheme()
 	symbol := lipgloss.NewStyle().Foreground(theme.Tool).Render("[")
 	label := lipgloss.NewStyle().Foreground(theme.Tool).Bold(true).Render(toolName)
-	
+
 	// Format args for compact display
 	argsDisplay := r.formatToolArgs(toolArgs)
 	if argsDisplay != "" {
 		argsDisplay = lipgloss.NewStyle().Foreground(theme.Muted).Render(argsDisplay)
 	}
-	
+
 	line := fmt.Sprintf("%s  %s %s", symbol, label, argsDisplay)
-	
+
 	return UIMessage{
 		Type:      ToolCallMessage,
 		Content:   line,
@@ -123,12 +123,12 @@ func (r *CompactRenderer) RenderToolCallMessage(toolName, toolArgs string, times
 func (r *CompactRenderer) RenderToolMessage(toolName, toolArgs, toolResult string, isError bool) UIMessage {
 	theme := getTheme()
 	symbol := lipgloss.NewStyle().Foreground(theme.Muted).Render("]")
-	
+
 	// Determine result type and styling
 	var label string
 	var content string
 	var labelText string
-	
+
 	if isError {
 		labelText = "Error"
 		label = lipgloss.NewStyle().Foreground(theme.Muted).Bold(true).Render(labelText)
@@ -138,16 +138,16 @@ func (r *CompactRenderer) RenderToolMessage(toolName, toolArgs, toolResult strin
 		labelText = r.determineResultType(toolName, toolResult)
 		label = lipgloss.NewStyle().Foreground(theme.Muted).Bold(true).Render(labelText)
 		content = lipgloss.NewStyle().Foreground(theme.Muted).Render(r.formatToolResult(toolResult))
-		
+
 		if r.formatToolResult(toolResult) == "" {
 			content = lipgloss.NewStyle().Foreground(theme.Muted).Italic(true).Render("(no output)")
 		}
 	}
-	
+
 	// Handle multi-line tool results
 	contentLines := strings.Split(content, "\n")
 	var formattedLines []string
-	
+
 	for i, line := range contentLines {
 		if i == 0 {
 			// First line includes symbol and label
@@ -157,7 +157,7 @@ func (r *CompactRenderer) RenderToolMessage(toolName, toolArgs, toolResult strin
 			formattedLines = append(formattedLines, line)
 		}
 	}
-	
+
 	return UIMessage{
 		Type:    ToolMessage,
 		Content: strings.Join(formattedLines, "\n"),
@@ -170,11 +170,11 @@ func (r *CompactRenderer) RenderSystemMessage(content string, timestamp time.Tim
 	theme := getTheme()
 	symbol := lipgloss.NewStyle().Foreground(theme.System).Render("*")
 	label := lipgloss.NewStyle().Foreground(theme.System).Bold(true).Render("System")
-	
+
 	compactContent := r.formatCompactContent(content)
-	
+
 	line := fmt.Sprintf("%s  %-8s %s", symbol, label, compactContent)
-	
+
 	return UIMessage{
 		Type:      SystemMessage,
 		Content:   line,
@@ -188,11 +188,11 @@ func (r *CompactRenderer) RenderErrorMessage(errorMsg string, timestamp time.Tim
 	theme := getTheme()
 	symbol := lipgloss.NewStyle().Foreground(theme.Error).Render("!")
 	label := lipgloss.NewStyle().Foreground(theme.Error).Bold(true).Render("Error")
-	
+
 	compactContent := lipgloss.NewStyle().Foreground(theme.Error).Render(r.formatCompactContent(errorMsg))
-	
+
 	line := fmt.Sprintf("%s  %-8s %s", symbol, label, compactContent)
-	
+
 	return UIMessage{
 		Type:      ErrorMessage,
 		Content:   line,
@@ -206,7 +206,7 @@ func (r *CompactRenderer) RenderDebugConfigMessage(config map[string]any, timest
 	theme := getTheme()
 	symbol := lipgloss.NewStyle().Foreground(theme.Tool).Render("*")
 	label := lipgloss.NewStyle().Foreground(theme.Tool).Bold(true).Render("Debug")
-	
+
 	// Format config as compact key=value pairs
 	var configPairs []string
 	for key, value := range config {
@@ -214,14 +214,14 @@ func (r *CompactRenderer) RenderDebugConfigMessage(config map[string]any, timest
 			configPairs = append(configPairs, fmt.Sprintf("%s=%v", key, value))
 		}
 	}
-	
+
 	content := strings.Join(configPairs, ", ")
 	if len(content) > r.width-20 {
 		content = content[:r.width-23] + "..."
 	}
-	
+
 	line := fmt.Sprintf("%s  %-8s %s", symbol, label, content)
-	
+
 	return UIMessage{
 		Type:      SystemMessage,
 		Content:   line,
@@ -235,18 +235,18 @@ func (r *CompactRenderer) formatCompactContent(content string) string {
 	if content == "" {
 		return ""
 	}
-	
+
 	// Remove markdown formatting for compact display
 	content = strings.ReplaceAll(content, "\n", " ")
 	content = strings.ReplaceAll(content, "\t", " ")
-	
+
 	// Collapse multiple spaces
 	for strings.Contains(content, "  ") {
 		content = strings.ReplaceAll(content, "  ", " ")
 	}
-	
+
 	content = strings.TrimSpace(content)
-	
+
 	// Truncate if too long (unless in debug mode)
 	maxLen := r.width - 28 // Reserve space for symbol and label more conservatively
 	if maxLen < 40 {
@@ -255,7 +255,7 @@ func (r *CompactRenderer) formatCompactContent(content string) string {
 	if !r.debug && len(content) > maxLen {
 		content = content[:maxLen-3] + "..."
 	}
-	
+
 	return content
 }
 
@@ -320,12 +320,13 @@ func (r *CompactRenderer) wrapText(text string, width int) string {
 
 	return strings.Join(wrappedLines, "\n")
 }
+
 // formatToolArgs formats tool arguments for compact display
 func (r *CompactRenderer) formatToolArgs(args string) string {
 	if args == "" || args == "{}" {
 		return ""
 	}
-	
+
 	// Remove JSON braces and format compactly
 	args = strings.TrimSpace(args)
 	if strings.HasPrefix(args, "{") && strings.HasSuffix(args, "}") {
@@ -333,16 +334,16 @@ func (r *CompactRenderer) formatToolArgs(args string) string {
 		args = strings.TrimSuffix(args, "}")
 		args = strings.TrimSpace(args)
 	}
-	
+
 	// Remove quotes around simple values
 	args = strings.ReplaceAll(args, `"`, "")
-	
+
 	// Remove parameter names (e.g., "command: ls" -> "ls", "path: /home" -> "/home")
 	// Look for pattern "key: value" and extract just the value
 	if colonIndex := strings.Index(args, ":"); colonIndex != -1 {
 		args = strings.TrimSpace(args[colonIndex+1:])
 	}
-	
+
 	return r.formatCompactContent(args)
 }
 
@@ -375,10 +376,11 @@ func (r *CompactRenderer) formatToolResult(result string) string {
 
 	return strings.Join(lines, "\n")
 }
+
 // determineResultType determines the display type for tool results
 func (r *CompactRenderer) determineResultType(toolName, result string) string {
 	toolName = strings.ToLower(toolName)
-	
+
 	switch {
 	case strings.Contains(toolName, "read"):
 		return "Text"

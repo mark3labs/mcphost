@@ -277,13 +277,24 @@ func readRemainingLines(scanner *bufio.Scanner) string {
 
 // parseScriptContent parses the content to extract YAML frontmatter and prompt
 func parseScriptContent(content string, variables map[string]string) (*config.Config, error) {
-	// First, validate that all declared variables are provided
-	if err := validateVariables(content, variables); err != nil {
+	// STEP 1: Apply environment variable substitution FIRST
+	envSubstituter := &config.EnvSubstituter{}
+	processedContent, err := envSubstituter.SubstituteEnvVars(content)
+	if err != nil {
+		return nil, fmt.Errorf("script env substitution failed: %v", err)
+	}
+
+	// STEP 2: Validate that all declared script variables are provided
+	if err := validateVariables(processedContent, variables); err != nil {
 		return nil, err
 	}
 
-	// Substitute variables in the content
-	content = substituteVariables(content, variables)
+	// STEP 3: Apply script args substitution
+	argsSubstituter := config.NewArgsSubstituter(variables)
+	content, err = argsSubstituter.SubstituteArgs(processedContent)
+	if err != nil {
+		return nil, fmt.Errorf("script args substitution failed: %v", err)
+	}
 
 	lines := strings.Split(content, "\n")
 
@@ -430,38 +441,16 @@ func validateVariables(content string, variables map[string]string) error {
 }
 
 // substituteVariables replaces ${variable} and ${variable:-default} patterns with their values
+// This function is kept for backward compatibility but now uses the shared ArgsSubstituter
 func substituteVariables(content string, variables map[string]string) string {
-	// Pattern matches both ${varname} and ${varname:-default}
-	re := regexp.MustCompile(`\$\{([^}:]+)(?::-([^}]*))?\}`)
-
-	return re.ReplaceAllStringFunc(content, func(match string) string {
-		// Parse the match to extract variable name and default value
-		submatches := re.FindStringSubmatch(match)
-		if len(submatches) < 2 {
-			return match // Should not happen, but safety check
-		}
-
-		varName := submatches[1]
-		// Check if the original match contains the :- pattern
-		hasDefault := strings.Contains(match, ":-")
-		defaultValue := ""
-		if hasDefault && len(submatches) >= 3 {
-			defaultValue = submatches[2] // Can be empty string
-		}
-
-		// Look up the variable value
-		if value, exists := variables[varName]; exists {
-			return value
-		}
-
-		// Use default value if available
-		if hasDefault {
-			return defaultValue
-		}
-
-		// If no value and no default, leave it as is
-		return match
-	})
+	substituter := config.NewArgsSubstituter(variables)
+	result, err := substituter.SubstituteArgs(content)
+	if err != nil {
+		// For backward compatibility, if there's an error, return the original content
+		// This maintains the existing behavior where missing variables were left as-is
+		return content
+	}
+	return result
 }
 
 // runScriptMode executes the script using the unified agentic loop

@@ -413,12 +413,12 @@ func (r *MessageRenderer) formatToolResult(toolName, result string, width int) s
 	// Format bash/command output with better formatting
 	if strings.Contains(toolName, "bash") || strings.Contains(toolName, "command") {
 		theme := getTheme()
-		
+
 		// Split result into sections if it contains both stdout and stderr
 		if strings.Contains(result, "<stdout>") || strings.Contains(result, "<stderr>") {
 			return r.formatBashOutput(result, width, theme)
 		}
-		
+
 		// For simple output, just render as monospace text with proper line breaks
 		return baseStyle.
 			Width(width).
@@ -437,12 +437,12 @@ func (r *MessageRenderer) formatToolResult(toolName, result string, width int) s
 // formatBashOutput formats bash command output with proper section handling
 func (r *MessageRenderer) formatBashOutput(result string, width int, theme Theme) string {
 	baseStyle := lipgloss.NewStyle()
-	
+
 	// Parse the output sections
 	lines := strings.Split(result, "\n")
 	var formattedLines []string
 	currentSection := ""
-	
+
 	for _, line := range lines {
 		if strings.HasPrefix(line, "<stdout>") {
 			currentSection = "stdout"
@@ -466,7 +466,7 @@ func (r *MessageRenderer) formatBashOutput(result string, width int, theme Theme
 			formattedLines = append(formattedLines, "")
 			continue
 		}
-		
+
 		// Regular content line
 		if currentSection == "stderr" {
 			styledLine := baseStyle.Foreground(theme.Error).Render(line)
@@ -476,7 +476,7 @@ func (r *MessageRenderer) formatBashOutput(result string, width int, theme Theme
 			formattedLines = append(formattedLines, line)
 		}
 	}
-	
+
 	return baseStyle.
 		Width(width).
 		Foreground(theme.Muted).
@@ -519,7 +519,7 @@ type MessageContainer struct {
 	messages    []UIMessage
 	width       int
 	height      int
-	compactMode bool  // Add compact mode flag
+	compactMode bool   // Add compact mode flag
 	modelName   string // Store current model name
 }
 
@@ -690,27 +690,27 @@ func (c *MessageContainer) renderEmptyState() string {
 // renderCompactMessages renders messages in compact format
 func (c *MessageContainer) renderCompactMessages() string {
 	var lines []string
-	
+
 	for _, msg := range c.messages {
 		lines = append(lines, msg.Content)
 	}
-	
+
 	return strings.Join(lines, "\n") + "\n"
 }
 
 // renderCompactEmptyState renders a simple empty state for compact mode
 func (c *MessageContainer) renderCompactEmptyState() string {
 	theme := getTheme()
-	
+
 	// Simple compact welcome
 	welcome := lipgloss.NewStyle().
 		Foreground(theme.System).
 		Bold(true).
 		Render("MCPHost - AI Assistant with MCP Tools")
-	
+
 	help := lipgloss.NewStyle().
 		Foreground(theme.Muted).
 		Render("Type your message or /help for commands")
-	
+
 	return fmt.Sprintf("%s\n%s\n\n", welcome, help)
 }
