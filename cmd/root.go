@@ -33,6 +33,7 @@ var (
 	noExitFlag       bool
 	maxSteps         int
 	streamFlag       bool           // Enable streaming output
+	compactMode      bool           // Enable compact output mode
 	scriptMCPConfig  *config.Config // Used to override config in script mode
 
 	// Session management
@@ -166,6 +167,8 @@ func init() {
 		IntVar(&maxSteps, "max-steps", 0, "maximum number of agent steps (0 for unlimited)")
 	rootCmd.PersistentFlags().
 		BoolVar(&streamFlag, "stream", true, "enable streaming output for faster response display")
+	rootCmd.PersistentFlags().
+		BoolVar(&compactMode, "compact", false, "enable compact output mode without fancy styling")
 
 	// Session management flags
 	rootCmd.PersistentFlags().
@@ -196,6 +199,7 @@ func init() {
 	viper.BindPFlag("prompt", rootCmd.PersistentFlags().Lookup("prompt"))
 	viper.BindPFlag("max-steps", rootCmd.PersistentFlags().Lookup("max-steps"))
 	viper.BindPFlag("stream", rootCmd.PersistentFlags().Lookup("stream"))
+	viper.BindPFlag("compact", rootCmd.PersistentFlags().Lookup("compact"))
 	viper.BindPFlag("provider-url", rootCmd.PersistentFlags().Lookup("provider-url"))
 	viper.BindPFlag("provider-api-key", rootCmd.PersistentFlags().Lookup("provider-api-key"))
 	viper.BindPFlag("max-tokens", rootCmd.PersistentFlags().Lookup("max-tokens"))
@@ -301,7 +305,7 @@ func runNormalMode(ctx context.Context) error {
 
 	if strings.HasPrefix(viper.GetString("model"), "ollama:") && !quietFlag {
 		// Create a temporary CLI for the spinner
-		tempCli, tempErr := ui.NewCLI(viper.GetBool("debug"))
+		tempCli, tempErr := ui.NewCLI(viper.GetBool("debug"), viper.GetBool("compact"))
 		if tempErr == nil {
 			err = tempCli.ShowSpinner("Loading Ollama model...", func() error {
 				var agentErr error
@@ -336,10 +340,13 @@ func runNormalMode(ctx context.Context) error {
 	// Create CLI interface (skip if quiet mode)
 	var cli *ui.CLI
 	if !quietFlag {
-		cli, err = ui.NewCLI(viper.GetBool("debug"))
+		cli, err = ui.NewCLI(viper.GetBool("debug"), viper.GetBool("compact"))
 		if err != nil {
 			return fmt.Errorf("failed to create CLI: %v", err)
 		}
+		
+		// Set the model name for consistent display
+		cli.SetModelName(modelName)
 
 		// Set up usage tracking for supported providers
 		if len(parts) == 2 {

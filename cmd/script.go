@@ -486,6 +486,7 @@ func runScriptMode(ctx context.Context, mcpConfig *config.Config, prompt string,
 	}
 
 	finalDebug := viper.GetBool("debug") || mcpConfig.Debug
+	finalCompact := viper.GetBool("compact")
 	finalMaxSteps := viper.GetInt("max-steps")
 	if finalMaxSteps == 0 && mcpConfig.MaxSteps != 0 {
 		finalMaxSteps = mcpConfig.MaxSteps
@@ -582,7 +583,7 @@ func runScriptMode(ctx context.Context, mcpConfig *config.Config, prompt string,
 	// Create CLI interface (skip if quiet mode)
 	var cli *ui.CLI
 	if !quietFlag {
-		cli, err = ui.NewCLI(finalDebug)
+		cli, err = ui.NewCLI(finalDebug, finalCompact)
 		if err != nil {
 			return fmt.Errorf("failed to create CLI: %v", err)
 		}

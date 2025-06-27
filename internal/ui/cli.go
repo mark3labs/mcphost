@@ -21,18 +21,24 @@ var (
 // CLI handles the command line interface with improved message rendering
 type CLI struct {
 	messageRenderer  *MessageRenderer
+	compactRenderer  *CompactRenderer  // Add compact renderer
 	messageContainer *MessageContainer
 	usageTracker     *UsageTracker
 	width            int
 	height           int
+	compactMode      bool              // Add compact mode flag
+	modelName        string            // Store current model name
 }
 
 // NewCLI creates a new CLI instance with message container
-func NewCLI(debug bool) (*CLI, error) {
-	cli := &CLI{}
+func NewCLI(debug bool, compact bool) (*CLI, error) {
+	cli := &CLI{
+		compactMode: compact,
+	}
 	cli.updateSize()
 	cli.messageRenderer = NewMessageRenderer(cli.width, debug)
-	cli.messageContainer = NewMessageContainer(cli.width, cli.height-4) // Reserve space for input and help
+	cli.compactRenderer = NewCompactRenderer(cli.width, debug)
+	cli.messageContainer = NewMessageContainer(cli.width, cli.height-4, compact) // Pass compact mode
 
 	return cli, nil
 }
@@ -42,6 +48,14 @@ func (c *CLI) SetUsageTracker(tracker *UsageTracker) {
 	c.usageTracker = tracker
 	if c.usageTracker != nil {
 		c.usageTracker.SetWidth(c.width)
+	}
+}
+
+// SetModelName sets the current model name for the CLI
+func (c *CLI) SetModelName(modelName string) {
+	c.modelName = modelName
+	if c.messageContainer != nil {
+		c.messageContainer.SetModelName(modelName)
 	}
 }
 
@@ -97,9 +111,14 @@ func (c *CLI) ShowSpinner(message string, action func() error) error {
 	return err
 }
 
-// DisplayUserMessage displays the user's message using the new renderer
+// DisplayUserMessage displays the user's message using the appropriate renderer
 func (c *CLI) DisplayUserMessage(message string) {
-	msg := c.messageRenderer.RenderUserMessage(message, time.Now())
+	var msg UIMessage
+	if c.compactMode {
+		msg = c.compactRenderer.RenderUserMessage(message, time.Now())
+	} else {
+		msg = c.messageRenderer.RenderUserMessage(message, time.Now())
+	}
 	c.messageContainer.AddMessage(msg)
 	c.displayContainer()
 }
@@ -111,7 +130,12 @@ func (c *CLI) DisplayAssistantMessage(message string) error {
 
 // DisplayAssistantMessageWithModel displays the assistant's message with model info
 func (c *CLI) DisplayAssistantMessageWithModel(message, modelName string) error {
-	msg := c.messageRenderer.RenderAssistantMessage(message, time.Now(), modelName)
+	var msg UIMessage
+	if c.compactMode {
+		msg = c.compactRenderer.RenderAssistantMessage(message, time.Now(), modelName)
+	} else {
+		msg = c.messageRenderer.RenderAssistantMessage(message, time.Now(), modelName)
+	}
 	c.messageContainer.AddMessage(msg)
 	c.displayContainer()
 	return nil
@@ -119,7 +143,12 @@ func (c *CLI) DisplayAssistantMessageWithModel(message, modelName string) error 
 
 // DisplayToolCallMessage displays a tool call in progress
 func (c *CLI) DisplayToolCallMessage(toolName, toolArgs string) {
-	msg := c.messageRenderer.RenderToolCallMessage(toolName, toolArgs, time.Now())
+	var msg UIMessage
+	if c.compactMode {
+		msg = c.compactRenderer.RenderToolCallMessage(toolName, toolArgs, time.Now())
+	} else {
+		msg = c.messageRenderer.RenderToolCallMessage(toolName, toolArgs, time.Now())
+	}
 
 	// Always display immediately - spinner management is handled externally
 	c.messageContainer.AddMessage(msg)
@@ -128,7 +157,12 @@ func (c *CLI) DisplayToolCallMessage(toolName, toolArgs string) {
 
 // DisplayToolMessage displays a tool call message
 func (c *CLI) DisplayToolMessage(toolName, toolArgs, toolResult string, isError bool) {
-	msg := c.messageRenderer.RenderToolMessage(toolName, toolArgs, toolResult, isError)
+	var msg UIMessage
+	if c.compactMode {
+		msg = c.compactRenderer.RenderToolMessage(toolName, toolArgs, toolResult, isError)
+	} else {
+		msg = c.messageRenderer.RenderToolMessage(toolName, toolArgs, toolResult, isError)
+	}
 
 	// Always display immediately - spinner management is handled externally
 	c.messageContainer.AddMessage(msg)
@@ -138,7 +172,12 @@ func (c *CLI) DisplayToolMessage(toolName, toolArgs, toolResult string, isError 
 // StartStreamingMessage starts a streaming assistant message
 func (c *CLI) StartStreamingMessage(modelName string) {
 	// Add an empty assistant message that we'll update during streaming
-	msg := c.messageRenderer.RenderAssistantMessage("", time.Now(), modelName)
+	var msg UIMessage
+	if c.compactMode {
+		msg = c.compactRenderer.RenderAssistantMessage("", time.Now(), modelName)
+	} else {
+		msg = c.messageRenderer.RenderAssistantMessage("", time.Now(), modelName)
+	}
 	c.messageContainer.AddMessage(msg)
 	c.displayContainer()
 }
@@ -150,30 +189,50 @@ func (c *CLI) UpdateStreamingMessage(content string) {
 	c.displayContainer()
 }
 
-// DisplayError displays an error message using the message component
+// DisplayError displays an error message using the appropriate renderer
 func (c *CLI) DisplayError(err error) {
-	msg := c.messageRenderer.RenderErrorMessage(err.Error(), time.Now())
+	var msg UIMessage
+	if c.compactMode {
+		msg = c.compactRenderer.RenderErrorMessage(err.Error(), time.Now())
+	} else {
+		msg = c.messageRenderer.RenderErrorMessage(err.Error(), time.Now())
+	}
 	c.messageContainer.AddMessage(msg)
 	c.displayContainer()
 }
 
-// DisplayInfo displays an informational message using the system message component
+// DisplayInfo displays an informational message using the appropriate renderer
 func (c *CLI) DisplayInfo(message string) {
-	msg := c.messageRenderer.RenderSystemMessage(message, time.Now())
+	var msg UIMessage
+	if c.compactMode {
+		msg = c.compactRenderer.RenderSystemMessage(message, time.Now())
+	} else {
+		msg = c.messageRenderer.RenderSystemMessage(message, time.Now())
+	}
 	c.messageContainer.AddMessage(msg)
 	c.displayContainer()
 }
 
 // DisplayCancellation displays a cancellation message
 func (c *CLI) DisplayCancellation() {
-	msg := c.messageRenderer.RenderSystemMessage("Generation cancelled by user (ESC pressed)", time.Now())
+	var msg UIMessage
+	if c.compactMode {
+		msg = c.compactRenderer.RenderSystemMessage("Generation cancelled by user (ESC pressed)", time.Now())
+	} else {
+		msg = c.messageRenderer.RenderSystemMessage("Generation cancelled by user (ESC pressed)", time.Now())
+	}
 	c.messageContainer.AddMessage(msg)
 	c.displayContainer()
 }
 
-// DisplayDebugConfig displays configuration settings in debug mode using tool response block styling
+// DisplayDebugConfig displays configuration settings using the appropriate renderer
 func (c *CLI) DisplayDebugConfig(config map[string]any) {
-	msg := c.messageRenderer.RenderDebugConfigMessage(config, time.Now())
+	var msg UIMessage
+	if c.compactMode {
+		msg = c.compactRenderer.RenderDebugConfigMessage(config, time.Now())
+	} else {
+		msg = c.messageRenderer.RenderDebugConfigMessage(config, time.Now())
+	}
 	c.messageContainer.AddMessage(msg)
 	c.displayContainer()
 }
@@ -242,15 +301,25 @@ func (c *CLI) DisplayServers(servers []string) {
 // DisplayHistory displays conversation history using the message container
 func (c *CLI) DisplayHistory(messages []*schema.Message) {
 	// Create a temporary container for history
-	historyContainer := NewMessageContainer(c.width, c.height-4)
+	historyContainer := NewMessageContainer(c.width, c.height-4, c.compactMode)
 
 	for _, msg := range messages {
 		switch msg.Role {
 		case schema.User:
-			uiMsg := c.messageRenderer.RenderUserMessage(msg.Content, time.Now())
+			var uiMsg UIMessage
+			if c.compactMode {
+				uiMsg = c.compactRenderer.RenderUserMessage(msg.Content, time.Now())
+			} else {
+				uiMsg = c.messageRenderer.RenderUserMessage(msg.Content, time.Now())
+			}
 			historyContainer.AddMessage(uiMsg)
 		case schema.Assistant:
-			uiMsg := c.messageRenderer.RenderAssistantMessage(msg.Content, time.Now(), "")
+			var uiMsg UIMessage
+			if c.compactMode {
+				uiMsg = c.compactRenderer.RenderAssistantMessage(msg.Content, time.Now(), c.modelName)
+			} else {
+				uiMsg = c.messageRenderer.RenderAssistantMessage(msg.Content, time.Now(), c.modelName)
+			}
 			historyContainer.AddMessage(uiMsg)
 		}
 	}
@@ -384,7 +453,12 @@ func (c *CLI) DisplayUsageStats() {
 	content.WriteString(fmt.Sprintf("**Session Total:** %d input + %d output tokens = $%.6f (%d requests)\n",
 		sessionStats.TotalInputTokens, sessionStats.TotalOutputTokens, sessionStats.TotalCost, sessionStats.RequestCount))
 
-	msg := c.messageRenderer.RenderSystemMessage(content.String(), time.Now())
+	var msg UIMessage
+	if c.compactMode {
+		msg = c.compactRenderer.RenderSystemMessage(content.String(), time.Now())
+	} else {
+		msg = c.messageRenderer.RenderSystemMessage(content.String(), time.Now())
+	}
 	c.messageContainer.AddMessage(msg)
 	c.displayContainer()
 }
@@ -433,6 +507,9 @@ func (c *CLI) updateSize() {
 	// Update renderers if they exist
 	if c.messageRenderer != nil {
 		c.messageRenderer.SetWidth(c.width)
+	}
+	if c.compactRenderer != nil {
+		c.compactRenderer.SetWidth(c.width)
 	}
 	if c.messageContainer != nil {
 		c.messageContainer.SetSize(c.width, c.height-4)

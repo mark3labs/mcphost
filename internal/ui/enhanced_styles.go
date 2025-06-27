@@ -1,6 +1,8 @@
 package ui
 
 import (
+	"fmt"
+	
 	"github.com/charmbracelet/lipgloss"
 )
 
@@ -209,4 +211,36 @@ func CreateGradientText(text string, startColor, endColor lipgloss.AdaptiveColor
 		Foreground(startColor).
 		Bold(true).
 		Render(text)
+}
+
+// Compact styling utilities
+
+// StyleCompactSymbol creates a styled symbol for compact mode
+func StyleCompactSymbol(symbol string, color lipgloss.AdaptiveColor) lipgloss.Style {
+	return lipgloss.NewStyle().
+		Foreground(color).
+		Bold(true)
+}
+
+// StyleCompactLabel creates a styled label for compact mode
+func StyleCompactLabel(color lipgloss.AdaptiveColor) lipgloss.Style {
+	return lipgloss.NewStyle().
+		Foreground(color).
+		Bold(true).
+		Width(8)
+}
+
+// StyleCompactContent creates basic content styling for compact mode
+func StyleCompactContent(color lipgloss.AdaptiveColor) lipgloss.Style {
+	return lipgloss.NewStyle().
+		Foreground(color)
+}
+
+// FormatCompactLine formats a complete compact line with consistent spacing
+func FormatCompactLine(symbol, label, content string, symbolColor, labelColor, contentColor lipgloss.AdaptiveColor) string {
+	styledSymbol := StyleCompactSymbol(symbol, symbolColor).Render(symbol)
+	styledLabel := StyleCompactLabel(labelColor).Render(label)
+	styledContent := StyleCompactContent(contentColor).Render(content)
+	
+	return fmt.Sprintf("%s  %-8s %s", styledSymbol, styledLabel, styledContent)
 }

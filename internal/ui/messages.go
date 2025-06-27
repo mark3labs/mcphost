@@ -516,23 +516,31 @@ func (r *MessageRenderer) renderMarkdown(content string, width int) string {
 
 // MessageContainer wraps multiple messages in a container
 type MessageContainer struct {
-	messages []UIMessage
-	width    int
-	height   int
+	messages    []UIMessage
+	width       int
+	height      int
+	compactMode bool  // Add compact mode flag
+	modelName   string // Store current model name
 }
 
 // NewMessageContainer creates a new message container
-func NewMessageContainer(width, height int) *MessageContainer {
+func NewMessageContainer(width, height int, compact bool) *MessageContainer {
 	return &MessageContainer{
-		messages: make([]UIMessage, 0),
-		width:    width,
-		height:   height,
+		messages:    make([]UIMessage, 0),
+		width:       width,
+		height:      height,
+		compactMode: compact,
 	}
 }
 
 // AddMessage adds a message to the container
 func (c *MessageContainer) AddMessage(msg UIMessage) {
 	c.messages = append(c.messages, msg)
+}
+
+// SetModelName sets the current model name for the container
+func (c *MessageContainer) SetModelName(modelName string) {
+	c.modelName = modelName
 }
 
 // UpdateLastMessage updates the content of the last message efficiently
@@ -546,9 +554,15 @@ func (c *MessageContainer) UpdateLastMessage(content string) {
 
 	// Only re-render if content actually changed and it's an assistant message
 	if lastMsg.Type == AssistantMessage {
-		// Create a new renderer to update the message
-		renderer := NewMessageRenderer(c.width, false)
-		newMsg := renderer.RenderAssistantMessage(content, lastMsg.Timestamp, "")
+		// Create appropriate renderer based on compact mode
+		var newMsg UIMessage
+		if c.compactMode {
+			compactRenderer := NewCompactRenderer(c.width, false)
+			newMsg = compactRenderer.RenderAssistantMessage(content, lastMsg.Timestamp, c.modelName)
+		} else {
+			renderer := NewMessageRenderer(c.width, false)
+			newMsg = renderer.RenderAssistantMessage(content, lastMsg.Timestamp, c.modelName)
+		}
 		c.messages[lastIdx] = newMsg
 	}
 }
@@ -567,7 +581,14 @@ func (c *MessageContainer) SetSize(width, height int) {
 // Render renders all messages in the container
 func (c *MessageContainer) Render() string {
 	if len(c.messages) == 0 {
+		if c.compactMode {
+			return c.renderCompactEmptyState()
+		}
 		return c.renderEmptyState()
+	}
+
+	if c.compactMode {
+		return c.renderCompactMessages()
 	}
 
 	var parts []string
@@ -664,4 +685,32 @@ func (c *MessageContainer) renderEmptyState() string {
 		Align(lipgloss.Center).
 		AlignVertical(lipgloss.Center).
 		Render(welcomeContent)
+}
+
+// renderCompactMessages renders messages in compact format
+func (c *MessageContainer) renderCompactMessages() string {
+	var lines []string
+	
+	for _, msg := range c.messages {
+		lines = append(lines, msg.Content)
+	}
+	
+	return strings.Join(lines, "\n") + "\n"
+}
+
+// renderCompactEmptyState renders a simple empty state for compact mode
+func (c *MessageContainer) renderCompactEmptyState() string {
+	theme := getTheme()
+	
+	// Simple compact welcome
+	welcome := lipgloss.NewStyle().
+		Foreground(theme.System).
+		Bold(true).
+		Render("MCPHost - AI Assistant with MCP Tools")
+	
+	help := lipgloss.NewStyle().
+		Foreground(theme.Muted).
+		Render("Type your message or /help for commands")
+	
+	return fmt.Sprintf("%s\n%s\n\n", welcome, help)
 }
