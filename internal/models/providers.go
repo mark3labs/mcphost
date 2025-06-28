@@ -11,10 +11,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cloudwego/eino-ext/components/model/claude"
+	einoclaude "github.com/cloudwego/eino-ext/components/model/claude"
 	"github.com/cloudwego/eino-ext/components/model/ollama"
-	"github.com/cloudwego/eino-ext/components/model/openai"
+	einoopenai "github.com/cloudwego/eino-ext/components/model/openai"
 	"github.com/cloudwego/eino/components/model"
+	"github.com/mark3labs/mcphost/internal/models/openai"
 	"github.com/mark3labs/mcphost/internal/ui/progress"
 	"github.com/ollama/ollama/api"
 	"google.golang.org/genai"
@@ -182,7 +183,7 @@ func createAzureOpenAIProvider(ctx context.Context, config *ProviderConfig, mode
 		return nil, fmt.Errorf("Azure OpenAI API key not provided. Use --provider-api-key flag or AZURE_OPENAI_API_KEY environment variable")
 	}
 
-	azureConfig := &openai.ChatModelConfig{
+	azureConfig := &einoopenai.ChatModelConfig{
 		APIKey:     apiKey,
 		Model:      modelName,
 		ByAzure:    true,                 // Indicate this is an Azure OpenAI model
@@ -214,7 +215,7 @@ func createAzureOpenAIProvider(ctx context.Context, config *ProviderConfig, mode
 		azureConfig.Stop = config.StopSequences
 	}
 
-	return openai.NewChatModel(ctx, azureConfig)
+	return openai.NewCustomChatModel(ctx, azureConfig)
 }
 
 func createAnthropicProvider(ctx context.Context, config *ProviderConfig, modelName string) (model.ToolCallingChatModel, error) {
@@ -235,7 +236,7 @@ func createAnthropicProvider(ctx context.Context, config *ProviderConfig, modelN
 		maxTokens = 4096 // Default value
 	}
 
-	claudeConfig := &claude.Config{
+	claudeConfig := &einoclaude.Config{
 		Model:     modelName,
 		MaxTokens: maxTokens,
 	}
@@ -272,7 +273,7 @@ func createAnthropicProvider(ctx context.Context, config *ProviderConfig, modelN
 		claudeConfig.StopSequences = config.StopSequences
 	}
 
-	return claude.NewChatModel(ctx, claudeConfig)
+	return einoclaude.NewChatModel(ctx, claudeConfig)
 }
 
 func createOpenAIProvider(ctx context.Context, config *ProviderConfig, modelName string) (model.ToolCallingChatModel, error) {
@@ -284,7 +285,7 @@ func createOpenAIProvider(ctx context.Context, config *ProviderConfig, modelName
 		return nil, fmt.Errorf("OpenAI API key not provided. Use --provider-api-key flag or OPENAI_API_KEY environment variable")
 	}
 
-	openaiConfig := &openai.ChatModelConfig{
+	openaiConfig := &einoopenai.ChatModelConfig{
 		APIKey: apiKey,
 		Model:  modelName,
 	}
@@ -330,7 +331,7 @@ func createOpenAIProvider(ctx context.Context, config *ProviderConfig, modelName
 		openaiConfig.Stop = config.StopSequences
 	}
 
-	return openai.NewChatModel(ctx, openaiConfig)
+	return openai.NewCustomChatModel(ctx, openaiConfig)
 }
 
 func createGoogleProvider(ctx context.Context, config *ProviderConfig, modelName string) (model.ToolCallingChatModel, error) {
