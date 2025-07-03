@@ -578,6 +578,14 @@ func (c *MessageContainer) SetSize(width, height int) {
 	c.height = height
 }
 
+// GetLastMessage returns the last message in the container
+func (c *MessageContainer) GetLastMessage() *UIMessage {
+	if len(c.messages) == 0 {
+		return nil
+	}
+	return &c.messages[len(c.messages)-1]
+}
+
 // Render renders all messages in the container
 func (c *MessageContainer) Render() string {
 	if len(c.messages) == 0 {

@@ -11,7 +11,6 @@ import (
 	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/cloudwego/eino/schema"
-	"golang.org/x/term"
 )
 
 var (
@@ -20,14 +19,19 @@ var (
 
 // CLI handles the command line interface with improved message rendering
 type CLI struct {
-	messageRenderer  *MessageRenderer
-	compactRenderer  *CompactRenderer // Add compact renderer
-	messageContainer *MessageContainer
-	usageTracker     *UsageTracker
-	width            int
-	height           int
-	compactMode      bool   // Add compact mode flag
-	modelName        string // Store current model name
+	messageRenderer    *MessageRenderer
+	compactRenderer    *CompactRenderer
+	messageContainer   *MessageContainer
+	usageTracker       *UsageTracker
+	terminalRenderer   *TerminalRenderer // NEW: Add terminal renderer
+	width              int
+	height             int
+	compactMode        bool
+	modelName          string
+	lastMessageRow     int  // NEW: Track last message position
+	streamingActive    bool // NEW: Track streaming state
+	streamingStartRow  int  // NEW: Track where streaming message starts
+	streamingLineCount int  // NEW: Track how many lines streaming message occupies
 }
 
 // NewCLI creates a new CLI instance with message container
@@ -36,9 +40,14 @@ func NewCLI(debug bool, compact bool) (*CLI, error) {
 		compactMode: compact,
 	}
 	cli.updateSize()
+
+	// Initialize renderers
 	cli.messageRenderer = NewMessageRenderer(cli.width, debug)
 	cli.compactRenderer = NewCompactRenderer(cli.width, debug)
-	cli.messageContainer = NewMessageContainer(cli.width, cli.height-4, compact) // Pass compact mode
+	cli.messageContainer = NewMessageContainer(cli.width, cli.height-4, compact)
+
+	// NEW: Initialize terminal renderer
+	cli.terminalRenderer = NewTerminalRenderer(os.Stdout)
 
 	return cli, nil
 }
@@ -77,8 +86,14 @@ func (c *CLI) GetPrompt() (string, error) {
 		MarginBottom(1).
 		PaddingLeft(2)
 
-	// Render the enhanced input section
-	fmt.Print(dividerStyle.Render(""))
+	// Use terminal renderer instead of fmt.Print
+	dividerContent := dividerStyle.Render("")
+	if c.compactMode {
+		c.terminalRenderer.WriteAt(c.lastMessageRow+1, 0, dividerContent)
+	} else {
+		c.terminalRenderer.WriteAt(c.lastMessageRow+1, 0, dividerContent)
+	}
+	c.lastMessageRow += strings.Count(dividerContent, "\n") + 1
 
 	var prompt string
 	err := huh.NewForm(huh.NewGroup(huh.NewText().
@@ -119,8 +134,9 @@ func (c *CLI) DisplayUserMessage(message string) {
 	} else {
 		msg = c.messageRenderer.RenderUserMessage(message, time.Now())
 	}
-	c.messageContainer.AddMessage(msg)
-	c.displayContainer()
+
+	// Use unified display logic that works in both streaming and non-streaming modes
+	c.DisplayMessageWithStreaming(msg)
 }
 
 // DisplayAssistantMessage displays the assistant's message using the new renderer
@@ -136,8 +152,9 @@ func (c *CLI) DisplayAssistantMessageWithModel(message, modelName string) error 
 	} else {
 		msg = c.messageRenderer.RenderAssistantMessage(message, time.Now(), modelName)
 	}
-	c.messageContainer.AddMessage(msg)
-	c.displayContainer()
+
+	// Use unified display logic
+	c.DisplayMessageWithStreaming(msg)
 	return nil
 }
 
@@ -150,9 +167,8 @@ func (c *CLI) DisplayToolCallMessage(toolName, toolArgs string) {
 		msg = c.messageRenderer.RenderToolCallMessage(toolName, toolArgs, time.Now())
 	}
 
-	// Always display immediately - spinner management is handled externally
-	c.messageContainer.AddMessage(msg)
-	c.displayContainer()
+	// Use unified display logic
+	c.DisplayMessageWithStreaming(msg)
 }
 
 // DisplayToolMessage displays a tool call message
@@ -164,13 +180,15 @@ func (c *CLI) DisplayToolMessage(toolName, toolArgs, toolResult string, isError 
 		msg = c.messageRenderer.RenderToolMessage(toolName, toolArgs, toolResult, isError)
 	}
 
-	// Always display immediately - spinner management is handled externally
-	c.messageContainer.AddMessage(msg)
-	c.displayContainer()
+	// Use unified display logic
+	c.DisplayMessageWithStreaming(msg)
 }
 
 // StartStreamingMessage starts a streaming assistant message
 func (c *CLI) StartStreamingMessage(modelName string) {
+	// Mark streaming as active
+	c.streamingActive = true
+
 	// Add an empty assistant message that we'll update during streaming
 	var msg UIMessage
 	if c.compactMode {
@@ -179,14 +197,98 @@ func (c *CLI) StartStreamingMessage(modelName string) {
 		msg = c.messageRenderer.RenderAssistantMessage("", time.Now(), modelName)
 	}
 	c.messageContainer.AddMessage(msg)
+
+	// Calculate where this streaming message starts
+	// This is where we'll clear and re-render during updates
+	content := c.messageContainer.Render()
+	lines := strings.Split(content, "\n")
+
+	// Find the start of the last message (the streaming message)
+	// We'll work backwards to find where this message begins
+	c.streamingStartRow = c.calculateStreamingMessageStart(lines)
+	c.streamingLineCount = 0 // Will be set during first update
+
+	// Display initial state using terminal renderer
 	c.displayContainer()
 }
 
-// UpdateStreamingMessage updates the streaming message with new content
+// calculateStreamingMessageStart finds where the streaming message starts in the rendered content
+func (c *CLI) calculateStreamingMessageStart(_ []string) int {
+	// For now, simple approach: streaming message starts after the last non-empty line
+	// before the current message. This can be refined based on message container logic.
+	return c.lastMessageRow + 1
+}
+
+// UpdateStreamingMessage updates the streaming message with new content using clear-and-rerender
 func (c *CLI) UpdateStreamingMessage(content string) {
-	// Update the last message (which should be the streaming assistant message)
+	if !c.streamingActive {
+		return
+	}
+
+	// Hide cursor during update
+	c.terminalRenderer.HideCursor()
+	defer c.terminalRenderer.ShowCursor()
+
+	// Update the message container with new content
 	c.messageContainer.UpdateLastMessage(content)
-	c.displayContainer()
+
+	// Clear the existing streaming message area and re-render
+	c.updateStreamingMessageOnly("")
+}
+
+// EndStreamingMessage marks the end of streaming and performs final cleanup
+func (c *CLI) EndStreamingMessage() {
+	c.streamingActive = false
+
+	// Reset streaming position tracking
+	c.streamingStartRow = 0
+	c.streamingLineCount = 0
+
+	// Show cursor
+	c.terminalRenderer.ShowCursor()
+}
+
+// DisplayMessageWithStreaming displays any message type using terminal renderer during streaming
+func (c *CLI) DisplayMessageWithStreaming(msg UIMessage) {
+	if !c.streamingActive {
+		// Not in streaming mode, use normal display
+		c.messageContainer.AddMessage(msg)
+		c.displayContainer()
+		return
+	}
+
+	// In streaming mode, add message and use terminal renderer
+	c.messageContainer.AddMessage(msg)
+
+	// Hide cursor during update
+	c.terminalRenderer.HideCursor()
+	defer c.terminalRenderer.ShowCursor()
+
+	// Get the rendered content for this message
+	content := c.messageContainer.Render()
+
+	// Calculate the position for this new message
+	lines := strings.Split(content, "\n")
+	messageStartRow := c.lastMessageRow + 1
+
+	// Render the new message lines
+	for i, line := range lines[messageStartRow:] {
+		if line != "" {
+			if c.compactMode {
+				// Compact mode: no padding, direct output
+				// Format: "symbol  Label content"
+				c.terminalRenderer.WriteAt(messageStartRow+i, 0, line)
+			} else {
+				// Normal mode: 2-space left padding + message container formatting
+				// The message container already handles the box formatting
+				paddedLine := strings.Repeat(" ", 2) + line
+				c.terminalRenderer.WriteAt(messageStartRow+i, 0, paddedLine)
+			}
+		}
+	}
+
+	// Update last message row
+	c.lastMessageRow = len(lines) - 1
 }
 
 // DisplayError displays an error message using the appropriate renderer
@@ -197,8 +299,9 @@ func (c *CLI) DisplayError(err error) {
 	} else {
 		msg = c.messageRenderer.RenderErrorMessage(err.Error(), time.Now())
 	}
-	c.messageContainer.AddMessage(msg)
-	c.displayContainer()
+
+	// Use unified display logic
+	c.DisplayMessageWithStreaming(msg)
 }
 
 // DisplayInfo displays an informational message using the appropriate renderer
@@ -209,8 +312,9 @@ func (c *CLI) DisplayInfo(message string) {
 	} else {
 		msg = c.messageRenderer.RenderSystemMessage(message, time.Now())
 	}
-	c.messageContainer.AddMessage(msg)
-	c.displayContainer()
+
+	// Use unified display logic
+	c.DisplayMessageWithStreaming(msg)
 }
 
 // DisplayCancellation displays a cancellation message
@@ -221,8 +325,9 @@ func (c *CLI) DisplayCancellation() {
 	} else {
 		msg = c.messageRenderer.RenderSystemMessage("Generation cancelled by user (ESC pressed)", time.Now())
 	}
-	c.messageContainer.AddMessage(msg)
-	c.displayContainer()
+
+	// Use unified display logic
+	c.DisplayMessageWithStreaming(msg)
 }
 
 // DisplayDebugConfig displays configuration settings using the appropriate renderer
@@ -233,8 +338,9 @@ func (c *CLI) DisplayDebugConfig(config map[string]any) {
 	} else {
 		msg = c.messageRenderer.RenderDebugConfigMessage(config, time.Now())
 	}
-	c.messageContainer.AddMessage(msg)
-	c.displayContainer()
+
+	// Use unified display logic
+	c.DisplayMessageWithStreaming(msg)
 }
 
 // DisplayHelp displays help information in a message block
@@ -324,8 +430,13 @@ func (c *CLI) DisplayHistory(messages []*schema.Message) {
 		}
 	}
 
-	fmt.Println("\nConversation History:")
-	fmt.Println(historyContainer.Render())
+	// Use terminal renderer instead of fmt.Println
+	headerText := "\nConversation History:\n"
+	historyContent := historyContainer.Render()
+
+	c.terminalRenderer.WriteAt(c.lastMessageRow+1, 0, headerText)
+	c.terminalRenderer.WriteAt(c.lastMessageRow+3, 0, historyContent)
+	c.lastMessageRow += strings.Count(headerText+historyContent, "\n") + 1
 }
 
 // IsSlashCommand checks if the input is a slash command
@@ -365,7 +476,8 @@ func (c *CLI) HandleSlashCommand(input string, servers []string, tools []string,
 		c.ResetUsageStats()
 		return SlashCommandResult{Handled: true}
 	case "/quit":
-		fmt.Println("\nGoodbye!")
+		goodbyeText := "\nGoodbye!\n"
+		c.terminalRenderer.WriteAt(c.lastMessageRow+1, 0, goodbyeText)
 		os.Exit(0)
 		return SlashCommandResult{Handled: true}
 	default:
@@ -379,18 +491,105 @@ func (c *CLI) ClearMessages() {
 	c.displayContainer()
 }
 
-// displayContainer renders and displays the message container
+// displayContainer renders and displays the message container using termenv
 func (c *CLI) displayContainer() {
-	// Clear screen and display messages
-	fmt.Print("\033[2J\033[H") // Clear screen and move cursor to top
+	if c.streamingActive {
+		// During streaming, use terminal renderer for all updates
+		c.displayContainerStreaming()
+	} else {
+		// Non-streaming mode - use terminal renderer for consistency
+		c.displayContainerNormal()
+	}
+}
 
-	// Add left padding to the entire container
+// displayContainerNormal handles non-streaming display using terminal renderer
+func (c *CLI) displayContainerNormal() {
+	// Hide cursor during updates
+	c.terminalRenderer.HideCursor()
+	defer c.terminalRenderer.ShowCursor()
+
+	// Get container content
 	content := c.messageContainer.Render()
-	paddedContent := lipgloss.NewStyle().
-		PaddingLeft(2).
-		Render(content)
 
-	fmt.Print(paddedContent)
+	// Full redraw for non-streaming updates
+	c.fullRedraw(content)
+}
+
+// displayContainerStreaming handles streaming display with simplified clear-and-rerender
+func (c *CLI) displayContainerStreaming() {
+	// Hide cursor during updates
+	c.terminalRenderer.HideCursor()
+	defer c.terminalRenderer.ShowCursor()
+
+	// Get container content
+	content := c.messageContainer.Render()
+
+	// For streaming, we only need to update the streaming message area
+	// All other messages remain static during streaming
+	c.updateStreamingMessageOnly(content)
+}
+
+// fullRedraw performs a complete screen redraw
+func (c *CLI) fullRedraw(content string) {
+	// Move to top of screen
+	c.terminalRenderer.MoveTo(0, 0)
+
+	// Clear from cursor to end of screen
+	c.terminalRenderer.ClearFromCursor()
+
+	// Split content into lines and render
+	lines := strings.Split(content, "\n")
+	for i, line := range lines {
+		if i > 0 {
+			c.terminalRenderer.MoveTo(i, 0)
+		}
+
+		// Add left padding
+		paddedLine := strings.Repeat(" ", 2) + line
+		c.terminalRenderer.WriteAt(i, 0, paddedLine)
+	}
+
+	// Update last message position
+	c.lastMessageRow = len(lines) - 1
+}
+
+// updateStreamingMessageOnly updates only the streaming message using clear-and-rerender
+func (c *CLI) updateStreamingMessageOnly(_ string) {
+	if !c.streamingActive {
+		return
+	}
+
+	// Clear the existing streaming message lines
+	if c.streamingLineCount > 0 {
+		c.terminalRenderer.MoveTo(c.streamingStartRow, 0)
+		c.terminalRenderer.ClearLines(c.streamingLineCount)
+	}
+
+	// Get the last message (which should be the streaming message)
+	lastMessage := c.messageContainer.GetLastMessage()
+	if lastMessage == nil {
+		return
+	}
+
+	// Split the message content into lines
+	lines := strings.Split(lastMessage.Content, "\n")
+
+	// Render each line
+	for i, line := range lines {
+		if line != "" {
+			if c.compactMode {
+				// Compact mode: no padding
+				c.terminalRenderer.WriteAt(c.streamingStartRow+i, 0, line)
+			} else {
+				// Normal mode: 2-space left padding
+				paddedLine := strings.Repeat(" ", 2) + line
+				c.terminalRenderer.WriteAt(c.streamingStartRow+i, 0, paddedLine)
+			}
+		}
+	}
+
+	// Update line count for next clear operation
+	c.streamingLineCount = len(lines)
 }
 
 // UpdateUsage updates the usage tracker with token counts and costs
@@ -482,27 +681,33 @@ func (c *CLI) DisplayUsageAfterResponse() {
 
 	usageInfo := c.usageTracker.RenderUsageInfo()
 	if usageInfo != "" {
-		paddedUsage := lipgloss.NewStyle().
-			PaddingLeft(2).
-			PaddingTop(1).
-			Render(usageInfo)
-		fmt.Print(paddedUsage)
+		if c.compactMode {
+			// In compact mode, write directly without extra padding
+			c.terminalRenderer.WriteAt(c.lastMessageRow+1, 0, usageInfo)
+		} else {
+			// In normal mode, add left padding
+			paddedUsage := lipgloss.NewStyle().
+				PaddingLeft(2).
+				PaddingTop(1).
+				Render(usageInfo)
+			c.terminalRenderer.WriteAt(c.lastMessageRow+1, 0, paddedUsage)
+		}
+		c.lastMessageRow += strings.Count(usageInfo, "\n") + 2
 	}
 }
 
 // updateSize updates the CLI size based on terminal dimensions
 func (c *CLI) updateSize() {
-	width, height, err := term.GetSize(int(os.Stdout.Fd()))
-	if err != nil {
-		c.width = 80  // Fallback width
-		c.height = 24 // Fallback height
-		return
+	// Update terminal renderer size first
+	if c.terminalRenderer != nil {
+		c.terminalRenderer.UpdateSize()
+		c.width, c.height = c.terminalRenderer.GetSize()
+	} else {
+		// Fallback for initialization
+		width, height := getTerminalSize()
+		c.width = width - 4 // Account for padding
+		c.height = height
 	}
-
-	// Add left and right padding (4 characters total: 2 on each side)
-	paddingTotal := 4
-	c.width = width - paddingTotal
-	c.height = height
 
 	// Update renderers if they exist
 	if c.messageRenderer != nil {

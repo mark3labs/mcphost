@@ -19,7 +19,7 @@ require (
 	github.com/ollama/ollama v0.5.12
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/viper v1.20.1
-	golang.org/x/term v0.31.0
+	golang.org/x/term v0.32.0
 	google.golang.org/genai v1.10.0
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -146,6 +146,6 @@ require (
 	github.com/spf13/pflag v1.0.6 // indirect
 	golang.org/x/exp v0.0.0-20231110203233-9a3e6036ecaa // indirect
 	golang.org/x/sync v0.13.0 // indirect
-	golang.org/x/sys v0.32.0 // indirect
+	golang.org/x/sys v0.33.0 // indirect
 	golang.org/x/text v0.24.0 // indirect
 )

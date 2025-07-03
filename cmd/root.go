@@ -716,8 +716,13 @@ func runAgenticStep(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI, mes
 	var lastDisplayedContent string
 	var streamingContent strings.Builder
 	var streamingStarted bool
-	if cli != nil && !config.Quiet {
+	if !config.Quiet && cli != nil {
 		streamingCallback = func(chunk string) {
+			// Skip empty chunks
+			if chunk == "" {
+				return
+			}
+
 			// Stop spinner before first chunk if still running
 			if currentSpinner != nil {
 				currentSpinner.Stop()
@@ -733,7 +738,7 @@ func runAgenticStep(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI, mes
 				streamingContent.Reset() // Reset content for new streaming session
 			}
 
-			// Accumulate content and update message
+			// Update streaming content and display
 			streamingContent.WriteString(chunk)
 			cli.UpdateStreamingMessage(streamingContent.String())
 		}
@@ -855,6 +860,11 @@ func runAgenticStep(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI, mes
 	// Make sure spinner is stopped if still running
 	if !config.Quiet && cli != nil && currentSpinner != nil {
 		currentSpinner.Stop()
+	}
+
+	// NEW: End streaming if it was active
+	if streamingStarted && cli != nil {
+		cli.EndStreamingMessage()
 	}
 
 	if err != nil {
