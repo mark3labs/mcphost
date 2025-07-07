@@ -3,27 +3,36 @@ package ui
 import (
 	"strings"
 
+	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/lipgloss"
 )
 
-// PromptWithUsage is a Bubble Tea component that displays usage info and a prompt form
-type PromptWithUsage struct {
+// InteractivePrompt is a comprehensive Bubble Tea component that handles:
+// - Usage info display
+// - Loading spinner during processing
+// - Input form for user prompts
+type InteractivePrompt struct {
 	usageTracker *UsageTracker
 	form         *huh.Form
+	spinner      spinner.Model
 	width        int
 	compactMode  bool
 	prompt       string
 	submitted    bool
+	showSpinner  bool
+	spinnerMsg   string
+	showForm     bool
 }
 
-// NewPromptWithUsage creates a new prompt component with usage display
-func NewPromptWithUsage(usageTracker *UsageTracker, width int, compactMode bool) *PromptWithUsage {
-	p := &PromptWithUsage{
+// NewInteractivePrompt creates a new comprehensive prompt component
+func NewInteractivePrompt(usageTracker *UsageTracker, width int, compactMode bool) *InteractivePrompt {
+	p := &InteractivePrompt{
 		usageTracker: usageTracker,
 		width:        width,
 		compactMode:  compactMode,
+		showForm:     true, // Start with form visible
 	}
 
 	// Create form with reference to our prompt field
@@ -34,18 +43,53 @@ func NewPromptWithUsage(usageTracker *UsageTracker, width int, compactMode bool)
 	).WithWidth(width).
 		WithTheme(huh.ThemeCharm())
 
+	// Initialize spinner
+	p.spinner = spinner.New()
+	p.spinner.Spinner = spinner.Points
+	theme := GetTheme()
+	p.spinner.Style = p.spinner.Style.Foreground(theme.Primary)
+
 	return p
 }
 
+// ShowSpinner shows the spinner with a message and hides the form
+func (p *InteractivePrompt) ShowSpinner(message string) tea.Cmd {
+	p.showSpinner = true
+	p.spinnerMsg = message
+	p.showForm = false
+	return p.spinner.Tick
+}
+
+// HideSpinner hides the spinner and shows the form again
+func (p *InteractivePrompt) HideSpinner() {
+	p.showSpinner = false
+	p.showForm = true
+}
+
 // Init implements tea.Model
-func (p *PromptWithUsage) Init() tea.Cmd {
-	return p.form.Init()
+func (p *InteractivePrompt) Init() tea.Cmd {
+	if p.showForm {
+		return p.form.Init()
+	}
+	return nil
 }
 
 // Update implements tea.Model
-func (p *PromptWithUsage) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (p *InteractivePrompt) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
+		if p.showSpinner {
+			// During spinner, only allow ESC to cancel
+			switch msg.String() {
+			case "esc":
+				return p, tea.Quit
+			case "ctrl+c":
+				return p, tea.Quit
+			}
+			return p, nil
+		}
+
+		// Handle form input
 		switch msg.String() {
 		case "ctrl+c":
 			return p, tea.Quit
@@ -54,23 +98,33 @@ func (p *PromptWithUsage) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			p.submitted = true
 			return p, tea.Quit
 		}
-	}
 
-	// Update the form
-	form, cmd := p.form.Update(msg)
-	if f, ok := form.(*huh.Form); ok {
-		p.form = f
-		if p.form.State == huh.StateCompleted {
-			p.submitted = true
-			return p, tea.Quit
+	case spinner.TickMsg:
+		if p.showSpinner {
+			var cmd tea.Cmd
+			p.spinner, cmd = p.spinner.Update(msg)
+			return p, cmd
 		}
 	}
 
-	return p, cmd
+	// Update the form if it's visible
+	if p.showForm {
+		form, cmd := p.form.Update(msg)
+		if f, ok := form.(*huh.Form); ok {
+			p.form = f
+			if p.form.State == huh.StateCompleted {
+				p.submitted = true
+				return p, tea.Quit
+			}
+		}
+		return p, cmd
+	}
+
+	return p, nil
 }
 
 // View implements tea.Model
-func (p *PromptWithUsage) View() string {
+func (p *InteractivePrompt) View() string {
 	var view strings.Builder
 
 	// Display usage info if available
@@ -86,18 +140,48 @@ func (p *PromptWithUsage) View() string {
 		}
 	}
 
-	// Display the form
-	view.WriteString(p.form.View())
+	// Display spinner or form
+	if p.showSpinner {
+		// Enhanced spinner display
+		baseStyle := lipgloss.NewStyle()
+		theme := GetTheme()
+
+		spinnerStyle := baseStyle.
+			Foreground(theme.Primary).
+			Bold(true)
+
+		messageStyle := baseStyle.
+			Foreground(theme.Text).
+			Italic(true)
+
+		spinnerView := lipgloss.NewStyle().
+			PaddingLeft(2).
+			PaddingTop(1).
+			Render(spinnerStyle.Render(p.spinner.View()) + " " + messageStyle.Render(p.spinnerMsg))
+
+		view.WriteString(spinnerView)
+	} else if p.showForm {
+		// Display the form
+		view.WriteString(p.form.View())
+	}
 
 	return view.String()
 }
 
 // GetPrompt returns the entered prompt value
-func (p *PromptWithUsage) GetPrompt() string {
+func (p *InteractivePrompt) GetPrompt() string {
 	return p.prompt
 }
 
 // WasSubmitted returns whether the form was submitted (not cancelled)
-func (p *PromptWithUsage) WasSubmitted() bool {
+func (p *InteractivePrompt) WasSubmitted() bool {
 	return p.submitted && p.form.State == huh.StateCompleted
+}
+
+// Legacy compatibility - keep the old name for now
+type PromptWithUsage = InteractivePrompt
+
+// NewPromptWithUsage creates a new prompt component (legacy compatibility)
+func NewPromptWithUsage(usageTracker *UsageTracker, width int, compactMode bool) *PromptWithUsage {
+	return NewInteractivePrompt(usageTracker, width, compactMode)
 }

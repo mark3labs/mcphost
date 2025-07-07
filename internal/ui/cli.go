@@ -28,10 +28,11 @@ type CLI struct {
 	height             int
 	compactMode        bool
 	modelName          string
-	lastMessageRow     int  // NEW: Track last message position
-	streamingActive    bool // NEW: Track streaming state
-	streamingStartRow  int  // NEW: Track where streaming message starts
-	streamingLineCount int  // NEW: Track how many lines streaming message occupies
+	lastMessageRow     int                // NEW: Track last message position
+	streamingActive    bool               // NEW: Track streaming state
+	streamingStartRow  int                // NEW: Track where streaming message starts
+	streamingLineCount int                // NEW: Track how many lines streaming message occupies
+	currentPrompt      *InteractivePrompt // NEW: Current interactive prompt component
 }
 
 // NewCLI creates a new CLI instance with message container
@@ -68,21 +69,26 @@ func (c *CLI) SetModelName(modelName string) {
 	}
 }
 
-// GetPrompt gets user input using the custom Bubble Tea component with usage display
+// GetPrompt gets user input using the comprehensive interactive component
 func (c *CLI) GetPrompt() (string, error) {
-	// Create the prompt component with usage display
-	promptComponent := NewPromptWithUsage(c.usageTracker, c.width, c.compactMode)
+	// Create the interactive prompt component with usage display
+	c.currentPrompt = NewInteractivePrompt(c.usageTracker, c.width, c.compactMode)
 
 	// Run the Bubble Tea program
-	program := tea.NewProgram(promptComponent)
+	program := tea.NewProgram(c.currentPrompt)
 	model, err := program.Run()
+
+	// Clear the current prompt reference
+	defer func() {
+		c.currentPrompt = nil
+	}()
 
 	if err != nil {
 		return "", err
 	}
 
 	// Extract the result
-	if p, ok := model.(*PromptWithUsage); ok {
+	if p, ok := model.(*InteractivePrompt); ok {
 		if !p.WasSubmitted() {
 			return "", io.EOF // User cancelled
 		}
@@ -94,6 +100,21 @@ func (c *CLI) GetPrompt() (string, error) {
 
 // ShowSpinner displays a spinner with the given message and executes the action
 func (c *CLI) ShowSpinner(message string, action func() error) error {
+	// If we have an active interactive prompt, use its spinner
+	if c.currentPrompt != nil {
+		// Show spinner in the interactive prompt
+		c.currentPrompt.ShowSpinner(message)
+
+		// Execute the action
+		err := action()
+
+		// Hide spinner when done
+		c.currentPrompt.HideSpinner()
+
+		return err
+	}
+
+	// Fallback to standalone spinner for non-interactive contexts
 	spinner := NewSpinner(message)
 	spinner.Start()
 
