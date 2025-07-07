@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/charmbracelet/huh"
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/cloudwego/eino/schema"
 )
@@ -68,54 +68,28 @@ func (c *CLI) SetModelName(modelName string) {
 	}
 }
 
-// GetPrompt gets user input using the huh library with divider and padding
+// GetPrompt gets user input using the custom Bubble Tea component with usage display
 func (c *CLI) GetPrompt() (string, error) {
-	// Usage info is now displayed immediately after responses via DisplayUsageAfterResponse()
-	// No need to display it here to avoid duplication
+	// Create the prompt component with usage display
+	promptComponent := NewPromptWithUsage(c.usageTracker, c.width, c.compactMode)
 
-	// Create an enhanced divider with gradient effect
-	theme := GetTheme()
-	dividerStyle := lipgloss.NewStyle().
-		Width(c.width).
-		BorderTop(true).
-		BorderStyle(lipgloss.Border{
-			Top: "━",
-		}).
-		BorderForeground(theme.Border).
-		MarginTop(1).
-		MarginBottom(1).
-		PaddingLeft(2)
-
-	// Use current cursor position from terminal renderer + space after usage info
-	currentRow, _ := c.terminalRenderer.GetCursorPosition()
-	dividerRow := currentRow + 2 // Add space after usage info
-
-	// Use terminal renderer instead of fmt.Print
-	dividerContent := dividerStyle.Render("")
-	if c.compactMode {
-		c.terminalRenderer.WriteAt(dividerRow, 0, dividerContent)
-	} else {
-		c.terminalRenderer.WriteAt(dividerRow, 0, dividerContent)
-	}
-	c.lastMessageRow = dividerRow + strings.Count(dividerContent, "\n") + 1
-
-	var prompt string
-	err := huh.NewForm(huh.NewGroup(huh.NewText().
-		Title("Enter your prompt (Type /help for commands, Ctrl+C to quit, ESC to cancel generation)").
-		Value(&prompt).
-		CharLimit(5000)),
-	).WithWidth(c.width).
-		WithTheme(huh.ThemeCharm()).
-		Run()
+	// Run the Bubble Tea program
+	program := tea.NewProgram(promptComponent)
+	model, err := program.Run()
 
 	if err != nil {
-		if errors.Is(err, huh.ErrUserAborted) {
-			return "", io.EOF // Signal clean exit
-		}
 		return "", err
 	}
 
-	return prompt, nil
+	// Extract the result
+	if p, ok := model.(*PromptWithUsage); ok {
+		if !p.WasSubmitted() {
+			return "", io.EOF // User cancelled
+		}
+		return p.GetPrompt(), nil
+	}
+
+	return "", errors.New("unexpected model type")
 }
 
 // ShowSpinner displays a spinner with the given message and executes the action
@@ -683,36 +657,9 @@ func (c *CLI) ResetUsageStats() {
 	c.DisplayInfo("Usage statistics have been reset.")
 }
 
-// DisplayUsageAfterResponse displays usage information immediately after a response
+// DisplayUsageAfterResponse is now a no-op since usage is displayed in the prompt component
 func (c *CLI) DisplayUsageAfterResponse() {
-	if c.usageTracker == nil {
-		return
-	}
-
-	// Don't display usage during streaming - wait until streaming ends
-	if c.streamingActive {
-		return
-	}
-
-	usageInfo := c.usageTracker.RenderUsageInfo()
-	if usageInfo != "" {
-		// Use current cursor position from terminal renderer
-		currentRow, _ := c.terminalRenderer.GetCursorPosition()
-		usageRow := currentRow + 1
-
-		if c.compactMode {
-			// In compact mode, write directly without extra padding
-			c.terminalRenderer.WriteAt(usageRow, 0, usageInfo)
-		} else {
-			// In normal mode, add left padding
-			paddedUsage := lipgloss.NewStyle().
-				PaddingLeft(2).
-				PaddingTop(1).
-				Render(usageInfo)
-			c.terminalRenderer.WriteAt(usageRow, 0, paddedUsage)
-		}
-		c.lastMessageRow = usageRow + strings.Count(usageInfo, "\n") + 1
-	}
+	// Usage is now displayed in the GetPrompt() Bubble Tea component
 }
 
 // updateSize updates the CLI size based on terminal dimensions
