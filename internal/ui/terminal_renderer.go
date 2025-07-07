@@ -88,7 +88,7 @@ func (tr *TerminalRenderer) Write(content string) {
 	tr.output.WriteString(content)
 
 	// Update cursor tracking based on content
-	lines := strings.Split(content, "\\n")
+	lines := strings.Split(content, "\n")
 	if len(lines) > 1 {
 		// Multi-line content: cursor moves to start of last line + length of last line
 		tr.cursorRow += len(lines) - 1
@@ -187,6 +187,26 @@ func (tr *TerminalRenderer) ScrollUp(lines int) {
 	for i := 0; i < lines; i++ {
 		tr.output.WriteString("\n")
 	}
+
+	// Update cursor tracking - everything shifts up
+	tr.cursorRow = max(0, tr.cursorRow-lines)
+}
+
+// ScrollUpPercent scrolls the terminal content up by a percentage of terminal height
+func (tr *TerminalRenderer) ScrollUpPercent(percent float64) {
+	lines := int(float64(tr.height) * percent / 100.0)
+	tr.ScrollUp(lines)
+	// After scrolling, cursor should be at the top of the visible area
+	tr.cursorRow = 0
+	tr.cursorCol = 0
+}
+
+// max helper function
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
 }
 
 // EnsureVisibleRow ensures the specified row is visible, scrolling if necessary

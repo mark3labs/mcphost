@@ -86,14 +86,18 @@ func (c *CLI) GetPrompt() (string, error) {
 		MarginBottom(1).
 		PaddingLeft(2)
 
+	// Use current cursor position from terminal renderer + space after usage info
+	currentRow, _ := c.terminalRenderer.GetCursorPosition()
+	dividerRow := currentRow + 2 // Add space after usage info
+
 	// Use terminal renderer instead of fmt.Print
 	dividerContent := dividerStyle.Render("")
 	if c.compactMode {
-		c.terminalRenderer.WriteAt(c.lastMessageRow+1, 0, dividerContent)
+		c.terminalRenderer.WriteAt(dividerRow, 0, dividerContent)
 	} else {
-		c.terminalRenderer.WriteAt(c.lastMessageRow+1, 0, dividerContent)
+		c.terminalRenderer.WriteAt(dividerRow, 0, dividerContent)
 	}
-	c.lastMessageRow += strings.Count(dividerContent, "\n") + 1
+	c.lastMessageRow = dividerRow + strings.Count(dividerContent, "\n") + 1
 
 	var prompt string
 	err := huh.NewForm(huh.NewGroup(huh.NewText().
@@ -137,6 +141,11 @@ func (c *CLI) DisplayUserMessage(message string) {
 
 	// Use unified display logic that works in both streaming and non-streaming modes
 	c.DisplayMessageWithStreaming(msg)
+
+	// Always scroll up by 100% AFTER displaying the new user message for clean slate
+	c.terminalRenderer.ScrollUpPercent(100.0)
+	// Reset our position tracking since everything shifted up
+	c.lastMessageRow = 0
 }
 
 // DisplayAssistantMessage displays the assistant's message using the new renderer
@@ -287,8 +296,9 @@ func (c *CLI) DisplayMessageWithStreaming(msg UIMessage) {
 		}
 	}
 
-	// Update last message row
+	// Update last message row and terminal cursor position
 	c.lastMessageRow = len(lines) - 1
+	c.terminalRenderer.MoveTo(c.lastMessageRow, 0)
 }
 
 // DisplayError displays an error message using the appropriate renderer
@@ -684,23 +694,24 @@ func (c *CLI) DisplayUsageAfterResponse() {
 		return
 	}
 
-	// Sync c.lastMessageRow with terminal renderer's actual cursor position
-	c.lastMessageRow, _ = c.terminalRenderer.GetCursorPosition()
-
 	usageInfo := c.usageTracker.RenderUsageInfo()
 	if usageInfo != "" {
+		// Use current cursor position from terminal renderer
+		currentRow, _ := c.terminalRenderer.GetCursorPosition()
+		usageRow := currentRow + 1
+
 		if c.compactMode {
 			// In compact mode, write directly without extra padding
-			c.terminalRenderer.WriteAt(c.lastMessageRow+1, 0, usageInfo)
+			c.terminalRenderer.WriteAt(usageRow, 0, usageInfo)
 		} else {
 			// In normal mode, add left padding
 			paddedUsage := lipgloss.NewStyle().
 				PaddingLeft(2).
 				PaddingTop(1).
 				Render(usageInfo)
-			c.terminalRenderer.WriteAt(c.lastMessageRow+1, 0, paddedUsage)
+			c.terminalRenderer.WriteAt(usageRow, 0, paddedUsage)
 		}
-		c.lastMessageRow += strings.Count(usageInfo, "\n") + 2
+		c.lastMessageRow = usageRow + strings.Count(usageInfo, "\n") + 1
 	}
 }
 
