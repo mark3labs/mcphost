@@ -679,6 +679,14 @@ func (c *CLI) DisplayUsageAfterResponse() {
 		return
 	}
 
+	// Don't display usage during streaming - wait until streaming ends
+	if c.streamingActive {
+		return
+	}
+
+	// Sync c.lastMessageRow with terminal renderer's actual cursor position
+	c.lastMessageRow, _ = c.terminalRenderer.GetCursorPosition()
+
 	usageInfo := c.usageTracker.RenderUsageInfo()
 	if usageInfo != "" {
 		if c.compactMode {
