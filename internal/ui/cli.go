@@ -252,47 +252,38 @@ func (c *CLI) EndStreamingMessage() {
 	c.terminalRenderer.ShowCursor()
 }
 
-// DisplayMessageWithStreaming displays any message type using terminal renderer during streaming
+// DisplayMessageWithStreaming displays any message type using terminal renderer with proper cursor tracking
 func (c *CLI) DisplayMessageWithStreaming(msg UIMessage) {
-	if !c.streamingActive {
-		// Not in streaming mode, use normal display
-		c.messageContainer.AddMessage(msg)
-		c.displayContainer()
-		return
-	}
-
-	// In streaming mode, add message and use terminal renderer
+	// Add message to container for history tracking
 	c.messageContainer.AddMessage(msg)
 
-	// Hide cursor during update
+	// Always use terminal renderer with proper cursor tracking
 	c.terminalRenderer.HideCursor()
 	defer c.terminalRenderer.ShowCursor()
 
-	// Get the rendered content for this message
-	content := c.messageContainer.Render()
+	// Get current cursor position and move to next line
+	currentRow, _ := c.terminalRenderer.GetCursorPosition()
+	messageStartRow := currentRow + 1
 
-	// Calculate the position for this new message
-	lines := strings.Split(content, "\n")
-	messageStartRow := c.lastMessageRow + 1
+	// Split message content into lines
+	lines := strings.Split(msg.Content, "\n")
 
-	// Render the new message lines
-	for i, line := range lines[messageStartRow:] {
+	// Render each line with proper positioning
+	for i, line := range lines {
 		if line != "" {
 			if c.compactMode {
-				// Compact mode: no padding, direct output
-				// Format: "symbol  Label content"
+				// Compact mode: no padding
 				c.terminalRenderer.WriteAt(messageStartRow+i, 0, line)
 			} else {
-				// Normal mode: 2-space left padding + message container formatting
-				// The message container already handles the box formatting
+				// Normal mode: 2-space left padding
 				paddedLine := strings.Repeat(" ", 2) + line
 				c.terminalRenderer.WriteAt(messageStartRow+i, 0, paddedLine)
 			}
 		}
 	}
 
-	// Update last message row and terminal cursor position
-	c.lastMessageRow = len(lines) - 1
+	// Update cursor position to end of message
+	c.lastMessageRow = messageStartRow + len(lines) - 1
 	c.terminalRenderer.MoveTo(c.lastMessageRow, 0)
 }
 
@@ -520,46 +511,8 @@ func (c *CLI) displayContainer() {
 
 // displayContainerNormal handles non-streaming display using terminal renderer
 func (c *CLI) displayContainerNormal() {
-	// Hide cursor during updates
-	c.terminalRenderer.HideCursor()
-	defer c.terminalRenderer.ShowCursor()
-
-	// Get the last message that was just added
-	lastMessage := c.messageContainer.GetLastMessage()
-	if lastMessage == nil {
-		return
-	}
-
-	// Display the new message incrementally at current cursor position
-	c.displayMessageIncremental(lastMessage)
-}
-
-// displayMessageIncremental displays a single message at the current cursor position
-func (c *CLI) displayMessageIncremental(msg *UIMessage) {
-	// Get current cursor position
-	currentRow, _ := c.terminalRenderer.GetCursorPosition()
-	messageStartRow := currentRow + 1
-
-	// Split message content into lines
-	lines := strings.Split(msg.Content, "\n")
-
-	// Render each line
-	for i, line := range lines {
-		if line != "" {
-			if c.compactMode {
-				// Compact mode: no padding
-				c.terminalRenderer.WriteAt(messageStartRow+i, 0, line)
-			} else {
-				// Normal mode: 2-space left padding
-				paddedLine := strings.Repeat(" ", 2) + line
-				c.terminalRenderer.WriteAt(messageStartRow+i, 0, paddedLine)
-			}
-		}
-	}
-
-	// Update last message row and move cursor to end
-	c.lastMessageRow = messageStartRow + len(lines) - 1
-	c.terminalRenderer.MoveTo(c.lastMessageRow, 0)
+	// This method is no longer needed since DisplayMessageWithStreaming
+	// now handles all display logic consistently using the terminal renderer
 }
 
 // displayContainerStreaming handles streaming display with simplified clear-and-rerender
