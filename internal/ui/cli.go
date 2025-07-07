@@ -513,11 +513,42 @@ func (c *CLI) displayContainerNormal() {
 	c.terminalRenderer.HideCursor()
 	defer c.terminalRenderer.ShowCursor()
 
-	// Get container content
-	content := c.messageContainer.Render()
+	// Get the last message that was just added
+	lastMessage := c.messageContainer.GetLastMessage()
+	if lastMessage == nil {
+		return
+	}
 
-	// Full redraw for non-streaming updates
-	c.fullRedraw(content)
+	// Display the new message incrementally at current cursor position
+	c.displayMessageIncremental(lastMessage)
+}
+
+// displayMessageIncremental displays a single message at the current cursor position
+func (c *CLI) displayMessageIncremental(msg *UIMessage) {
+	// Get current cursor position
+	currentRow, _ := c.terminalRenderer.GetCursorPosition()
+	messageStartRow := currentRow + 1
+
+	// Split message content into lines
+	lines := strings.Split(msg.Content, "\n")
+
+	// Render each line
+	for i, line := range lines {
+		if line != "" {
+			if c.compactMode {
+				// Compact mode: no padding
+				c.terminalRenderer.WriteAt(messageStartRow+i, 0, line)
+			} else {
+				// Normal mode: 2-space left padding
+				paddedLine := strings.Repeat(" ", 2) + line
+				c.terminalRenderer.WriteAt(messageStartRow+i, 0, paddedLine)
+			}
+		}
+	}
+
+	// Update last message row and move cursor to end
+	c.lastMessageRow = messageStartRow + len(lines) - 1
+	c.terminalRenderer.MoveTo(c.lastMessageRow, 0)
 }
 
 // displayContainerStreaming handles streaming display with simplified clear-and-rerender
@@ -532,30 +563,6 @@ func (c *CLI) displayContainerStreaming() {
 	// For streaming, we only need to update the streaming message area
 	// All other messages remain static during streaming
 	c.updateStreamingMessageOnly(content)
-}
-
-// fullRedraw performs a complete screen redraw
-func (c *CLI) fullRedraw(content string) {
-	// Move to top of screen
-	c.terminalRenderer.MoveTo(0, 0)
-
-	// Clear from cursor to end of screen
-	c.terminalRenderer.ClearFromCursor()
-
-	// Split content into lines and render
-	lines := strings.Split(content, "\n")
-	for i, line := range lines {
-		if i > 0 {
-			c.terminalRenderer.MoveTo(i, 0)
-		}
-
-		// Add left padding
-		paddedLine := strings.Repeat(" ", 2) + line
-		c.terminalRenderer.WriteAt(i, 0, paddedLine)
-	}
-
-	// Update last message position
-	c.lastMessageRow = len(lines) - 1
 }
 
 // updateStreamingMessageOnly updates only the streaming message using clear-and-rerender
