@@ -481,8 +481,19 @@ func (c *CLI) HandleSlashCommand(input string, servers []string, tools []string,
 		c.ResetUsageStats()
 		return SlashCommandResult{Handled: true}
 	case "/quit":
-		goodbyeText := "\nGoodbye!\n"
-		c.terminalRenderer.WriteAt(c.lastMessageRow+1, 0, goodbyeText)
+		// Show cursor and move to a clean line before exiting
+		c.terminalRenderer.ShowCursor()
+
+		// Move to next line and write goodbye message with proper padding
+		currentRow, _ := c.terminalRenderer.GetCursorPosition()
+		c.terminalRenderer.MoveTo(currentRow+1, 0)
+
+		if c.compactMode {
+			c.terminalRenderer.Write("\nGoodbye!\n")
+		} else {
+			c.terminalRenderer.Write("\n  Goodbye!\n")
+		}
+
 		os.Exit(0)
 		return SlashCommandResult{Handled: true}
 	default:

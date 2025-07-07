@@ -126,9 +126,7 @@ func (ut *UsageTracker) RenderUsageInfo() string {
 	ut.mu.RLock()
 	defer ut.mu.RUnlock()
 
-	if ut.sessionStats.RequestCount == 0 {
-		return ""
-	}
+	// Always show usage info, even if no requests have been made yet
 
 	// Import lipgloss for styling
 	baseStyle := lipgloss.NewStyle()
