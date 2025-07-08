@@ -93,9 +93,8 @@ func (r *MessageRenderer) RenderUserMessage(content string, timestamp time.Time)
 	rendered := renderContentBlock(
 		fullContent,
 		r.width,
-		WithAlign(lipgloss.Right),
-		WithBorderColor(theme.Secondary),
-		WithMarginBottom(1),
+		WithAlign(lipgloss.Left),
+		WithBorderColor(theme.Info),
 	)
 
 	return UIMessage{
@@ -140,7 +139,6 @@ func (r *MessageRenderer) RenderAssistantMessage(content string, timestamp time.
 		r.width,
 		WithAlign(lipgloss.Left),
 		WithBorderColor(theme.Primary),
-		WithMarginBottom(1),
 	)
 
 	return UIMessage{
@@ -278,7 +276,6 @@ func (r *MessageRenderer) RenderErrorMessage(errorMsg string, timestamp time.Tim
 		r.width,
 		WithAlign(lipgloss.Left),
 		WithBorderColor(theme.Error),
-		WithMarginBottom(1),
 	)
 
 	return UIMessage{

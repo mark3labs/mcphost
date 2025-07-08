@@ -68,23 +68,7 @@ func (c *CLI) GetPrompt() (string, error) {
 	c.messageContainer.messages = nil // clear previous messages (they should have been printed already)
 	c.lastStreamHeight = 0            // Reset last stream height for new prompt
 
-	// Create an enhanced divider with gradient effect
-	theme := GetTheme()
-	dividerStyle := lipgloss.NewStyle().
-		Width(c.width).
-		BorderTop(true).
-		BorderStyle(lipgloss.Border{
-			Top: "━",
-		}).
-		BorderForeground(theme.Border).
-		MarginTop(1).
-		MarginBottom(1).
-		PaddingLeft(2)
-
-	// Render the enhanced input section
-	if !c.compactMode {
-		fmt.Print(dividerStyle.Render(""))
-	}
+	// No divider needed - removed for cleaner appearance
 
 	var prompt string
 	err := huh.NewForm(huh.NewGroup(huh.NewText().
@@ -397,8 +381,19 @@ func (c *CLI) displayContainer() {
 	// Add left padding to the entire container
 	content := c.messageContainer.Render()
 
+	// Check if we're displaying a user message
+	// User messages should not have additional left padding since they're right-aligned
+	// This only applies in non-compact mode
+	paddingLeft := 2
+	if !c.compactMode && len(c.messageContainer.messages) > 0 {
+		lastMessage := c.messageContainer.messages[len(c.messageContainer.messages)-1]
+		if lastMessage.Type == UserMessage {
+			paddingLeft = 0
+		}
+	}
+
 	paddedContent := lipgloss.NewStyle().
-		PaddingLeft(2).
+		PaddingLeft(paddingLeft).
 		Width(c.width). // overwrite (no content) while agent is streaming
 		Render(content)
 
