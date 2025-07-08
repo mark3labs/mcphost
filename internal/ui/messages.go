@@ -30,6 +30,7 @@ type UIMessage struct {
 	Height    int
 	Content   string
 	Timestamp time.Time
+	Streaming bool
 }
 
 // Helper functions to get theme colors
@@ -563,6 +564,7 @@ func (c *MessageContainer) UpdateLastMessage(content string) {
 			renderer := NewMessageRenderer(c.width, false)
 			newMsg = renderer.RenderAssistantMessage(content, lastMsg.Timestamp, c.modelName)
 		}
+		newMsg.Streaming = lastMsg.Streaming // Preserve streaming state
 		c.messages[lastIdx] = newMsg
 	}
 }
@@ -608,12 +610,16 @@ func (c *MessageContainer) Render() string {
 		}
 	}
 
-	return lipgloss.NewStyle().
-		Width(c.width).
-		PaddingBottom(1).
-		Render(
-			lipgloss.JoinVertical(lipgloss.Top, parts...),
-		)
+	style := lipgloss.NewStyle().
+		Width(c.width)
+
+	if !c.compactMode {
+		style = style.PaddingBottom(1)
+	}
+
+	return style.Render(
+		lipgloss.JoinVertical(lipgloss.Top, parts...),
+	)
 }
 
 // renderEmptyState renders an enhanced initial empty state
@@ -695,7 +701,7 @@ func (c *MessageContainer) renderCompactMessages() string {
 		lines = append(lines, msg.Content)
 	}
 
-	return strings.Join(lines, "\n") + "\n"
+	return strings.Join(lines, "\n")
 }
 
 // renderCompactEmptyState renders a simple empty state for compact mode

@@ -28,6 +28,7 @@ type CLI struct {
 	height           int
 	compactMode      bool   // Add compact mode flag
 	modelName        string // Store current model name
+	lastStreamHeight int    // track how far back we need to move the cursor to overwrite streaming messages
 }
 
 // NewCLI creates a new CLI instance with message container
@@ -64,6 +65,9 @@ func (c *CLI) GetPrompt() (string, error) {
 	// Usage info is now displayed immediately after responses via DisplayUsageAfterResponse()
 	// No need to display it here to avoid duplication
 
+	c.messageContainer.messages = nil // clear previous messages (they should have been printed already)
+	c.lastStreamHeight = 0            // Reset last stream height for new prompt
+
 	// Create an enhanced divider with gradient effect
 	theme := GetTheme()
 	dividerStyle := lipgloss.NewStyle().
@@ -78,7 +82,9 @@ func (c *CLI) GetPrompt() (string, error) {
 		PaddingLeft(2)
 
 	// Render the enhanced input section
-	fmt.Print(dividerStyle.Render(""))
+	if !c.compactMode {
+		fmt.Print(dividerStyle.Render(""))
+	}
 
 	var prompt string
 	err := huh.NewForm(huh.NewGroup(huh.NewText().
@@ -143,6 +149,10 @@ func (c *CLI) DisplayAssistantMessageWithModel(message, modelName string) error 
 
 // DisplayToolCallMessage displays a tool call in progress
 func (c *CLI) DisplayToolCallMessage(toolName, toolArgs string) {
+
+	c.messageContainer.messages = nil // clear previous messages (they should have been printed already)
+	c.lastStreamHeight = 0            // Reset last stream height for new prompt
+
 	var msg UIMessage
 	if c.compactMode {
 		msg = c.compactRenderer.RenderToolCallMessage(toolName, toolArgs, time.Now())
@@ -178,6 +188,8 @@ func (c *CLI) StartStreamingMessage(modelName string) {
 	} else {
 		msg = c.messageRenderer.RenderAssistantMessage("", time.Now(), modelName)
 	}
+	msg.Streaming = true
+	c.lastStreamHeight = 0 // Reset last stream height for new message
 	c.messageContainer.AddMessage(msg)
 	c.displayContainer()
 }
@@ -381,16 +393,33 @@ func (c *CLI) ClearMessages() {
 
 // displayContainer renders and displays the message container
 func (c *CLI) displayContainer() {
-	// Clear screen and display messages
-	fmt.Print("\033[2J\033[H") // Clear screen and move cursor to top
 
 	// Add left padding to the entire container
 	content := c.messageContainer.Render()
+
 	paddedContent := lipgloss.NewStyle().
 		PaddingLeft(2).
+		Width(c.width). // overwrite (no content) while agent is streaming
 		Render(content)
 
-	fmt.Print(paddedContent)
+	if c.lastStreamHeight > 0 {
+		// Move cursor up by the height of the last streamed message
+		fmt.Printf("\033[%dF", c.lastStreamHeight)
+	}
+
+	fmt.Println(paddedContent)
+
+	// clear message history except the "in-progress" message
+	if len(c.messageContainer.messages) > 0 {
+		// keep the last message, clear the rest (in case of streaming)
+		last := c.messageContainer.messages[len(c.messageContainer.messages)-1]
+		c.messageContainer.messages = []UIMessage{}
+		if last.Streaming {
+			// If the last message is still streaming, we keep it
+			c.messageContainer.messages = append(c.messageContainer.messages, last)
+			c.lastStreamHeight = lipgloss.Height(paddedContent)
+		}
+	}
 }
 
 // UpdateUsage updates the usage tracker with token counts and costs
