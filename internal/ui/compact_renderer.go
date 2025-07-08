@@ -353,6 +353,11 @@ func (r *CompactRenderer) formatToolResult(result string) string {
 		return ""
 	}
 
+	// Check if this is bash output with stdout/stderr tags
+	if strings.Contains(result, "<stdout>") || strings.Contains(result, "<stderr>") {
+		result = r.formatBashOutput(result)
+	}
+
 	// Calculate available width more conservatively
 	availableWidth := r.width - 28
 	if availableWidth < 40 {
@@ -377,6 +382,74 @@ func (r *CompactRenderer) formatToolResult(result string) string {
 	return strings.Join(lines, "\n")
 }
 
+// formatBashOutput formats bash command output by removing stdout/stderr tags and styling appropriately
+func (r *CompactRenderer) formatBashOutput(result string) string {
+	theme := getTheme()
+
+	// Replace tag pairs with styled content
+	var formattedResult strings.Builder
+	remaining := result
+
+	for {
+		// Find stderr tags
+		stderrStart := strings.Index(remaining, "<stderr>")
+		stderrEnd := strings.Index(remaining, "</stderr>")
+
+		// Find stdout tags
+		stdoutStart := strings.Index(remaining, "<stdout>")
+		stdoutEnd := strings.Index(remaining, "</stdout>")
+
+		// Process whichever comes first
+		if stderrStart != -1 && stderrEnd != -1 && stderrEnd > stderrStart &&
+			(stdoutStart == -1 || stderrStart < stdoutStart) {
+			// Process stderr
+			// Add content before the tag
+			if stderrStart > 0 {
+				formattedResult.WriteString(remaining[:stderrStart])
+			}
+
+			// Extract and style stderr content
+			stderrContent := remaining[stderrStart+8 : stderrEnd]
+			// Trim leading/trailing newlines but preserve internal ones
+			stderrContent = strings.Trim(stderrContent, "\n")
+			if len(stderrContent) > 0 {
+				// Style stderr content with error color, same as non-compact mode
+				styledContent := lipgloss.NewStyle().Foreground(theme.Error).Render(stderrContent)
+				formattedResult.WriteString(styledContent)
+			}
+
+			// Continue with remaining content
+			remaining = remaining[stderrEnd+9:] // Skip past </stderr>
+
+		} else if stdoutStart != -1 && stdoutEnd != -1 && stdoutEnd > stdoutStart {
+			// Process stdout
+			// Add content before the tag
+			if stdoutStart > 0 {
+				formattedResult.WriteString(remaining[:stdoutStart])
+			}
+
+			// Extract stdout content (no special styling needed)
+			stdoutContent := remaining[stdoutStart+8 : stdoutEnd]
+			// Trim leading/trailing newlines but preserve internal ones
+			stdoutContent = strings.Trim(stdoutContent, "\n")
+			if len(stdoutContent) > 0 {
+				formattedResult.WriteString(stdoutContent)
+			}
+
+			// Continue with remaining content
+			remaining = remaining[stdoutEnd+9:] // Skip past </stdout>
+
+		} else {
+			// No more tags, add remaining content
+			formattedResult.WriteString(remaining)
+			break
+		}
+	}
+
+	// Trim any leading/trailing whitespace from the final result
+	return strings.TrimSpace(formattedResult.String())
+}
+
 // determineResultType determines the display type for tool results
 func (r *CompactRenderer) determineResultType(toolName, result string) string {
 	toolName = strings.ToLower(toolName)
@@ -386,7 +459,7 @@ func (r *CompactRenderer) determineResultType(toolName, result string) string {
 		return "Text"
 	case strings.Contains(toolName, "write"):
 		return "Write"
-	case strings.Contains(toolName, "bash") || strings.Contains(toolName, "command"):
+	case strings.Contains(toolName, "bash") || strings.Contains(toolName, "command") || strings.Contains(toolName, "shell") || toolName == "run_shell_cmd":
 		return "Bash"
 	case strings.Contains(toolName, "list") || strings.Contains(toolName, "ls"):
 		return "List"

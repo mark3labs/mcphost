@@ -412,7 +412,7 @@ func (r *MessageRenderer) formatToolResult(toolName, result string, width int) s
 	}
 
 	// Format bash/command output with better formatting
-	if strings.Contains(toolName, "bash") || strings.Contains(toolName, "command") {
+	if strings.Contains(toolName, "bash") || strings.Contains(toolName, "command") || strings.Contains(toolName, "shell") || toolName == "run_shell_cmd" {
 		theme := getTheme()
 
 		// Split result into sections if it contains both stdout and stderr
@@ -439,49 +439,71 @@ func (r *MessageRenderer) formatToolResult(toolName, result string, width int) s
 func (r *MessageRenderer) formatBashOutput(result string, width int, theme Theme) string {
 	baseStyle := lipgloss.NewStyle()
 
-	// Parse the output sections
-	lines := strings.Split(result, "\n")
-	var formattedLines []string
-	currentSection := ""
+	// Replace tag pairs with styled content
+	var formattedResult strings.Builder
+	remaining := result
 
-	for _, line := range lines {
-		if strings.HasPrefix(line, "<stdout>") {
-			currentSection = "stdout"
-			if len(strings.TrimSpace(strings.TrimPrefix(line, "<stdout>"))) > 0 {
-				// If there's content on the same line as <stdout>
-				content := strings.TrimSpace(strings.TrimPrefix(line, "<stdout>"))
-				formattedLines = append(formattedLines, content)
-			}
-			continue
-		} else if strings.HasPrefix(line, "<stderr>") {
-			currentSection = "stderr"
-			if len(strings.TrimSpace(strings.TrimPrefix(line, "<stderr>"))) > 0 {
-				// If there's content on the same line as <stderr>
-				content := strings.TrimSpace(strings.TrimPrefix(line, "<stderr>"))
-				styledLine := baseStyle.Foreground(theme.Error).Render(content)
-				formattedLines = append(formattedLines, styledLine)
-			}
-			continue
-		} else if line == "" {
-			// Preserve empty lines but don't add extra spacing
-			formattedLines = append(formattedLines, "")
-			continue
-		}
+	for {
+		// Find stderr tags
+		stderrStart := strings.Index(remaining, "<stderr>")
+		stderrEnd := strings.Index(remaining, "</stderr>")
 
-		// Regular content line
-		if currentSection == "stderr" {
-			styledLine := baseStyle.Foreground(theme.Error).Render(line)
-			formattedLines = append(formattedLines, styledLine)
+		// Find stdout tags
+		stdoutStart := strings.Index(remaining, "<stdout>")
+		stdoutEnd := strings.Index(remaining, "</stdout>")
+
+		// Process whichever comes first
+		if stderrStart != -1 && stderrEnd != -1 && stderrEnd > stderrStart &&
+			(stdoutStart == -1 || stderrStart < stdoutStart) {
+			// Process stderr
+			// Add content before the tag
+			if stderrStart > 0 {
+				formattedResult.WriteString(remaining[:stderrStart])
+			}
+			// Extract and style stderr content
+			stderrContent := remaining[stderrStart+8 : stderrEnd]
+			// Trim leading/trailing newlines but preserve internal ones
+			stderrContent = strings.Trim(stderrContent, "\n")
+			if len(stderrContent) > 0 {
+				styledContent := baseStyle.Foreground(theme.Error).Render(stderrContent)
+				formattedResult.WriteString(styledContent)
+			}
+
+			// Continue with remaining content
+			remaining = remaining[stderrEnd+9:] // Skip past </stderr>
+
+		} else if stdoutStart != -1 && stdoutEnd != -1 && stdoutEnd > stdoutStart {
+			// Process stdout
+			// Add content before the tag
+			if stdoutStart > 0 {
+				formattedResult.WriteString(remaining[:stdoutStart])
+			}
+
+			// Extract stdout content (no special styling needed)
+			stdoutContent := remaining[stdoutStart+8 : stdoutEnd]
+			// Trim leading/trailing newlines but preserve internal ones
+			stdoutContent = strings.Trim(stdoutContent, "\n")
+			if len(stdoutContent) > 0 {
+				formattedResult.WriteString(stdoutContent)
+			}
+
+			// Continue with remaining content
+			remaining = remaining[stdoutEnd+9:] // Skip past </stdout>
+
 		} else {
-			// stdout or no section - use normal muted color
-			formattedLines = append(formattedLines, line)
+			// No more tags, add remaining content
+			formattedResult.WriteString(remaining)
+			break
 		}
 	}
+
+	// Trim any leading/trailing whitespace from the final result
+	finalResult := strings.TrimSpace(formattedResult.String())
 
 	return baseStyle.
 		Width(width).
 		Foreground(theme.Muted).
-		Render(strings.Join(formattedLines, "\n"))
+		Render(finalResult)
 }
 
 // truncateText truncates text to fit within the specified width
