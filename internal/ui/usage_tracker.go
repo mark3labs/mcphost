@@ -126,9 +126,9 @@ func (ut *UsageTracker) RenderUsageInfo() string {
 	ut.mu.RLock()
 	defer ut.mu.RUnlock()
 
-	if ut.sessionStats.RequestCount == 0 {
-		return ""
-	}
+	// if ut.sessionStats.RequestCount == 0 {
+	// 	return ""
+	// }
 
 	// Import lipgloss for styling
 	baseStyle := lipgloss.NewStyle()

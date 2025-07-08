@@ -75,6 +75,8 @@ func SetupCLI(opts *CLISetupOptions) (*CLI, error) {
 		}
 	}
 
+	fmt.Println("")
+
 	// Display model info
 	if provider != "unknown" && model != "unknown" {
 		cli.DisplayInfo(fmt.Sprintf("Model loaded: %s (%s)", provider, model))
@@ -88,6 +90,11 @@ func SetupCLI(opts *CLISetupOptions) (*CLI, error) {
 	// Display tool count
 	tools := opts.Agent.GetTools()
 	cli.DisplayInfo(fmt.Sprintf("Loaded %d tools from MCP servers", len(tools)))
+
+	// Display usage information (for both streaming and non-streaming)
+	if !opts.Quiet && cli != nil {
+		cli.DisplayUsageAfterResponse()
+	}
 
 	return cli, nil
 }
