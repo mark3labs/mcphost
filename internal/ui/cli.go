@@ -29,6 +29,7 @@ type CLI struct {
 	compactMode      bool   // Add compact mode flag
 	modelName        string // Store current model name
 	lastStreamHeight int    // track how far back we need to move the cursor to overwrite streaming messages
+	usageDisplayed   bool   // track if usage info was displayed after last assistant message
 }
 
 // NewCLI creates a new CLI instance with message container
@@ -400,6 +401,11 @@ func (c *CLI) displayContainer() {
 	if c.lastStreamHeight > 0 {
 		// Move cursor up by the height of the last streamed message
 		fmt.Printf("\033[%dF", c.lastStreamHeight)
+	} else if c.usageDisplayed {
+		// If we're not overwriting a streaming message but usage was displayed,
+		// move up to account for the usage info (2 lines: content + padding)
+		fmt.Printf("\033[2F")
+		c.usageDisplayed = false
 	}
 
 	fmt.Println(paddedContent)
@@ -511,6 +517,7 @@ func (c *CLI) DisplayUsageAfterResponse() {
 			PaddingTop(1).
 			Render(usageInfo)
 		fmt.Print(paddedUsage)
+		c.usageDisplayed = true
 	}
 }
 
