@@ -15,7 +15,7 @@ require (
 	github.com/cloudwego/eino-ext/components/model/ollama v0.0.0-20250609074000-b7f307dffa18
 	github.com/cloudwego/eino-ext/components/model/openai v0.0.0-20250609074000-b7f307dffa18
 	github.com/mark3labs/mcp-filesystem-server v0.11.1
-	github.com/mark3labs/mcp-go v0.32.0
+	github.com/mark3labs/mcp-go v0.33.0
 	github.com/ollama/ollama v0.5.12
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/viper v1.20.1
@@ -141,7 +141,7 @@ require (
 	github.com/mattn/go-runewidth v0.0.16 // indirect
 	github.com/muesli/ansi v0.0.0-20230316100256-276c6243b2f6 // indirect
 	github.com/muesli/cancelreader v0.2.2 // indirect
-	github.com/muesli/termenv v0.16.0 // indirect
+	github.com/muesli/termenv v0.16.0
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/spf13/pflag v1.0.6 // indirect
 	golang.org/x/exp v0.0.0-20231110203233-9a3e6036ecaa // indirect
