@@ -544,6 +544,7 @@ type MessageContainer struct {
 	height      int
 	compactMode bool   // Add compact mode flag
 	modelName   string // Store current model name
+	wasCleared  bool   // Track if container was explicitly cleared
 }
 
 // NewMessageContainer creates a new message container
@@ -559,6 +560,7 @@ func NewMessageContainer(width, height int, compact bool) *MessageContainer {
 // AddMessage adds a message to the container
 func (c *MessageContainer) AddMessage(msg UIMessage) {
 	c.messages = append(c.messages, msg)
+	c.wasCleared = false // Reset the cleared flag when adding messages
 }
 
 // SetModelName sets the current model name for the container
@@ -594,6 +596,7 @@ func (c *MessageContainer) UpdateLastMessage(content string) {
 // Clear clears all messages from the container
 func (c *MessageContainer) Clear() {
 	c.messages = make([]UIMessage, 0)
+	c.wasCleared = true
 }
 
 // SetSize updates the container size
@@ -605,6 +608,10 @@ func (c *MessageContainer) SetSize(width, height int) {
 // Render renders all messages in the container
 func (c *MessageContainer) Render() string {
 	if len(c.messages) == 0 {
+		// Don't show welcome box if explicitly cleared
+		if c.wasCleared {
+			return ""
+		}
 		if c.compactMode {
 			return c.renderCompactEmptyState()
 		}

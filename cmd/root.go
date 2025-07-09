@@ -944,7 +944,7 @@ func runInteractiveLoop(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI,
 
 		// Handle slash commands
 		if cli.IsSlashCommand(prompt) {
-			result := cli.HandleSlashCommand(prompt, config.ServerNames, config.ToolNames, messages)
+			result := cli.HandleSlashCommand(prompt, config.ServerNames, config.ToolNames)
 			if result.Handled {
 				// If the command was to clear history, clear the messages slice and session
 				if result.ClearHistory {

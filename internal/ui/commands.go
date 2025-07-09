@@ -28,12 +28,7 @@ var SlashCommands = []SlashCommand{
 		Category:    "Info",
 		Aliases:     []string{"/s"},
 	},
-	{
-		Name:        "/history",
-		Description: "Display conversation history",
-		Category:    "Navigation",
-		Aliases:     []string{"/hist"},
-	},
+
 	{
 		Name:        "/clear",
 		Description: "Clear conversation and start fresh",

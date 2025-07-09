@@ -250,7 +250,6 @@ func (c *CLI) DisplayHelp() {
 - ` + "`/help`" + `: Show this help message
 - ` + "`/tools`" + `: List all available tools
 - ` + "`/servers`" + `: List configured MCP servers
-- ` + "`/history`" + `: Display conversation history
 - ` + "`/usage`" + `: Show token usage and cost statistics
 - ` + "`/reset-usage`" + `: Reset usage statistics
 - ` + "`/clear`" + `: Clear message history
@@ -304,36 +303,6 @@ func (c *CLI) DisplayServers(servers []string) {
 	c.displayContainer()
 }
 
-// DisplayHistory displays conversation history using the message container
-func (c *CLI) DisplayHistory(messages []*schema.Message) {
-	// Create a temporary container for history
-	historyContainer := NewMessageContainer(c.width, c.height-4, c.compactMode)
-
-	for _, msg := range messages {
-		switch msg.Role {
-		case schema.User:
-			var uiMsg UIMessage
-			if c.compactMode {
-				uiMsg = c.compactRenderer.RenderUserMessage(msg.Content, time.Now())
-			} else {
-				uiMsg = c.messageRenderer.RenderUserMessage(msg.Content, time.Now())
-			}
-			historyContainer.AddMessage(uiMsg)
-		case schema.Assistant:
-			var uiMsg UIMessage
-			if c.compactMode {
-				uiMsg = c.compactRenderer.RenderAssistantMessage(msg.Content, time.Now(), c.modelName)
-			} else {
-				uiMsg = c.messageRenderer.RenderAssistantMessage(msg.Content, time.Now(), c.modelName)
-			}
-			historyContainer.AddMessage(uiMsg)
-		}
-	}
-
-	fmt.Println("\nConversation History:")
-	fmt.Println(historyContainer.Render())
-}
-
 // IsSlashCommand checks if the input is a slash command
 func (c *CLI) IsSlashCommand(input string) bool {
 	return strings.HasPrefix(input, "/")
@@ -346,7 +315,7 @@ type SlashCommandResult struct {
 }
 
 // HandleSlashCommand handles slash commands and returns the result
-func (c *CLI) HandleSlashCommand(input string, servers []string, tools []string, history []*schema.Message) SlashCommandResult {
+func (c *CLI) HandleSlashCommand(input string, servers []string, tools []string) SlashCommandResult {
 	switch input {
 	case "/help":
 		c.DisplayHelp()
@@ -357,9 +326,7 @@ func (c *CLI) HandleSlashCommand(input string, servers []string, tools []string,
 	case "/servers":
 		c.DisplayServers(servers)
 		return SlashCommandResult{Handled: true}
-	case "/history":
-		c.DisplayHistory(history)
-		return SlashCommandResult{Handled: true}
+
 	case "/clear":
 		c.ClearMessages()
 		c.DisplayInfo("Conversation cleared. Starting fresh.")
