@@ -931,7 +931,7 @@ func runInteractiveLoop(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI,
 		// Get user input
 		prompt, err := cli.GetPrompt()
 		if err == io.EOF {
-			fmt.Println("\nGoodbye!")
+			fmt.Println("\n  Goodbye!")
 			return nil
 		}
 		if err != nil {

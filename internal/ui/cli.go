@@ -339,7 +339,7 @@ func (c *CLI) HandleSlashCommand(input string, servers []string, tools []string)
 		c.ResetUsageStats()
 		return SlashCommandResult{Handled: true}
 	case "/quit":
-		fmt.Println("\nGoodbye!")
+		fmt.Println("\n  Goodbye!")
 		os.Exit(0)
 		return SlashCommandResult{Handled: true}
 	default:
