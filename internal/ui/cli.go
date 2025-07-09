@@ -2,6 +2,7 @@ package ui
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"strings"
 	"time"
@@ -69,15 +70,11 @@ func (c *CLI) GetPrompt() (string, error) {
 
 	// No divider needed - removed for cleaner appearance
 
-	// Create our custom slash command field
-	field := NewSlashCommandField(c.width)
+	// Create our custom slash command input
+	input := NewSlashCommandInput(c.width, "Enter your prompt (Type /help for commands, Ctrl+C to quit, ESC to cancel generation)")
 
-	// Display the title
-	titleStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("12"))
-	fmt.Println(titleStyle.Render("Enter your prompt (Type /help for commands, Ctrl+C to quit, ESC to cancel generation)"))
-
-	// Run the field as a tea program without alt screen to keep it inline
-	p := tea.NewProgram(field)
+	// Run as a tea program
+	p := tea.NewProgram(input)
 	finalModel, err := p.Run()
 
 	if err != nil {
@@ -85,11 +82,17 @@ func (c *CLI) GetPrompt() (string, error) {
 	}
 
 	// Get the value from the final model
-	if finalField, ok := finalModel.(*SlashCommandField); ok {
-		value := strings.TrimSpace(finalField.Value())
-		if value == "" {
-			return "", nil
+	if finalInput, ok := finalModel.(*SlashCommandInput); ok {
+		// Clear the input field from the display
+		linesToClear := finalInput.RenderedLines()
+		for i := 0; i < linesToClear; i++ {
+			fmt.Print("\033[1A\033[2K") // Move up one line and clear it
 		}
+
+		if finalInput.Cancelled() {
+			return "", io.EOF // Signal clean exit
+		}
+		value := strings.TrimSpace(finalInput.Value())
 		return value, nil
 	}
 
