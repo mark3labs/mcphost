@@ -40,6 +40,7 @@ func NewRegistry() *Registry {
 	r.registerBashServer()
 	r.registerTodoServer()
 	r.registerFetchServer()
+	r.registerHTTPServer()
 
 	return r
 }
@@ -138,6 +139,19 @@ func (r *Registry) registerFetchServer() {
 		server, err := NewFetchServer()
 		if err != nil {
 			return nil, fmt.Errorf("failed to create fetch server: %v", err)
+		}
+
+		return &BuiltinServerWrapper{server: server}, nil
+	}
+}
+
+// registerHTTPServer registers the HTTP server
+func (r *Registry) registerHTTPServer() {
+	r.servers["http"] = func(options map[string]any) (*BuiltinServerWrapper, error) {
+		// Create the HTTP server
+		server, err := NewHTTPServer()
+		if err != nil {
+			return nil, fmt.Errorf("failed to create HTTP server: %v", err)
 		}
 
 		return &BuiltinServerWrapper{server: server}, nil
