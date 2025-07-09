@@ -1,14 +1,12 @@
 package ui
 
 import (
-	"errors"
 	"fmt"
-	"io"
 	"os"
 	"strings"
 	"time"
 
-	"github.com/charmbracelet/huh"
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/cloudwego/eino/schema"
 	"golang.org/x/term"
@@ -71,23 +69,31 @@ func (c *CLI) GetPrompt() (string, error) {
 
 	// No divider needed - removed for cleaner appearance
 
-	var prompt string
-	err := huh.NewForm(huh.NewGroup(huh.NewText().
-		Title("Enter your prompt (Type /help for commands, Ctrl+C to quit, ESC to cancel generation)").
-		Value(&prompt).
-		CharLimit(5000)),
-	).WithWidth(c.width).
-		WithTheme(huh.ThemeCharm()).
-		Run()
+	// Create our custom slash command field
+	field := NewSlashCommandField(c.width)
+
+	// Display the title
+	titleStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("12"))
+	fmt.Println(titleStyle.Render("Enter your prompt (Type /help for commands, Ctrl+C to quit, ESC to cancel generation)"))
+
+	// Run the field as a tea program without alt screen to keep it inline
+	p := tea.NewProgram(field)
+	finalModel, err := p.Run()
 
 	if err != nil {
-		if errors.Is(err, huh.ErrUserAborted) {
-			return "", io.EOF // Signal clean exit
-		}
 		return "", err
 	}
 
-	return prompt, nil
+	// Get the value from the final model
+	if finalField, ok := finalModel.(*SlashCommandField); ok {
+		value := strings.TrimSpace(finalField.Value())
+		if value == "" {
+			return "", nil
+		}
+		return value, nil
+	}
+
+	return "", fmt.Errorf("unexpected model type")
 }
 
 // ShowSpinner displays a spinner with the given message and executes the action
