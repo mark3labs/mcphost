@@ -33,7 +33,7 @@ func NewSlashCommandInput(width int, title string) *SlashCommandInput {
 	ta.ShowLineNumbers = false
 	ta.Prompt = ""
 	ta.CharLimit = 5000
-	ta.SetWidth(width - 6) // Account for border and padding
+	ta.SetWidth(width - 8) // Account for container padding, border and internal padding
 	ta.SetHeight(3)        // Default to 3 lines like huh
 	ta.Focus()
 
@@ -83,10 +83,12 @@ func (s *SlashCommandInput) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return s, tea.Quit
 			}
 
-			// Check for submit keys (Ctrl+J or Alt+Enter for new line)
-			if key.Matches(msg, key.NewBinding(key.WithKeys("ctrl+j", "alt+enter"))) {
-				// These are for new lines, let textarea handle them
-			} else if key.Matches(msg, key.NewBinding(key.WithKeys("enter"))) && !strings.Contains(s.textarea.Value(), "\n") {
+			// Check for newline keys first
+			if msg.String() == "ctrl+j" || msg.String() == "alt+enter" {
+				// Insert newline at cursor position
+				s.textarea, cmd = s.textarea.Update(tea.KeyMsg{Type: tea.KeyEnter, Alt: true})
+				return s, cmd
+			} else if msg.String() == "enter" && !strings.Contains(s.textarea.Value(), "\n") {
 				// Submit on Enter only if it's single line
 				s.value = s.textarea.Value()
 				s.quitting = true
@@ -103,7 +105,7 @@ func (s *SlashCommandInput) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 				return s, nil
 			case key.Matches(msg, key.NewBinding(key.WithKeys("down"), key.WithHelp("↓", "down"))):
-				if s.selected < len(s.filtered)-1 && s.selected < s.popupHeight-1 {
+				if s.selected < len(s.filtered)-1 {
 					s.selected++
 				}
 				return s, nil
@@ -168,6 +170,9 @@ func (s *SlashCommandInput) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 // View implements tea.Model
 func (s *SlashCommandInput) View() string {
+	// Add left padding to entire component (2 spaces like other UI elements)
+	containerStyle := lipgloss.NewStyle().PaddingLeft(2)
+
 	// Title
 	titleStyle := lipgloss.NewStyle().
 		Foreground(lipgloss.Color("252")).
@@ -182,14 +187,13 @@ func (s *SlashCommandInput) View() string {
 		BorderBottom(false).
 		BorderForeground(lipgloss.Color("39")).
 		PaddingLeft(1).
-		Width(s.width)
+		Width(s.width - 2) // Account for container padding
 
 	// Build the view
 	var view strings.Builder
 	view.WriteString(titleStyle.Render(s.title))
 	view.WriteString("\n")
 	view.WriteString(inputBoxStyle.Render(s.textarea.View()))
-
 	// Count rendered lines
 	s.renderedLines = 2 + s.textarea.Height() // title + newline + textarea height
 
@@ -198,8 +202,16 @@ func (s *SlashCommandInput) View() string {
 		view.WriteString("\n")
 		view.WriteString(s.renderPopup())
 		// Add popup lines
-		popupLines := min(len(s.filtered), s.popupHeight) + 5 // items + border + padding + footer
-		s.renderedLines += 1 + popupLines                     // newline + popup
+		visibleItems := min(len(s.filtered), s.popupHeight)
+		scrollIndicators := 0
+		if s.selected >= s.popupHeight {
+			scrollIndicators++ // top indicator
+		}
+		if len(s.filtered) > s.popupHeight {
+			scrollIndicators++ // bottom indicator
+		}
+		popupLines := visibleItems + scrollIndicators + 5 // items + scroll + border + padding + footer
+		s.renderedLines += 1 + popupLines                 // newline + popup
 	}
 
 	// Add help text at bottom
@@ -219,7 +231,8 @@ func (s *SlashCommandInput) View() string {
 	view.WriteString(helpStyle.Render(helpText))
 	s.renderedLines += 2 // newline + help text
 
-	return view.String()
+	// Apply container padding to entire view
+	return containerStyle.Render(view.String())
 }
 
 // renderPopup renders the autocomplete popup
@@ -229,17 +242,25 @@ func (s *SlashCommandInput) renderPopup() string {
 		Border(lipgloss.RoundedBorder()).
 		BorderForeground(lipgloss.Color("236")).
 		Padding(1, 2).
-		Background(lipgloss.Color("234")).
-		Width(s.width - 2).
-		MarginLeft(2) // Align with input field
+		Width(s.width - 4). // Account for container padding
+		MarginLeft(0)       // No extra margin needed due to container padding
 
 	var items []string
-	maxItems := min(len(s.filtered), s.popupHeight)
 
-	for i := 0; i < maxItems; i++ {
+	// Calculate visible window
+	visibleItems := min(len(s.filtered), s.popupHeight)
+	startIdx := 0
+
+	// Adjust window to keep selected item visible
+	if s.selected >= s.popupHeight {
+		startIdx = s.selected - s.popupHeight + 1
+	}
+
+	endIdx := min(startIdx+visibleItems, len(s.filtered))
+
+	for i := startIdx; i < endIdx; i++ {
 		match := s.filtered[i]
 		cmd := match.Command
-
 		// Create the selection indicator
 		var indicator string
 		if i == s.selected {
@@ -270,7 +291,7 @@ func (s *SlashCommandInput) renderPopup() string {
 
 		// Truncate description if needed
 		desc := cmd.Description
-		maxDescLen := s.width - nameWidth - 10
+		maxDescLen := s.width - nameWidth - 14 // Account for padding and indicator
 		if len(desc) > maxDescLen && maxDescLen > 3 {
 			desc = desc[:maxDescLen-3] + "..."
 		}
@@ -279,6 +300,15 @@ func (s *SlashCommandInput) renderPopup() string {
 		items = append(items, line)
 	}
 
+	// Add scroll indicators if needed
+	if startIdx > 0 {
+		scrollUpStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("238"))
+		items = append([]string{scrollUpStyle.Render("  ↑ more above")}, items...)
+	}
+	if endIdx < len(s.filtered) {
+		scrollDownStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("238"))
+		items = append(items, scrollDownStyle.Render("  ↓ more below"))
+	}
 	// Join items
 	content := strings.Join(items, "\n")
 
