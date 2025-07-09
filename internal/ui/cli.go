@@ -85,7 +85,8 @@ func (c *CLI) GetPrompt() (string, error) {
 	if finalInput, ok := finalModel.(*SlashCommandInput); ok {
 		// Clear the input field from the display
 		linesToClear := finalInput.RenderedLines()
-		for i := 0; i < linesToClear; i++ {
+		// We need to clear linesToClear - 1 lines because we're already on the line after the last rendered line
+		for i := 0; i < linesToClear-1; i++ {
 			fmt.Print("\033[1A\033[2K") // Move up one line and clear it
 		}
 
