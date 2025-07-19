@@ -4,9 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"strings"
-	"time"
-
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/cloudwego/eino/components/model"
 	"github.com/cloudwego/eino/components/tool"
@@ -15,6 +12,8 @@ import (
 	"github.com/mark3labs/mcphost/internal/config"
 	"github.com/mark3labs/mcphost/internal/models"
 	"github.com/mark3labs/mcphost/internal/tools"
+	"strings"
+	"time"
 )
 
 // AgentConfig is the config for agent.
@@ -183,7 +182,13 @@ func (a *Agent) GenerateWithLoopAndStreaming(ctx context.Context, messages []*sc
 						onToolExecution(toolCall.Function.Name, true)
 					}
 
-					output, err := selectedTool.(tool.InvokableTool).InvokableRun(ctx, toolCall.Function.Arguments)
+					// Sanitize arguments for common LLM junk like "}{"
+					arguments := toolCall.Function.Arguments
+					if len(arguments) > 0 && strings.Trim(arguments, " \t\n\r{}") == "" {
+						arguments = "{}"
+					}
+
+					output, err := selectedTool.(tool.InvokableTool).InvokableRun(ctx, arguments)
 
 					// Notify tool execution end
 					if onToolExecution != nil {
