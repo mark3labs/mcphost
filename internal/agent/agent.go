@@ -34,6 +34,9 @@ type ToolExecutionHandler func(toolName string, isStarting bool)
 // ToolResultHandler is a function type for handling tool results
 type ToolResultHandler func(toolName, toolArgs, result string, isError bool)
 
+// ToolBlockChecker is a function type for checking if a tool should be blocked
+type ToolBlockChecker func(toolName, toolArgs string) (blocked bool, reason string)
+
 // ResponseHandler is a function type for handling LLM responses
 type ResponseHandler func(content string)
 

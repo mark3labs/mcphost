@@ -197,6 +197,61 @@ func compareHookOutputs(a, b *HookOutput) bool {
 		a.ModifyOutput == b.ModifyOutput
 }
 
+func TestToolBlocking(t *testing.T) {
+	// Create test script that blocks bash tool
+	tmpDir := t.TempDir()
+
+	blockBashScript := filepath.Join(tmpDir, "block_bash.sh")
+	if err := os.WriteFile(blockBashScript, []byte(`#!/bin/bash
+echo '{"decision": "block", "reason": "Bash commands are not allowed for security reasons"}'
+`), 0755); err != nil {
+		t.Fatalf("failed to create block bash script: %v", err)
+	}
+
+	config := &HookConfig{
+		Hooks: map[HookEvent][]HookMatcher{
+			PreToolUse: {{
+				Matcher: "bash",
+				Hooks: []HookEntry{{
+					Type:    "command",
+					Command: blockBashScript,
+				}},
+			}},
+		},
+	}
+
+	executor := NewExecutor(config, "test-session", "/tmp/test.jsonl")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	input := &PreToolUseInput{
+		CommonInput: CommonInput{HookEventName: PreToolUse},
+		ToolName:    "bash",
+		ToolInput:   json.RawMessage(`{"command": "ls -la"}`),
+	}
+
+	got, err := executor.ExecuteHooks(ctx, PreToolUse, input)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// Verify the hook blocked the tool
+	if got == nil {
+		t.Fatal("expected hook output, got nil")
+	}
+
+	if got.Decision != "block" {
+		t.Errorf("expected decision 'block', got '%s'", got.Decision)
+	}
+
+	if got.Reason != "Bash commands are not allowed for security reasons" {
+		t.Errorf("unexpected reason: %s", got.Reason)
+	}
+
+	// Continue field is optional for JSON output (only set for exit code 2)
+}
+
 func TestHookOutputLLMFeedback(t *testing.T) {
 	// Create test scripts
 	tmpDir := t.TempDir()
