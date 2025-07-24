@@ -189,5 +189,151 @@ func compareHookOutputs(a, b *HookOutput) bool {
 	return a.StopReason == b.StopReason &&
 		a.SuppressOutput == b.SuppressOutput &&
 		a.Decision == b.Decision &&
-		a.Reason == b.Reason
+		a.Reason == b.Reason &&
+		a.Feedback == b.Feedback &&
+		a.Context == b.Context &&
+		a.SystemPrompt == b.SystemPrompt &&
+		a.ModifyInput == b.ModifyInput &&
+		a.ModifyOutput == b.ModifyOutput
+}
+
+func TestHookOutputLLMFeedback(t *testing.T) {
+	// Create test scripts
+	tmpDir := t.TempDir()
+
+	// Script with feedback and context
+	feedbackScript := filepath.Join(tmpDir, "feedback.sh")
+	if err := os.WriteFile(feedbackScript, []byte(`#!/bin/bash
+echo '{
+	"feedback": "Tool execution was slow, consider optimization",
+	"context": "Performance warning",
+	"continue": true
+}'
+`), 0755); err != nil {
+		t.Fatalf("failed to create feedback script: %v", err)
+	}
+
+	// Script with output modification
+	modifyScript := filepath.Join(tmpDir, "modify.sh")
+	if err := os.WriteFile(modifyScript, []byte(`#!/bin/bash
+echo '{
+	"modifyOutput": "{\"result\": \"sanitized output\"}",
+	"suppressOutput": true
+}'
+`), 0755); err != nil {
+		t.Fatalf("failed to create modify script: %v", err)
+	}
+
+	// Script with system prompt modification
+	systemPromptScript := filepath.Join(tmpDir, "systemprompt.sh")
+	if err := os.WriteFile(systemPromptScript, []byte(`#!/bin/bash
+echo '{
+	"systemPrompt": "Additional context: User is working on sensitive data",
+	"context": "Security context applied"
+}'
+`), 0755); err != nil {
+		t.Fatalf("failed to create system prompt script: %v", err)
+	}
+
+	tests := []struct {
+		name     string
+		config   *HookConfig
+		event    HookEvent
+		input    interface{}
+		expected *HookOutput
+	}{
+		{
+			name: "feedback and context",
+			config: &HookConfig{
+				Hooks: map[HookEvent][]HookMatcher{
+					PostToolUse: {{
+						Matcher: "bash",
+						Hooks: []HookEntry{{
+							Type:    "command",
+							Command: feedbackScript,
+						}},
+					}},
+				},
+			},
+			event: PostToolUse,
+			input: &PostToolUseInput{
+				CommonInput:  CommonInput{HookEventName: PostToolUse},
+				ToolName:     "bash",
+				ToolResponse: json.RawMessage(`{"output": "test"}`),
+			},
+			expected: &HookOutput{
+				Feedback: "Tool execution was slow, consider optimization",
+				Context:  "Performance warning",
+				Continue: boolPtr(true),
+			},
+		},
+		{
+			name: "modify output",
+			config: &HookConfig{
+				Hooks: map[HookEvent][]HookMatcher{
+					PostToolUse: {{
+						Matcher: "bash",
+						Hooks: []HookEntry{{
+							Type:    "command",
+							Command: modifyScript,
+						}},
+					}},
+				},
+			},
+			event: PostToolUse,
+			input: &PostToolUseInput{
+				CommonInput:  CommonInput{HookEventName: PostToolUse},
+				ToolName:     "bash",
+				ToolResponse: json.RawMessage(`{"output": "sensitive data"}`),
+			},
+			expected: &HookOutput{
+				ModifyOutput:   `{"result": "sanitized output"}`,
+				SuppressOutput: true,
+			},
+		},
+		{
+			name: "system prompt modification",
+			config: &HookConfig{
+				Hooks: map[HookEvent][]HookMatcher{
+					UserPromptSubmit: {{
+						Matcher: ".*",
+						Hooks: []HookEntry{{
+							Type:    "command",
+							Command: systemPromptScript,
+						}},
+					}},
+				},
+			},
+			event: UserPromptSubmit,
+			input: &UserPromptSubmitInput{
+				CommonInput: CommonInput{HookEventName: UserPromptSubmit},
+				Prompt:      "help me with this task",
+			},
+			expected: &HookOutput{
+				SystemPrompt: "Additional context: User is working on sensitive data",
+				Context:      "Security context applied",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			executor := NewExecutor(tt.config, "test-session", "/tmp/test.jsonl")
+
+			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+
+			got, err := executor.ExecuteHooks(ctx, tt.event, tt.input)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+
+			// Compare outputs
+			if !compareHookOutputs(got, tt.expected) {
+				gotJSON, _ := json.MarshalIndent(got, "", "  ")
+				expectedJSON, _ := json.MarshalIndent(tt.expected, "", "  ")
+				t.Errorf("ExecuteHooks() output mismatch:\ngot:\n%s\nwant:\n%s", gotJSON, expectedJSON)
+			}
+		})
+	}
 }

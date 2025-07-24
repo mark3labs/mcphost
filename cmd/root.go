@@ -884,6 +884,7 @@ func runAgenticStep(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI, mes
 		// Tool result handler - called when a tool execution completes
 		func(toolName, toolArgs, result string, isError bool) {
 			// Execute PostToolUse hooks
+			var postToolHookOutput *hooks.HookOutput
 			if hookExecutor != nil && result != "" {
 				input := &hooks.PostToolUseInput{
 					CommonInput:  hookExecutor.PopulateCommonFields(hooks.PostToolUse),
@@ -892,13 +893,21 @@ func runAgenticStep(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI, mes
 					ToolResponse: json.RawMessage(result),
 				}
 
-				_, err := hookExecutor.ExecuteHooks(ctx, hooks.PostToolUse, input)
+				hookOutput, err := hookExecutor.ExecuteHooks(ctx, hooks.PostToolUse, input)
 				if err != nil {
 					// Log error but don't fail
 					if debugMode {
 						fmt.Fprintf(os.Stderr, "PostToolUse hook execution error: %v\n", err)
 					}
 				}
+				postToolHookOutput = hookOutput
+			}
+
+			// Check if hook wants to suppress output
+			if postToolHookOutput != nil && postToolHookOutput.SuppressOutput {
+				// Skip displaying tool result to user
+				// Note: Result still goes to LLM unless ModifyOutput is used
+				return
 			}
 
 			if !config.Quiet && cli != nil {
@@ -1089,6 +1098,7 @@ func runInteractiveLoop(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI,
 		}
 
 		// Execute UserPromptSubmit hooks
+		var userPromptHookOutput *hooks.HookOutput
 		if hookExecutor != nil {
 			input := &hooks.UserPromptSubmitInput{
 				CommonInput: hookExecutor.PopulateCommonFields(hooks.UserPromptSubmit),
@@ -1102,6 +1112,7 @@ func runInteractiveLoop(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI,
 					fmt.Fprintf(os.Stderr, "UserPromptSubmit hook execution error: %v\n", err)
 				}
 			}
+			userPromptHookOutput = hookOutput
 
 			// Check if hook blocked the prompt
 			if hookOutput != nil && hookOutput.Decision == "block" {
@@ -1110,8 +1121,15 @@ func runInteractiveLoop(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI,
 				}
 				continue // Skip this prompt
 			}
-		}
 
+			// Check if hook wants to stop the session
+			if hookOutput != nil && hookOutput.Continue != nil && !*hookOutput.Continue {
+				if hookOutput.StopReason != "" {
+					cli.DisplayInfo(fmt.Sprintf("Session ended by hook: %s", hookOutput.StopReason))
+				}
+				return nil // Exit interactive loop gracefully
+			}
+		}
 		// Handle slash commands
 		if cli.IsSlashCommand(prompt) {
 			result := cli.HandleSlashCommand(prompt, config.ServerNames, config.ToolNames)
@@ -1132,7 +1150,17 @@ func runInteractiveLoop(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI,
 		cli.DisplayUserMessage(prompt)
 
 		// Create temporary messages with user input for processing
-		tempMessages := append(messages, schema.UserMessage(prompt))
+		var tempMessages []*schema.Message
+		tempMessages = append(tempMessages, messages...)
+
+		// Add context from hook if provided
+		if userPromptHookOutput != nil && userPromptHookOutput.Context != "" {
+			// Add context as a system message before the user message
+			contextMsg := schema.SystemMessage(fmt.Sprintf("Context from system hook: %s", userPromptHookOutput.Context))
+			tempMessages = append(tempMessages, contextMsg)
+		}
+
+		tempMessages = append(tempMessages, schema.UserMessage(prompt))
 
 		// Process the user input with tool calls
 		_, conversationMessages, err := runAgenticStep(ctx, mcpAgent, cli, tempMessages, config, hookExecutor)

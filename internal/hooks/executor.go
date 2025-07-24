@@ -243,6 +243,21 @@ func mergeHookOutputs(dst, src *HookOutput) {
 	if src.SuppressOutput {
 		dst.SuppressOutput = true
 	}
+	if src.Feedback != "" {
+		dst.Feedback = src.Feedback
+	}
+	if src.Context != "" {
+		dst.Context = src.Context
+	}
+	if src.SystemPrompt != "" {
+		dst.SystemPrompt = src.SystemPrompt
+	}
+	if src.ModifyInput != "" {
+		dst.ModifyInput = src.ModifyInput
+	}
+	if src.ModifyOutput != "" {
+		dst.ModifyOutput = src.ModifyOutput
+	}
 }
 
 func getCurrentWorkingDir() string {

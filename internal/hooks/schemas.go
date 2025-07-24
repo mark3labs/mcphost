@@ -47,9 +47,17 @@ type StopInput struct {
 
 // HookOutput represents the JSON output from a hook
 type HookOutput struct {
+	// Existing fields
 	Continue       *bool  `json:"continue,omitempty"`
 	StopReason     string `json:"stopReason,omitempty"`
 	SuppressOutput bool   `json:"suppressOutput,omitempty"`
 	Decision       string `json:"decision,omitempty"` // "approve", "block", or ""
 	Reason         string `json:"reason,omitempty"`
+
+	// New fields for LLM feedback
+	Feedback     string `json:"feedback,omitempty"`     // Direct feedback to LLM
+	Context      string `json:"context,omitempty"`      // Additional context for the conversation
+	SystemPrompt string `json:"systemPrompt,omitempty"` // Append to system prompt
+	ModifyInput  string `json:"modifyInput,omitempty"`  // Modified tool input (PreToolUse only)
+	ModifyOutput string `json:"modifyOutput,omitempty"` // Modified tool output (PostToolUse only)
 }
