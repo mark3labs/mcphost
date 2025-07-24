@@ -52,6 +52,9 @@ var (
 	// Ollama-specific parameters
 	numGPU  int32
 	mainGPU int32
+
+	// Hooks control
+	noHooks bool
 )
 
 // agentUIAdapter adapts agent.Agent to ui.AgentInterface
@@ -180,15 +183,17 @@ func initConfig() {
 	viper.SetEnvPrefix("MCPHOST")
 	viper.AutomaticEnv()
 
-	// Load hooks configuration
-	hooksConfig, err := hooks.LoadHooksConfig()
-	if err != nil {
-		// Hooks are optional, so just log a warning
-		if debugMode {
-			fmt.Fprintf(os.Stderr, "Warning: Failed to load hooks configuration: %v\n", err)
+	// Load hooks configuration unless disabled
+	if !viper.GetBool("no-hooks") {
+		hooksConfig, err := hooks.LoadHooksConfig()
+		if err != nil {
+			// Hooks are optional, so just log a warning
+			if debugMode {
+				fmt.Fprintf(os.Stderr, "Warning: Failed to load hooks configuration: %v\n", err)
+			}
+		} else {
+			viper.Set("hooks", hooksConfig)
 		}
-	} else {
-		viper.Set("hooks", hooksConfig)
 	}
 }
 
@@ -243,6 +248,8 @@ func init() {
 		BoolVar(&streamFlag, "stream", true, "enable streaming output for faster response display")
 	rootCmd.PersistentFlags().
 		BoolVar(&compactMode, "compact", false, "enable compact output mode without fancy styling")
+	rootCmd.PersistentFlags().
+		BoolVar(&noHooks, "no-hooks", false, "disable all hooks execution")
 
 	// Session management flags
 	rootCmd.PersistentFlags().
@@ -274,6 +281,7 @@ func init() {
 	viper.BindPFlag("max-steps", rootCmd.PersistentFlags().Lookup("max-steps"))
 	viper.BindPFlag("stream", rootCmd.PersistentFlags().Lookup("stream"))
 	viper.BindPFlag("compact", rootCmd.PersistentFlags().Lookup("compact"))
+	viper.BindPFlag("no-hooks", rootCmd.PersistentFlags().Lookup("no-hooks"))
 	viper.BindPFlag("provider-url", rootCmd.PersistentFlags().Lookup("provider-url"))
 	viper.BindPFlag("provider-api-key", rootCmd.PersistentFlags().Lookup("provider-api-key"))
 	viper.BindPFlag("max-tokens", rootCmd.PersistentFlags().Lookup("max-tokens"))

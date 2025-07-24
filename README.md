@@ -614,6 +614,11 @@ hooks:
 
 ⚠️ **WARNING**: Hooks execute arbitrary commands on your system. Only use hooks from trusted sources and always review hook commands before enabling them.
 
+To temporarily disable all hooks, use the `--no-hooks` flag:
+```bash
+mcphost --no-hooks
+```
+
 See the example hook scripts in `examples/hooks/`:
 - `bash-validator.py` - Validates and blocks dangerous bash commands
 - `prompt-logger.sh` - Logs all user prompts with timestamps
