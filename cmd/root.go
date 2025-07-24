@@ -1123,7 +1123,6 @@ func runInteractiveLoop(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI,
 		}
 
 		// Execute UserPromptSubmit hooks
-		var userPromptHookOutput *hooks.HookOutput
 		if hookExecutor != nil {
 			input := &hooks.UserPromptSubmitInput{
 				CommonInput: hookExecutor.PopulateCommonFields(hooks.UserPromptSubmit),
@@ -1137,7 +1136,6 @@ func runInteractiveLoop(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI,
 					fmt.Fprintf(os.Stderr, "UserPromptSubmit hook execution error: %v\n", err)
 				}
 			}
-			userPromptHookOutput = hookOutput
 
 			// Check if hook blocked the prompt
 			if hookOutput != nil && hookOutput.Decision == "block" {
@@ -1175,18 +1173,7 @@ func runInteractiveLoop(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI,
 		cli.DisplayUserMessage(prompt)
 
 		// Create temporary messages with user input for processing
-		var tempMessages []*schema.Message
-		tempMessages = append(tempMessages, messages...)
-
-		// Add context from hook if provided
-		if userPromptHookOutput != nil && userPromptHookOutput.Context != "" {
-			// Add context as a system message before the user message
-			contextMsg := schema.SystemMessage(fmt.Sprintf("Context from system hook: %s", userPromptHookOutput.Context))
-			tempMessages = append(tempMessages, contextMsg)
-		}
-
-		tempMessages = append(tempMessages, schema.UserMessage(prompt))
-
+		tempMessages := append(messages, schema.UserMessage(prompt))
 		// Process the user input with tool calls
 		_, conversationMessages, err := runAgenticStep(ctx, mcpAgent, cli, tempMessages, config, hookExecutor)
 		if err != nil {
