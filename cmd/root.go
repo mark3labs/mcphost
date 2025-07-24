@@ -9,10 +9,12 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/cloudwego/eino/schema"
 	"github.com/mark3labs/mcphost/internal/agent"
 	"github.com/mark3labs/mcphost/internal/config"
+	"github.com/mark3labs/mcphost/internal/hooks"
 	"github.com/mark3labs/mcphost/internal/models"
 	"github.com/mark3labs/mcphost/internal/session"
 	"github.com/mark3labs/mcphost/internal/tokens"
@@ -177,6 +179,17 @@ func initConfig() {
 	// Set environment variable prefix
 	viper.SetEnvPrefix("MCPHOST")
 	viper.AutomaticEnv()
+
+	// Load hooks configuration
+	hooksConfig, err := hooks.LoadHooksConfig()
+	if err != nil {
+		// Hooks are optional, so just log a warning
+		if debugMode {
+			fmt.Fprintf(os.Stderr, "Warning: Failed to load hooks configuration: %v\n", err)
+		}
+	} else {
+		viper.Set("hooks", hooksConfig)
+	}
 }
 
 // loadConfigWithEnvSubstitution loads a config file with environment variable substitution
@@ -374,12 +387,27 @@ func runNormalMode(ctx context.Context) error {
 	}
 	defer mcpAgent.Close()
 
+	// Initialize hook executor if hooks are configured
 	// Get model name for display
 	modelString := viper.GetString("model")
 	parts := strings.SplitN(modelString, ":", 2)
 	modelName := "Unknown"
 	if len(parts) == 2 {
 		modelName = parts[1]
+	}
+
+	var hookExecutor *hooks.Executor
+	if hooksConfig := viper.Get("hooks"); hooksConfig != nil {
+		if hc, ok := hooksConfig.(*hooks.HookConfig); ok {
+			// Generate a session ID for this run
+			sessionID := fmt.Sprintf("mcphost-%d", time.Now().Unix())
+			transcriptPath := "" // We could add transcript logging later
+			hookExecutor = hooks.NewExecutor(hc, sessionID, transcriptPath)
+
+			// Set model and interactive mode
+			hookExecutor.SetModel(modelString)
+			hookExecutor.SetInteractive(promptFlag == "") // Interactive if no prompt flag
+		}
 	}
 
 	// Create an adapter for the agent to match the UI interface
@@ -608,7 +636,7 @@ func runNormalMode(ctx context.Context) error {
 
 	// Check if running in non-interactive mode
 	if promptFlag != "" {
-		return runNonInteractiveMode(ctx, mcpAgent, cli, promptFlag, modelName, messages, quietFlag, noExitFlag, mcpConfig, sessionManager)
+		return runNonInteractiveMode(ctx, mcpAgent, cli, promptFlag, modelName, messages, quietFlag, noExitFlag, mcpConfig, sessionManager, hookExecutor)
 	}
 
 	// Quiet mode is not allowed in interactive mode
@@ -616,7 +644,7 @@ func runNormalMode(ctx context.Context) error {
 		return fmt.Errorf("--quiet flag can only be used with --prompt/-p")
 	}
 
-	return runInteractiveMode(ctx, mcpAgent, cli, serverNames, toolNames, modelName, messages, sessionManager)
+	return runInteractiveMode(ctx, mcpAgent, cli, serverNames, toolNames, modelName, messages, sessionManager, hookExecutor)
 }
 
 // AgenticLoopConfig configures the behavior of the unified agentic loop
@@ -672,9 +700,30 @@ func replaceMessagesHistory(messages *[]*schema.Message, sessionManager *session
 }
 
 // runAgenticLoop handles all execution modes with a single unified loop
-func runAgenticLoop(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI, messages []*schema.Message, config AgenticLoopConfig) error {
+func runAgenticLoop(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI, messages []*schema.Message, config AgenticLoopConfig, hookExecutor *hooks.Executor) error {
 	// Handle initial prompt for non-interactive modes
 	if !config.IsInteractive && config.InitialPrompt != "" {
+		// Execute UserPromptSubmit hooks for non-interactive mode
+		if hookExecutor != nil {
+			input := &hooks.UserPromptSubmitInput{
+				CommonInput: hookExecutor.PopulateCommonFields(hooks.UserPromptSubmit),
+				Prompt:      config.InitialPrompt,
+			}
+
+			hookOutput, err := hookExecutor.ExecuteHooks(ctx, hooks.UserPromptSubmit, input)
+			if err != nil {
+				// Log error but don't fail
+				if debugMode {
+					fmt.Fprintf(os.Stderr, "UserPromptSubmit hook execution error: %v\n", err)
+				}
+			}
+
+			// Check if hook blocked the prompt
+			if hookOutput != nil && hookOutput.Decision == "block" {
+				return fmt.Errorf("prompt blocked by hook: %s", hookOutput.Reason)
+			}
+		}
+
 		// Display user message (skip if quiet)
 		if !config.Quiet && cli != nil {
 			cli.DisplayUserMessage(config.InitialPrompt)
@@ -684,7 +733,7 @@ func runAgenticLoop(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI, mes
 		tempMessages := append(messages, schema.UserMessage(config.InitialPrompt))
 
 		// Process the initial prompt with tool calls
-		_, conversationMessages, err := runAgenticStep(ctx, mcpAgent, cli, tempMessages, config)
+		_, conversationMessages, err := runAgenticStep(ctx, mcpAgent, cli, tempMessages, config, hookExecutor)
 		if err != nil {
 			// Check if this was a user cancellation
 			if err.Error() == "generation cancelled by user" && cli != nil {
@@ -712,14 +761,14 @@ func runAgenticLoop(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI, mes
 
 	// Interactive loop (or continuation after non-interactive)
 	if config.IsInteractive {
-		return runInteractiveLoop(ctx, mcpAgent, cli, messages, config)
+		return runInteractiveLoop(ctx, mcpAgent, cli, messages, config, hookExecutor)
 	}
 
 	return nil
 }
 
 // runAgenticStep processes a single step of the agentic loop (handles tool calls)
-func runAgenticStep(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI, messages []*schema.Message, config AgenticLoopConfig) (*schema.Message, []*schema.Message, error) {
+func runAgenticStep(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI, messages []*schema.Message, config AgenticLoopConfig, hookExecutor *hooks.Executor) (*schema.Message, []*schema.Message, error) {
 	var currentSpinner *ui.Spinner
 
 	// Start initial spinner (skip if quiet)
@@ -762,9 +811,17 @@ func runAgenticStep(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI, mes
 	streamingStarted = false
 	streamingContent.Reset()
 
+	// Variables to store tool information for hooks
+	var currentToolName string
+	var currentToolArgs string
+
 	result, err := mcpAgent.GenerateWithLoopAndStreaming(ctx, messages,
 		// Tool call handler - called when a tool is about to be executed
 		func(toolName, toolArgs string) {
+			// Store tool info for use in execution handler
+			currentToolName = toolName
+			currentToolArgs = toolArgs
+
 			if !config.Quiet && cli != nil {
 				// Stop spinner before displaying tool call
 				if currentSpinner != nil {
@@ -776,22 +833,66 @@ func runAgenticStep(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI, mes
 		},
 		// Tool execution handler - called when tool execution starts/ends
 		func(toolName string, isStarting bool) {
-			if !config.Quiet && cli != nil {
-				if isStarting {
+			if isStarting {
+				// Execute PreToolUse hooks
+				if hookExecutor != nil {
+					input := &hooks.PreToolUseInput{
+						CommonInput: hookExecutor.PopulateCommonFields(hooks.PreToolUse),
+						ToolName:    currentToolName,
+						ToolInput:   json.RawMessage(currentToolArgs),
+					}
+
+					hookOutput, err := hookExecutor.ExecuteHooks(ctx, hooks.PreToolUse, input)
+					if err != nil {
+						// Log error but don't fail the tool execution
+						if debugMode {
+							fmt.Fprintf(os.Stderr, "Hook execution error: %v\n", err)
+						}
+					}
+
+					// Check if hook blocked the execution
+					if hookOutput != nil && hookOutput.Decision == "block" {
+						// We need a way to cancel the tool execution
+						// For now, just log it
+						if !config.Quiet && cli != nil {
+							cli.DisplayInfo(fmt.Sprintf("Tool execution blocked by hook: %s", hookOutput.Reason))
+						}
+					}
+				}
+
+				if !config.Quiet && cli != nil {
 					// Start spinner for tool execution
 					currentSpinner = ui.NewSpinner(fmt.Sprintf("Executing %s...", toolName))
 					currentSpinner.Start()
-				} else {
-					// Stop spinner when tool execution completes
-					if currentSpinner != nil {
-						currentSpinner.Stop()
-						currentSpinner = nil
-					}
+				}
+			} else {
+				// Stop spinner when tool execution completes
+				if !config.Quiet && cli != nil && currentSpinner != nil {
+					currentSpinner.Stop()
+					currentSpinner = nil
 				}
 			}
 		},
 		// Tool result handler - called when a tool execution completes
 		func(toolName, toolArgs, result string, isError bool) {
+			// Execute PostToolUse hooks
+			if hookExecutor != nil && result != "" {
+				input := &hooks.PostToolUseInput{
+					CommonInput:  hookExecutor.PopulateCommonFields(hooks.PostToolUse),
+					ToolName:     currentToolName,
+					ToolInput:    json.RawMessage(currentToolArgs),
+					ToolResponse: json.RawMessage(result),
+				}
+
+				_, err := hookExecutor.ExecuteHooks(ctx, hooks.PostToolUse, input)
+				if err != nil {
+					// Log error but don't fail
+					if debugMode {
+						fmt.Fprintf(os.Stderr, "PostToolUse hook execution error: %v\n", err)
+					}
+				}
+			}
+
 			if !config.Quiet && cli != nil {
 				// Parse tool result content - it might be JSON-encoded MCP content
 				resultContent := result
@@ -921,12 +1022,49 @@ func runAgenticStep(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI, mes
 		cli.DisplayUsageAfterResponse()
 	}
 
+	// Execute Stop hook after agent has finished responding
+	executeStopHook(hookExecutor, response, "completed", config.ModelName)
+
 	// Return the final response and all conversation messages
 	return response, conversationMessages, nil
 }
 
+// executeStopHook executes the Stop hook if a hook executor is available
+func executeStopHook(hookExecutor *hooks.Executor, response *schema.Message, stopReason string, modelName string) {
+	if hookExecutor != nil {
+		// Prepare metadata
+		var meta json.RawMessage
+		if response != nil {
+			metaData := map[string]interface{}{
+				"model":          modelName,
+				"role":           string(response.Role),
+				"has_tool_calls": len(response.ToolCalls) > 0,
+			}
+			if metaBytes, err := json.Marshal(metaData); err == nil {
+				meta = json.RawMessage(metaBytes)
+			}
+		}
+
+		responseContent := ""
+		if response != nil {
+			responseContent = response.Content
+		}
+
+		input := &hooks.StopInput{
+			CommonInput:    hookExecutor.PopulateCommonFields(hooks.Stop),
+			StopHookActive: true,
+			Response:       responseContent,
+			StopReason:     stopReason,
+			Meta:           meta,
+		}
+
+		// Execute Stop hook (ignore errors as we're exiting anyway)
+		hookExecutor.ExecuteHooks(context.Background(), hooks.Stop, input)
+	}
+}
+
 // runInteractiveLoop handles the interactive portion of the agentic loop
-func runInteractiveLoop(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI, messages []*schema.Message, config AgenticLoopConfig) error {
+func runInteractiveLoop(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI, messages []*schema.Message, config AgenticLoopConfig, hookExecutor *hooks.Executor) error {
 	for {
 		// Get user input
 		prompt, err := cli.GetPrompt()
@@ -940,6 +1078,30 @@ func runInteractiveLoop(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI,
 
 		if prompt == "" {
 			continue
+		}
+
+		// Execute UserPromptSubmit hooks
+		if hookExecutor != nil {
+			input := &hooks.UserPromptSubmitInput{
+				CommonInput: hookExecutor.PopulateCommonFields(hooks.UserPromptSubmit),
+				Prompt:      prompt,
+			}
+
+			hookOutput, err := hookExecutor.ExecuteHooks(ctx, hooks.UserPromptSubmit, input)
+			if err != nil {
+				// Log error but don't fail
+				if debugMode {
+					fmt.Fprintf(os.Stderr, "UserPromptSubmit hook execution error: %v\n", err)
+				}
+			}
+
+			// Check if hook blocked the prompt
+			if hookOutput != nil && hookOutput.Decision == "block" {
+				if cli != nil {
+					cli.DisplayInfo(fmt.Sprintf("Prompt blocked: %s", hookOutput.Reason))
+				}
+				continue // Skip this prompt
+			}
 		}
 
 		// Handle slash commands
@@ -965,7 +1127,7 @@ func runInteractiveLoop(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI,
 		tempMessages := append(messages, schema.UserMessage(prompt))
 
 		// Process the user input with tool calls
-		_, conversationMessages, err := runAgenticStep(ctx, mcpAgent, cli, tempMessages, config)
+		_, conversationMessages, err := runAgenticStep(ctx, mcpAgent, cli, tempMessages, config, hookExecutor)
 		if err != nil {
 			// Check if this was a user cancellation
 			if err.Error() == "generation cancelled by user" {
@@ -983,7 +1145,7 @@ func runInteractiveLoop(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI,
 }
 
 // runNonInteractiveMode handles the non-interactive mode execution
-func runNonInteractiveMode(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI, prompt, modelName string, messages []*schema.Message, quiet, noExit bool, mcpConfig *config.Config, sessionManager *session.Manager) error {
+func runNonInteractiveMode(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI, prompt, modelName string, messages []*schema.Message, quiet, noExit bool, mcpConfig *config.Config, sessionManager *session.Manager, hookExecutor *hooks.Executor) error {
 	// Prepare data for slash commands (needed if continuing to interactive mode)
 	var serverNames []string
 	for name := range mcpConfig.MCPServers {
@@ -1011,11 +1173,11 @@ func runNonInteractiveMode(ctx context.Context, mcpAgent *agent.Agent, cli *ui.C
 		SessionManager:   sessionManager,
 	}
 
-	return runAgenticLoop(ctx, mcpAgent, cli, messages, config)
+	return runAgenticLoop(ctx, mcpAgent, cli, messages, config, hookExecutor)
 }
 
 // runInteractiveMode handles the interactive mode execution
-func runInteractiveMode(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI, serverNames, toolNames []string, modelName string, messages []*schema.Message, sessionManager *session.Manager) error {
+func runInteractiveMode(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI, serverNames, toolNames []string, modelName string, messages []*schema.Message, sessionManager *session.Manager, hookExecutor *hooks.Executor) error {
 	// Configure and run unified agentic loop
 	config := AgenticLoopConfig{
 		IsInteractive:    true,
@@ -1029,5 +1191,5 @@ func runInteractiveMode(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI,
 		SessionManager:   sessionManager,
 	}
 
-	return runAgenticLoop(ctx, mcpAgent, cli, messages, config)
+	return runAgenticLoop(ctx, mcpAgent, cli, messages, config, hookExecutor)
 }

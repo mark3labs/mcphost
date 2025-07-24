@@ -1,0 +1,10 @@
+hooks:
+  InvalidEvent:
+    - hooks:
+        - type: command
+          command: "echo test"
+  PreToolUse:
+    - matcher: "[invalid regex"
+      hooks:
+        - type: command
+          command: "echo test"

@@ -1,0 +1,21 @@
+hooks:
+  PreToolUse:
+    - matcher: "bash"
+      hooks:
+        - type: command
+          command: "echo 'Executing bash command'"
+          timeout: 5
+    - matcher: "fetch"
+      hooks:
+        - type: command
+          command: "echo 'Fetching URL'"
+          timeout: 10
+  UserPromptSubmit:
+    - hooks:
+        - type: command
+          command: "date >> /tmp/mcphost-prompts.log"
+  PostToolUse:
+    - matcher: ".*"
+      hooks:
+        - type: command
+          command: "echo 'Tool execution completed'"
