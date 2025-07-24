@@ -8,10 +8,12 @@ import (
 	"os"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/cloudwego/eino/schema"
 	"github.com/mark3labs/mcphost/internal/agent"
 	"github.com/mark3labs/mcphost/internal/config"
+	"github.com/mark3labs/mcphost/internal/hooks"
 	"github.com/mark3labs/mcphost/internal/models"
 	"github.com/mark3labs/mcphost/internal/ui"
 	"github.com/spf13/cobra"
@@ -652,6 +654,21 @@ func runScriptMode(ctx context.Context, mcpConfig *config.Config, prompt string,
 		cli.DisplayDebugConfig(debugConfig)
 	}
 
+	// Initialize hooks
+	var hookExecutor *hooks.Executor
+	if hooksConfig := viper.Get("hooks"); hooksConfig != nil {
+		if hc, ok := hooksConfig.(*hooks.HookConfig); ok {
+			// Generate a session ID for this run
+			sessionID := fmt.Sprintf("mcphost-%d", time.Now().Unix())
+			transcriptPath := "" // We could add transcript logging later
+			hookExecutor = hooks.NewExecutor(hc, sessionID, transcriptPath)
+
+			// Set model and interactive mode
+			hookExecutor.SetModel(finalModel)
+			hookExecutor.SetInteractive(prompt == "")
+		}
+	}
+
 	// Prepare data for slash commands
 	var serverNames []string
 	for name := range mcpConfig.MCPServers {
@@ -679,5 +696,5 @@ func runScriptMode(ctx context.Context, mcpConfig *config.Config, prompt string,
 		MCPConfig:        mcpConfig,
 	}
 
-	return runAgenticLoop(ctx, mcpAgent, cli, messages, config)
+	return runAgenticLoop(ctx, mcpAgent, cli, messages, config, hookExecutor)
 }
