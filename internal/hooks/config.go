@@ -39,8 +39,6 @@ func LoadHooksConfig(customPaths ...string) (*HookConfig, error) {
 		filepath.Join(configDir, "mcphost", "hooks.yml"),
 		".mcphost/hooks.json",
 		".mcphost/hooks.yml",
-		".mcphost/hooks.local.json",
-		".mcphost/hooks.local.yml",
 	}
 
 	// Add custom paths with highest precedence

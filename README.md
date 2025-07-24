@@ -558,6 +558,67 @@ See `examples/scripts/` for sample scripts:
 - `example-script.sh` - Script with custom MCP servers
 - `simple-script.sh` - Script using default config fallback
 
+### Hooks System
+
+MCPHost supports a powerful hooks system that allows you to execute custom commands at specific points during execution. This enables security policies, logging, custom integrations, and automated workflows.
+
+#### Quick Start
+
+1. Initialize a hooks configuration:
+   ```bash
+   mcphost hooks init
+   ```
+
+2. View active hooks:
+   ```bash
+   mcphost hooks list
+   ```
+
+3. Validate your configuration:
+   ```bash
+   mcphost hooks validate
+   ```
+
+#### Configuration
+
+Hooks are configured in YAML files with the following precedence (highest to lowest):
+- `.mcphost/hooks.yml` (project-specific hooks)
+- `$XDG_CONFIG_HOME/mcphost/hooks.yml` (user global hooks, defaults to `~/.config/mcphost/hooks.yml`)
+
+Example configuration:
+```yaml
+hooks:
+  PreToolUse:
+    - matcher: "bash"
+      hooks:
+        - type: command
+          command: "/usr/local/bin/validate-bash.py"
+          timeout: 5
+  
+  UserPromptSubmit:
+    - hooks:
+        - type: command
+          command: "~/.mcphost/hooks/log-prompt.sh"
+```
+
+#### Available Hook Events
+
+- **PreToolUse**: Before any tool execution (bash, fetch, todo, MCP tools)
+- **PostToolUse**: After tool execution completes
+- **UserPromptSubmit**: When user submits a prompt
+- **Stop**: When the agent finishes responding
+- **SubagentStop**: When a subagent (Task tool) finishes
+- **Notification**: When MCPHost sends notifications
+
+#### Security
+
+⚠️ **WARNING**: Hooks execute arbitrary commands on your system. Only use hooks from trusted sources and always review hook commands before enabling them.
+
+See the example hook scripts in `examples/hooks/`:
+- `bash-validator.py` - Validates and blocks dangerous bash commands
+- `prompt-logger.sh` - Logs all user prompts with timestamps
+- `mcp-monitor.py` - Monitors and enforces policies on MCP tool usage
+
 ### Non-Interactive Mode
 
 Run a single prompt and exit - perfect for scripting and automation:
