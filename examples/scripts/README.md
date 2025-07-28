@@ -28,6 +28,28 @@ mcphost script default-values-demo.sh \
   --args:format "json"
 ```
 
+### `tls-test-script.sh`
+Demonstrates TLS skip verify for connecting to providers with self-signed certificates.
+
+**Features showcased:**
+- `tls-skip-verify` configuration in script frontmatter
+- Connecting to HTTPS endpoints with self-signed certificates
+- Security considerations for development environments
+
+**Usage:**
+```bash
+# Run with TLS skip verify enabled (configured in script)
+mcphost script tls-test-script.sh
+
+# Override the provider URL
+mcphost script tls-test-script.sh --provider-url https://192.168.1.100:443
+
+# Disable TLS skip verify via command line (overrides script config)
+mcphost script tls-test-script.sh --tls-skip-verify=false
+```
+
+⚠️ **WARNING**: Only use `tls-skip-verify` for development or when connecting to trusted servers with self-signed certificates.
+
 ## Variable Syntax Reference
 
 MCPHost scripts support two types of variables:

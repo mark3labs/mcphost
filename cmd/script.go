@@ -134,6 +134,9 @@ func overrideConfigWithFrontmatter(scriptFile string, variables map[string]strin
 	if scriptConfig.Stream != nil && !flagChanged("stream") {
 		viper.Set("stream", *scriptConfig.Stream)
 	}
+	if scriptConfig.TLSSkipVerify && !flagChanged("tls-skip-verify") {
+		viper.Set("tls-skip-verify", scriptConfig.TLSSkipVerify)
+	}
 }
 
 // parseCustomVariables extracts custom variables from command line arguments
@@ -392,6 +395,9 @@ func parseScriptContent(content string, variables map[string]string) (*config.Co
 		if noExit := frontmatterViper.GetBool("no-exit"); noExit {
 			scriptConfig.NoExit = noExit
 		}
+		if tlsSkipVerify := frontmatterViper.GetBool("tls-skip-verify"); tlsSkipVerify {
+			scriptConfig.TLSSkipVerify = tlsSkipVerify
+		}
 	}
 
 	// Set prompt from content after frontmatter
@@ -586,6 +592,7 @@ func runScriptMode(ctx context.Context, mcpConfig *config.Config, prompt string,
 		TopP:           &finalTopP,
 		TopK:           &finalTopK,
 		StopSequences:  finalStopSequences,
+		TLSSkipVerify:  viper.GetBool("tls-skip-verify"),
 	}
 
 	// Create the agent using the factory (scripts don't need spinners)
