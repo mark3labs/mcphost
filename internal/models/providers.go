@@ -3,6 +3,7 @@ package models
 import (
 	"bytes"
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -78,6 +79,9 @@ type ProviderConfig struct {
 	// Ollama-specific parameters
 	NumGPU  *int32
 	MainGPU *int32
+
+	// TLS configuration
+	TLSSkipVerify bool // Skip TLS certificate verification (insecure)
 }
 
 // ProviderResult contains the result of provider creation
@@ -216,6 +220,11 @@ func createAzureOpenAIProvider(ctx context.Context, config *ProviderConfig, mode
 		azureConfig.Stop = config.StopSequences
 	}
 
+	// Set HTTP client with TLS config if needed
+	if config.TLSSkipVerify {
+		azureConfig.HTTPClient = createHTTPClientWithTLSConfig(true)
+	}
+
 	return openai.NewCustomChatModel(ctx, azureConfig)
 }
 
@@ -246,12 +255,16 @@ func createAnthropicProvider(ctx context.Context, config *ProviderConfig, modelN
 	if strings.HasPrefix(source, "stored OAuth") {
 		// For OAuth tokens, we need to use Authorization: Bearer header
 		// Create a custom HTTP client that adds the proper headers
-		claudeConfig.HTTPClient = createOAuthHTTPClient(apiKey)
+		claudeConfig.HTTPClient = createOAuthHTTPClient(apiKey, config.TLSSkipVerify)
 		// Set a dummy API key to prevent the library from failing validation
 		claudeConfig.APIKey = "oauth-placeholder"
 	} else {
 		// For API keys, use the standard x-api-key header
 		claudeConfig.APIKey = apiKey
+		// Set HTTP client with TLS config if needed
+		if config.TLSSkipVerify {
+			claudeConfig.HTTPClient = createHTTPClientWithTLSConfig(true)
+		}
 	}
 
 	if config.ProviderURL != "" {
@@ -293,6 +306,11 @@ func createOpenAIProvider(ctx context.Context, config *ProviderConfig, modelName
 
 	if config.ProviderURL != "" {
 		openaiConfig.BaseURL = config.ProviderURL
+	}
+
+	// Set HTTP client with TLS config if needed
+	if config.TLSSkipVerify {
+		openaiConfig.HTTPClient = createHTTPClientWithTLSConfig(true)
 	}
 
 	// Check if this is a reasoning model to handle beta limitations (skip validation if using custom URL)
@@ -350,10 +368,17 @@ func createGoogleProvider(ctx context.Context, config *ProviderConfig, modelName
 		return nil, fmt.Errorf("Google API key not provided. Use --provider-api-key flag or GOOGLE_API_KEY/GEMINI_API_KEY/GOOGLE_GENERATIVE_AI_API_KEY environment variable")
 	}
 
-	client, err := genai.NewClient(ctx, &genai.ClientConfig{
+	clientConfig := &genai.ClientConfig{
 		APIKey:  apiKey,
 		Backend: genai.BackendGeminiAPI,
-	})
+	}
+
+	// Set HTTP client with TLS config if needed
+	if config.TLSSkipVerify {
+		clientConfig.HTTPClient = createHTTPClientWithTLSConfig(true)
+	}
+
+	client, err := genai.NewClient(ctx, clientConfig)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create Google client: %v", err)
 	}
@@ -389,8 +414,8 @@ type OllamaLoadingResult struct {
 }
 
 // loadOllamaModelWithFallback loads an Ollama model with GPU settings and automatic CPU fallback
-func loadOllamaModelWithFallback(ctx context.Context, baseURL, modelName string, options *api.Options) (*OllamaLoadingResult, error) {
-	client := &http.Client{}
+func loadOllamaModelWithFallback(ctx context.Context, baseURL, modelName string, options *api.Options, tlsSkipVerify bool) (*OllamaLoadingResult, error) {
+	client := createHTTPClientWithTLSConfig(tlsSkipVerify)
 
 	// Phase 1: Check if model exists locally
 	if err := checkOllamaModelExists(client, baseURL, modelName); err != nil {
@@ -601,7 +626,7 @@ func createOllamaProviderWithResult(ctx context.Context, config *ProviderConfig,
 
 	// Try to pre-load the model with GPU settings and automatic CPU fallback
 	// If this fails, fall back to the original behavior
-	loadingResult, err := loadOllamaModelWithFallback(ctx, baseURL, modelName, options)
+	loadingResult, err := loadOllamaModelWithFallback(ctx, baseURL, modelName, options, config.TLSSkipVerify)
 	var loadingMessage string
 
 	if err != nil {
@@ -620,6 +645,11 @@ func createOllamaProviderWithResult(ctx context.Context, config *ProviderConfig,
 		Options: finalOptions,
 	}
 
+	// Set HTTP client with TLS config if needed
+	if config.TLSSkipVerify {
+		ollamaConfig.HTTPClient = createHTTPClientWithTLSConfig(true)
+	}
+
 	chatModel, err := ollama.NewChatModel(ctx, ollamaConfig)
 	if err != nil {
 		return nil, err
@@ -631,12 +661,38 @@ func createOllamaProviderWithResult(ctx context.Context, config *ProviderConfig,
 	}, nil
 }
 
+// createHTTPClientWithTLSConfig creates an HTTP client with optional TLS skip verify
+func createHTTPClientWithTLSConfig(skipVerify bool) *http.Client {
+	if !skipVerify {
+		return &http.Client{}
+	}
+
+	transport := &http.Transport{
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: true,
+		},
+	}
+
+	return &http.Client{
+		Transport: transport,
+	}
+}
+
 // createOAuthHTTPClient creates an HTTP client that adds OAuth headers for Anthropic API
-func createOAuthHTTPClient(accessToken string) *http.Client {
+func createOAuthHTTPClient(accessToken string, skipVerify bool) *http.Client {
+	var base http.RoundTripper = http.DefaultTransport
+	if skipVerify {
+		base = &http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true,
+			},
+		}
+	}
+
 	return &http.Client{
 		Transport: &oauthTransport{
 			accessToken: accessToken,
-			base:        http.DefaultTransport,
+			base:        base,
 		},
 	}
 }

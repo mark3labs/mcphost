@@ -113,6 +113,13 @@ export GOOGLE_API_KEY='your-api-key'
 - Get your API server base URL, API key and model name
 - Use `--provider-url` and `--provider-api-key` flags or set environment variables
 
+5. Self-Signed Certificates (TLS):
+If your provider uses self-signed certificates (e.g., local Ollama with HTTPS), you can skip certificate verification:
+```bash
+mcphost --provider-url https://192.168.1.100:443 --tls-skip-verify
+```
+⚠️ **WARNING**: Only use `--tls-skip-verify` for development or when connecting to trusted servers with self-signed certificates. This disables TLS certificate verification and is insecure for production use.
+
 ## Installation 📦
 
 ```bash
@@ -741,6 +748,7 @@ mcphost -p "Generate a random UUID" --quiet | tr '[:lower:]' '[:upper:]'
 ### Flags
 - `--provider-url string`: Base URL for the provider API (applies to OpenAI, Anthropic, Ollama, and Google)
 - `--provider-api-key string`: API key for the provider (applies to OpenAI, Anthropic, and Google)
+- `--tls-skip-verify`: Skip TLS certificate verification (WARNING: insecure, use only for self-signed certificates)
 - `--config string`: Config file location (default is $HOME/.mcphost.yml)
 - `--system-prompt string`: system-prompt file location
 - `--debug`: Enable debug logging
@@ -808,6 +816,7 @@ stream: false  # Disable streaming (default: true)
 # API Configuration
 provider-api-key: "your-api-key"      # For OpenAI, Anthropic, or Google
 provider-url: "https://api.openai.com/v1"  # Custom base URL
+tls-skip-verify: false  # Skip TLS certificate verification (default: false)
 ```
 
 **Note**: Command-line flags take precedence over config file values.

@@ -55,6 +55,9 @@ var (
 
 	// Hooks control
 	noHooks bool
+
+	// TLS configuration
+	tlsSkipVerify bool
 )
 
 // agentUIAdapter adapts agent.Agent to ui.AgentInterface
@@ -260,6 +263,7 @@ func init() {
 	flags := rootCmd.PersistentFlags()
 	flags.StringVar(&providerURL, "provider-url", "", "base URL for the provider API (applies to OpenAI, Anthropic, Ollama, and Google)")
 	flags.StringVar(&providerAPIKey, "provider-api-key", "", "API key for the provider (applies to OpenAI, Anthropic, and Google)")
+	flags.BoolVar(&tlsSkipVerify, "tls-skip-verify", false, "skip TLS certificate verification (WARNING: insecure, use only for self-signed certificates)")
 
 	// Model generation parameters
 	flags.IntVar(&maxTokens, "max-tokens", 4096, "maximum number of tokens in the response")
@@ -291,6 +295,7 @@ func init() {
 	viper.BindPFlag("stop-sequences", rootCmd.PersistentFlags().Lookup("stop-sequences"))
 	viper.BindPFlag("num-gpu-layers", rootCmd.PersistentFlags().Lookup("num-gpu-layers"))
 	viper.BindPFlag("main-gpu", rootCmd.PersistentFlags().Lookup("main-gpu"))
+	viper.BindPFlag("tls-skip-verify", rootCmd.PersistentFlags().Lookup("tls-skip-verify"))
 
 	// Defaults are already set in flag definitions, no need to duplicate in viper
 
@@ -364,6 +369,7 @@ func runNormalMode(ctx context.Context) error {
 		StopSequences:  viper.GetStringSlice("stop-sequences"),
 		NumGPU:         &numGPU,
 		MainGPU:        &mainGPU,
+		TLSSkipVerify:  viper.GetBool("tls-skip-verify"),
 	}
 
 	// Create spinner function for agent creation
@@ -446,6 +452,11 @@ func runNormalMode(ctx context.Context) error {
 			"top-k":         viper.GetInt("top-k"),
 			"provider-url":  viper.GetString("provider-url"),
 			"system-prompt": viper.GetString("system-prompt"),
+		}
+
+		// Add TLS skip verify if enabled
+		if viper.GetBool("tls-skip-verify") {
+			debugConfig["tls-skip-verify"] = true
 		}
 
 		// Add Ollama-specific parameters if using Ollama
