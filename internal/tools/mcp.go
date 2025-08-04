@@ -21,17 +21,19 @@ import (
 
 // MCPToolManager manages MCP tools and clients
 type MCPToolManager struct {
-	clients map[string]client.MCPClient
-	tools   []tool.BaseTool
-	toolMap map[string]*toolMapping    // maps prefixed tool names to their server and original name
-	model   model.ToolCallingChatModel // LLM model for sampling
+	connectionPool *MCPConnectionPool
+	tools          []tool.BaseTool
+	toolMap        map[string]*toolMapping    // maps prefixed tool names to their server and original name
+	model          model.ToolCallingChatModel // LLM model for sampling
+	config         *config.Config
 }
 
 // toolMapping stores the mapping between prefixed tool names and their original details
 type toolMapping struct {
 	serverName   string
 	originalName string
-	client       client.MCPClient
+	serverConfig config.MCPServerConfig
+	manager      *MCPToolManager
 }
 
 // mcpToolImpl implements the eino tool interface with server prefixing
@@ -43,7 +45,6 @@ type mcpToolImpl struct {
 // NewMCPToolManager creates a new MCP tool manager
 func NewMCPToolManager() *MCPToolManager {
 	return &MCPToolManager{
-		clients: make(map[string]client.MCPClient),
 		tools:   make([]tool.BaseTool, 0),
 		toolMap: make(map[string]*toolMapping),
 	}
@@ -117,6 +118,10 @@ func (h *samplingHandler) CreateMessage(ctx context.Context, request mcp.CreateM
 
 // LoadTools loads tools from MCP servers based on configuration
 func (m *MCPToolManager) LoadTools(ctx context.Context, config *config.Config) error {
+	// Initialize connection pool
+	m.config = config
+	m.connectionPool = NewMCPConnectionPool(DefaultConnectionPoolConfig(), m.model)
+
 	var loadErrors []string
 
 	for serverName, serverConfig := range config.MCPServers {
@@ -137,21 +142,20 @@ func (m *MCPToolManager) LoadTools(ctx context.Context, config *config.Config) e
 
 // loadServerTools loads tools from a single MCP server
 func (m *MCPToolManager) loadServerTools(ctx context.Context, serverName string, serverConfig config.MCPServerConfig) error {
-	client, err := m.createMCPClient(ctx, serverName, serverConfig)
+	// Add debug logging
+	debugLogConnectionInfo(serverName, serverConfig)
+
+	// Get connection from pool
+	conn, err := m.connectionPool.GetConnection(ctx, serverName, serverConfig)
 	if err != nil {
-		return fmt.Errorf("failed to create MCP client: %v", err)
-	}
-
-	m.clients[serverName] = client
-
-	// Initialize the client
-	if err := m.initializeClient(ctx, client); err != nil {
-		return fmt.Errorf("failed to initialize MCP client: %v", err)
+		return fmt.Errorf("failed to get connection from pool: %v", err)
 	}
 
 	// Get tools from this server
-	listResults, err := client.ListTools(ctx, mcp.ListToolsRequest{})
+	listResults, err := conn.client.ListTools(ctx, mcp.ListToolsRequest{})
 	if err != nil {
+		// Handle connection error
+		m.connectionPool.HandleConnectionError(serverName, err)
 		return fmt.Errorf("failed to list tools: %v", err)
 	}
 
@@ -203,7 +207,8 @@ func (m *MCPToolManager) loadServerTools(ctx context.Context, serverName string,
 		mapping := &toolMapping{
 			serverName:   serverName,
 			originalName: mcpTool.Name,
-			client:       client,
+			serverConfig: serverConfig,
+			manager:      m,
 		}
 		m.toolMap[prefixedName] = mapping
 
@@ -243,7 +248,13 @@ func (t *mcpToolImpl) InvokableRun(ctx context.Context, argumentsInJSON string, 
 		arguments = json.RawMessage(argumentsInJSON)
 	}
 
-	result, err := t.mapping.client.CallTool(ctx, mcp.CallToolRequest{
+	// Get connection from pool for this server
+	conn, err := t.mapping.manager.connectionPool.GetConnection(ctx, t.mapping.serverName, t.mapping.serverConfig)
+	if err != nil {
+		return "", fmt.Errorf("failed to get connection from pool: %w", err)
+	}
+	
+	result, err := conn.client.CallTool(ctx, mcp.CallToolRequest{
 		Request: mcp.Request{
 			Method: "tools/call",
 		},
@@ -257,6 +268,8 @@ func (t *mcpToolImpl) InvokableRun(ctx context.Context, argumentsInJSON string, 
 		},
 	})
 	if err != nil {
+		// Handle connection error in pool
+		t.mapping.manager.connectionPool.HandleConnectionError(t.mapping.serverName, err)
 		return "", fmt.Errorf("failed to call mcp tool: %w", err)
 	}
 
@@ -280,7 +293,7 @@ func (m *MCPToolManager) GetTools() []tool.BaseTool {
 // GetLoadedServerNames returns the names of successfully loaded MCP servers
 func (m *MCPToolManager) GetLoadedServerNames() []string {
 	var names []string
-	for serverName := range m.clients {
+	for serverName := range m.connectionPool.GetClients() {
 		names = append(names, serverName)
 	}
 	return names
@@ -288,12 +301,7 @@ func (m *MCPToolManager) GetLoadedServerNames() []string {
 
 // Close closes all MCP clients
 func (m *MCPToolManager) Close() error {
-	for name, client := range m.clients {
-		if err := client.Close(); err != nil {
-			return fmt.Errorf("failed to close client %s: %v", name, err)
-		}
-	}
-	return nil
+	return m.connectionPool.Close()
 }
 
 // shouldExcludeTool determines if a tool should be excluded based on excludedTools
@@ -474,4 +482,25 @@ func (m *MCPToolManager) createBuiltinClient(ctx context.Context, serverName str
 	}
 
 	return inProcessClient, nil
+}
+
+// debugLogConnectionInfo logs detailed connection information for debugging
+func debugLogConnectionInfo(serverName string, serverConfig config.MCPServerConfig) {
+	fmt.Printf("🔍 [DEBUG] Connecting to MCP server: %s\n", serverName)
+	fmt.Printf("🔍 [DEBUG] Transport type: %s\n", serverConfig.GetTransportType())
+	
+	switch serverConfig.GetTransportType() {
+	case "stdio":
+		if len(serverConfig.Command) > 0 {
+			fmt.Printf("🔍 [DEBUG] Command: %s %v\n", serverConfig.Command[0], serverConfig.Command[1:])
+		}
+		if len(serverConfig.Environment) > 0 {
+			fmt.Printf("🔍 [DEBUG] Environment variables: %d\n", len(serverConfig.Environment))
+		}
+	case "sse", "streamable":
+		fmt.Printf("🔍 [DEBUG] URL: %s\n", serverConfig.URL)
+		if len(serverConfig.Headers) > 0 {
+			fmt.Printf("🔍 [DEBUG] Headers: %v\n", serverConfig.Headers)
+		}
+	}
 }
