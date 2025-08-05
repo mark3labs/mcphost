@@ -248,12 +248,12 @@ func (t *mcpToolImpl) InvokableRun(ctx context.Context, argumentsInJSON string, 
 		arguments = json.RawMessage(argumentsInJSON)
 	}
 
-	// Get connection from pool for this server
-	conn, err := t.mapping.manager.connectionPool.GetConnection(ctx, t.mapping.serverName, t.mapping.serverConfig)
+	// Get connection from pool for this server with health check
+	conn, err := t.mapping.manager.connectionPool.GetConnectionWithHealthCheck(ctx, t.mapping.serverName, t.mapping.serverConfig)
 	if err != nil {
-		return "", fmt.Errorf("failed to get connection from pool: %w", err)
+		return "", fmt.Errorf("failed to get healthy connection from pool: %w", err)
 	}
-	
+
 	result, err := conn.client.CallTool(ctx, mcp.CallToolRequest{
 		Request: mcp.Request{
 			Method: "tools/call",
@@ -488,7 +488,7 @@ func (m *MCPToolManager) createBuiltinClient(ctx context.Context, serverName str
 func debugLogConnectionInfo(serverName string, serverConfig config.MCPServerConfig) {
 	fmt.Printf("🔍 [DEBUG] Connecting to MCP server: %s\n", serverName)
 	fmt.Printf("🔍 [DEBUG] Transport type: %s\n", serverConfig.GetTransportType())
-	
+
 	switch serverConfig.GetTransportType() {
 	case "stdio":
 		if len(serverConfig.Command) > 0 {

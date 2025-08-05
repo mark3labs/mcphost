@@ -109,6 +109,73 @@ func (p *MCPConnectionPool) GetConnection(ctx context.Context, serverName string
 	return conn, nil
 }
 
+// GetConnectionWithHealthCheck gets a connection from the pool with proactive health check
+func (p *MCPConnectionPool) GetConnectionWithHealthCheck(ctx context.Context, serverName string, serverConfig config.MCPServerConfig) (*MCPConnection, error) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+
+	if conn, exists := p.connections[serverName]; exists {
+		conn.mu.RLock()
+		isHealthy := conn.isHealthy && time.Since(conn.lastUsed) < p.config.MaxIdleTime
+		conn.mu.RUnlock()
+
+		if isHealthy {
+			// Perform proactive health check before reusing connection
+			if p.performHealthCheck(ctx, conn) {
+				conn.mu.Lock()
+				conn.lastUsed = time.Now()
+				conn.mu.Unlock()
+				fmt.Printf("✅ [POOL] Reusing healthy connection for %s\n", serverName)
+				return conn, nil
+			} else {
+				fmt.Printf("🔍 [POOL] Connection %s failed health check, removing\n", serverName)
+				conn.client.Close()
+				delete(p.connections, serverName)
+			}
+		} else {
+			fmt.Printf("🔍 [POOL] Connection %s unhealthy, removing\n", serverName)
+			conn.client.Close()
+			delete(p.connections, serverName)
+		}
+	}
+
+	fmt.Printf("🆕 [POOL] Creating new connection for %s\n", serverName)
+	conn, err := p.createConnection(ctx, serverName, serverConfig)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create connection for %s: %w", serverName, err)
+	}
+
+	p.connections[serverName] = conn
+	return conn, nil
+}
+
+// performHealthCheck performs a quick health check on the connection
+func (p *MCPConnectionPool) performHealthCheck(ctx context.Context, conn *MCPConnection) bool {
+	// Create a short timeout context for health check
+	healthCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	// Try to list tools as a health check - this is a lightweight operation
+	_, err := conn.client.ListTools(healthCtx, mcp.ListToolsRequest{})
+	if err != nil {
+		fmt.Printf("⚠️ [HEALTH_CHECK] Connection %s failed health check: %v\n", conn.serverName, err)
+		conn.mu.Lock()
+		conn.isHealthy = false
+		conn.errorCount++
+		conn.lastError = err
+		conn.mu.Unlock()
+		return false
+	}
+
+	// Reset error count on successful health check
+	conn.mu.Lock()
+	conn.errorCount = 0
+	conn.lastError = nil
+	conn.mu.Unlock()
+
+	return true
+}
+
 // createConnection creates a new connection
 func (p *MCPConnectionPool) createConnection(ctx context.Context, serverName string, serverConfig config.MCPServerConfig) (*MCPConnection, error) {
 	client, err := p.createMCPClient(ctx, serverName, serverConfig)
