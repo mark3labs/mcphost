@@ -263,7 +263,7 @@ func init() {
 	rootCmd.PersistentFlags().
 		StringVar(&loadSessionPath, "load-session", "", "load session from file at startup")
 	rootCmd.PersistentFlags().
-		StringVar(&sessionPath, "session", "s", "session file to load and update")
+		StringVarP(&sessionPath, "session", "s", "", "session file to load and update")
 
 	flags := rootCmd.PersistentFlags()
 	flags.StringVar(&providerURL, "provider-url", "", "base URL for the provider API (applies to OpenAI, Anthropic, Ollama, and Google)")
