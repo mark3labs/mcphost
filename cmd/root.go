@@ -263,7 +263,7 @@ func init() {
 	rootCmd.PersistentFlags().
 		StringVar(&loadSessionPath, "load-session", "", "load session from file at startup")
 	rootCmd.PersistentFlags().
-		StringVar(&sessionPath, "session", "", "session file to load and update")
+		StringVar(&sessionPath, "session", "s", "session file to load and update")
 
 	flags := rootCmd.PersistentFlags()
 	flags.StringVar(&providerURL, "provider-url", "", "base URL for the provider API (applies to OpenAI, Anthropic, Ollama, and Google)")
@@ -566,10 +566,10 @@ func runNormalMode(ctx context.Context) error {
 	// Main interaction logic
 	var messages []*schema.Message
 	var sessionManager *session.Manager
-  if sessionPath != "" {
-    loadSessionPath = sessionPath
-    saveSessionPath = sessionPath
-  }
+	if sessionPath != "" {
+		loadSessionPath = sessionPath
+		saveSessionPath = sessionPath
+	}
 
 	// Load existing session if specified
 	if loadSessionPath != "" {
