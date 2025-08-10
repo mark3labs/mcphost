@@ -567,6 +567,13 @@ func runNormalMode(ctx context.Context) error {
 	var messages []*schema.Message
 	var sessionManager *session.Manager
 	if sessionPath != "" {
+		_, err := os.Stat(sessionPath)
+		if os.IsNotExist(err) {
+			content := []byte("{}")
+			if err := os.WriteFile(sessionPath, content, 0664); err != nil {
+				panic(err)
+			}
+		}
 		loadSessionPath = sessionPath
 		saveSessionPath = sessionPath
 	}
