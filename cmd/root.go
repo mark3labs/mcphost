@@ -42,6 +42,7 @@ var (
 	// Session management
 	saveSessionPath string
 	loadSessionPath string
+	sessionPath     string
 
 	// Model generation parameters
 	maxTokens     int
@@ -110,6 +111,7 @@ Examples:
   mcphost --save-session ./my-session.json -p "Hello"
   mcphost --load-session ./my-session.json -p "Continue our conversation"
   mcphost --load-session ./session.json --save-session ./session.json -p "Next message"
+  mcphost --session ./session.json -p "Next message"
   
   # Script mode
   mcphost script myscript.sh`,
@@ -260,6 +262,8 @@ func init() {
 		StringVar(&saveSessionPath, "save-session", "", "save session to file after each message")
 	rootCmd.PersistentFlags().
 		StringVar(&loadSessionPath, "load-session", "", "load session from file at startup")
+	rootCmd.PersistentFlags().
+		StringVar(&sessionPath, "session", "", "session file to load and update")
 
 	flags := rootCmd.PersistentFlags()
 	flags.StringVar(&providerURL, "provider-url", "", "base URL for the provider API (applies to OpenAI, Anthropic, Ollama, and Google)")
@@ -562,6 +566,10 @@ func runNormalMode(ctx context.Context) error {
 	// Main interaction logic
 	var messages []*schema.Message
 	var sessionManager *session.Manager
+  if sessionPath != "" {
+    loadSessionPath = sessionPath
+    saveSessionPath = sessionPath
+  }
 
 	// Load existing session if specified
 	if loadSessionPath != "" {
