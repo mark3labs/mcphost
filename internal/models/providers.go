@@ -575,6 +575,17 @@ func isGPUMemoryError(err error) bool {
 		strings.Contains(errStr, "gpu memory")
 }
 
+type bearerTransport struct {
+	base  http.RoundTripper
+	token string
+}
+
+func (t *bearerTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	newReq := req.Clone(req.Context())
+	newReq.Header.Set("Authorization", "Bearer "+t.token)
+	return t.base.RoundTrip(newReq)
+}
+
 func createOllamaProviderWithResult(ctx context.Context, config *ProviderConfig, modelName string) (*ProviderResult, error) {
 	baseURL := "http://localhost:11434" // Default Ollama URL
 
@@ -643,6 +654,17 @@ func createOllamaProviderWithResult(ctx context.Context, config *ProviderConfig,
 		BaseURL: baseURL,
 		Model:   modelName,
 		Options: finalOptions,
+	}
+
+	if config.ProviderAPIKey != "" {
+		transport := http.DefaultTransport
+		authTransport := &bearerTransport{
+			base:  transport,
+			token: config.ProviderAPIKey,
+		}
+		ollamaConfig.HTTPClient = &http.Client{
+			Transport: authTransport,
+		}
 	}
 
 	// Set HTTP client with TLS config if needed
