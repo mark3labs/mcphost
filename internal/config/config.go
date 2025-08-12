@@ -97,6 +97,45 @@ func (s *MCPServerConfig) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+type AdaptiveColor struct {
+  Light string  `json:"light,omitempty" yaml:"light,omitempty"`
+  Dark string   `json:"dark,omitempty" yaml:"dark,omitempty"`
+}
+
+type Theme struct {
+	Primary     AdaptiveColor `json:"primary" yaml:"primary"`
+	Secondary   AdaptiveColor `json:"secondary" yaml:"secondary"`
+	Success     AdaptiveColor `json:"success" yaml:"success"`
+	Warning     AdaptiveColor `json:"warning" yaml:"warning"`
+	Error       AdaptiveColor `json:"error" yaml:"error"`
+	Info        AdaptiveColor `json:"info" yaml:"info"`
+	Text        AdaptiveColor `json:"text" yaml:"text"`
+	Muted       AdaptiveColor `json:"muted" yaml:"muted"`
+	VeryMuted   AdaptiveColor `json:"very-muted" yaml:"very-muted"`
+	Background  AdaptiveColor `json:"background" yaml:"background"`
+	Border      AdaptiveColor `json:"border" yaml:"border"`
+	MutedBorder AdaptiveColor `json:"muted-border" yaml:"muted-border"`
+	System      AdaptiveColor `json:"system" yaml:"system"`
+	Tool        AdaptiveColor `json:"tool" yaml:"tool"`
+	Accent      AdaptiveColor `json:"accent" yaml:"accent"`
+	Highlight   AdaptiveColor `json:"highlight" yaml:"highlight"`
+}
+
+type MarkdownTheme struct {
+Text AdaptiveColor      `json:"text" yaml:"text"`
+Muted AdaptiveColor     `json:"muted" yaml:"muted"`
+Heading AdaptiveColor   `json:"heading" yaml:"heading"`
+Emph AdaptiveColor      `json:"emph" yaml:"emph"`
+Strong AdaptiveColor    `json:"strong" yaml:"strong"`
+Link AdaptiveColor      `json:"link" yaml:"link"`
+Code AdaptiveColor      `json:"code" yaml:"code"`
+Error AdaptiveColor     `json:"error" yaml:"error"`
+Keyword AdaptiveColor   `json:"keyword" yaml:"keyword"`
+String AdaptiveColor    `json:"string" yaml:"string"`
+Number AdaptiveColor    `json:"number" yaml:"number"`
+Comment AdaptiveColor   `json:"comment" yaml:"comment"`
+}
+
 // Config represents the application configuration
 type Config struct {
 	MCPServers     map[string]MCPServerConfig `json:"mcpServers" yaml:"mcpServers"`
@@ -110,6 +149,8 @@ type Config struct {
 	Prompt         string                     `json:"prompt,omitempty" yaml:"prompt,omitempty"`
 	NoExit         bool                       `json:"no-exit,omitempty" yaml:"no-exit,omitempty"`
 	Stream         *bool                      `json:"stream,omitempty" yaml:"stream,omitempty"`
+  Theme          Theme                      `json:"theme" yaml:"theme"`
+  MarkdownTheme  MarkdownTheme              `json:"markdown-theme" yaml:"markdown-theme"`
 
 	// Model generation parameters
 	MaxTokens     int      `json:"max-tokens,omitempty" yaml:"max-tokens,omitempty"`

@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/charmbracelet/lipgloss"
 	"github.com/cloudwego/eino/schema"
 	"github.com/mark3labs/mcphost/internal/agent"
 	"github.com/mark3labs/mcphost/internal/config"
@@ -227,8 +228,51 @@ func loadConfigWithEnvSubstitution(configPath string) error {
 	return viper.ReadConfig(strings.NewReader(processedContent))
 }
 
+func configToUiTheme(theme config.Theme) ui.Theme {
+	return ui.Theme{
+		Primary:     lipgloss.AdaptiveColor(theme.Primary),
+		Secondary:   lipgloss.AdaptiveColor(theme.Secondary),
+		Success:     lipgloss.AdaptiveColor(theme.Success),
+		Warning:     lipgloss.AdaptiveColor(theme.Warning),
+		Error:       lipgloss.AdaptiveColor(theme.Error),
+		Info:        lipgloss.AdaptiveColor(theme.Info),
+		Text:        lipgloss.AdaptiveColor(theme.Text),
+		Muted:       lipgloss.AdaptiveColor(theme.Muted),
+		VeryMuted:   lipgloss.AdaptiveColor(theme.VeryMuted),
+		Background:  lipgloss.AdaptiveColor(theme.Background),
+		Border:      lipgloss.AdaptiveColor(theme.Border),
+		MutedBorder: lipgloss.AdaptiveColor(theme.MutedBorder),
+		System:      lipgloss.AdaptiveColor(theme.System),
+		Tool:        lipgloss.AdaptiveColor(theme.Tool),
+		Accent:      lipgloss.AdaptiveColor(theme.Accent),
+		Highlight:   lipgloss.AdaptiveColor(theme.Highlight),
+	}
+}
+
 func init() {
 	cobra.OnInitialize(initConfig)
+	var theme config.Theme
+	err := viper.UnmarshalKey("theme", &theme)
+	if err == nil && viper.InConfig("theme") {
+		uiTheme := configToUiTheme(theme)
+		ui.SetTheme(uiTheme)
+	}
+	var themePath string
+	err = viper.UnmarshalKey("theme", &themePath)
+	if err == nil && viper.InConfig("theme") {
+		f, err := os.Open(themePath)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "%q: %q", themePath, err)
+			os.Exit(1)
+		}
+		defer f.Close()
+		decoder := json.NewDecoder(f)
+		err = decoder.Decode(&theme)
+		if err == nil {
+			uiTheme := configToUiTheme(theme)
+			ui.SetTheme(uiTheme)
+		}
+	}
 
 	rootCmd.PersistentFlags().
 		StringVar(&configFile, "config", "", "config file (default is $HOME/.mcp.json)")
