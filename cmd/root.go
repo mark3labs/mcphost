@@ -260,6 +260,18 @@ func init() {
 	var themePath string
 	err = viper.UnmarshalKey("theme", &themePath)
 	if err == nil && viper.InConfig("theme") {
+		if strings.HasPrefix(themePath, "~/") {
+			home, e := os.UserHomeDir()
+			if e != nil {
+				fmt.Fprintf(os.Stderr, "%q: %q", themePath, e)
+				os.Exit(1)
+			}
+			themePath = filepath.Join(home, themePath[2:])
+		}
+		if !filepath.IsAbs(themePath) {
+			path := filepath.Dir(viper.ConfigFileUsed())
+			themePath = filepath.Join(path, themePath)
+		}
 		f, err := os.Open(themePath)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "%q: %q", themePath, err)
