@@ -38,7 +38,6 @@ func generateMarkdownStyleConfig() ansi.StyleConfig {
 	var headingColor, emphColor, strongColor, linkColor, codeColor, errorColor, keywordColor, stringColor, numberColor, commentColor string
 	var mdTheme config.MarkdownTheme
 
-	fmt.Println(viper.ConfigFileUsed())
 	err := config.FilepathOr("markdown-theme", &mdTheme)
 	fromConfig := err == nil && viper.InConfig("markdown-theme")
 	if fromConfig && lipgloss.HasDarkBackground() {
