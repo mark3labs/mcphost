@@ -252,38 +252,11 @@ func configToUiTheme(theme config.Theme) ui.Theme {
 func init() {
 	cobra.OnInitialize(initConfig)
 	var theme config.Theme
-	err := viper.UnmarshalKey("theme", &theme)
+	config.SetConfigPath(viper.ConfigFileUsed())
+	err := config.FilepathOr("theme", &theme)
 	if err == nil && viper.InConfig("theme") {
 		uiTheme := configToUiTheme(theme)
 		ui.SetTheme(uiTheme)
-	}
-	var themePath string
-	err = viper.UnmarshalKey("theme", &themePath)
-	if err == nil && viper.InConfig("theme") {
-		if strings.HasPrefix(themePath, "~/") {
-			home, e := os.UserHomeDir()
-			if e != nil {
-				fmt.Fprintf(os.Stderr, "%q: %q", themePath, e)
-				os.Exit(1)
-			}
-			themePath = filepath.Join(home, themePath[2:])
-		}
-		if !filepath.IsAbs(themePath) {
-			path := filepath.Dir(viper.ConfigFileUsed())
-			themePath = filepath.Join(path, themePath)
-		}
-		f, err := os.Open(themePath)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "%q: %q", themePath, err)
-			os.Exit(1)
-		}
-		defer f.Close()
-		decoder := json.NewDecoder(f)
-		err = decoder.Decode(&theme)
-		if err == nil {
-			uiTheme := configToUiTheme(theme)
-			ui.SetTheme(uiTheme)
-		}
 	}
 
 	rootCmd.PersistentFlags().

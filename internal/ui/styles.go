@@ -1,11 +1,7 @@
 package ui
 
 import (
-	"encoding/json"
 	"fmt"
-	"os"
-	"path/filepath"
-	"strings"
 
 	"github.com/charmbracelet/glamour"
 	"github.com/charmbracelet/glamour/ansi"
@@ -41,33 +37,9 @@ func generateMarkdownStyleConfig() ansi.StyleConfig {
 	var textColor, mutedColor string
 	var headingColor, emphColor, strongColor, linkColor, codeColor, errorColor, keywordColor, stringColor, numberColor, commentColor string
 	var mdTheme config.MarkdownTheme
-	var mdThemePath string
-	err := viper.UnmarshalKey("markdown-theme", &mdTheme)
-	if err != nil {
-		err = viper.UnmarshalKey("markdown-theme", &mdThemePath)
-		if err == nil && viper.InConfig("markdown-theme") {
-			if strings.HasPrefix(mdThemePath, "~/") {
-				home, e := os.UserHomeDir()
-				if e != nil {
-					fmt.Fprintf(os.Stderr, "%q: %q", mdThemePath, e)
-					os.Exit(1)
-				}
-				mdThemePath = filepath.Join(home, mdThemePath[2:])
-			}
-			if !filepath.IsAbs(mdThemePath) {
-				path := filepath.Dir(viper.ConfigFileUsed())
-				mdThemePath = filepath.Join(path, mdThemePath)
-			}
-			f, err := os.Open(mdThemePath)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "%q: %q", mdThemePath, err)
-				os.Exit(1)
-			}
-			defer f.Close()
-			decoder := json.NewDecoder(f)
-			err = decoder.Decode(&mdTheme)
-		}
-	}
+
+	fmt.Println(viper.ConfigFileUsed())
+	err := config.FilepathOr("markdown-theme", &mdTheme)
 	fromConfig := err == nil && viper.InConfig("markdown-theme")
 	if fromConfig && lipgloss.HasDarkBackground() {
 		textColor = mdTheme.Text.Light
