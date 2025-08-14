@@ -200,6 +200,7 @@ func initConfig() {
 			viper.Set("hooks", hooksConfig)
 		}
 	}
+
 }
 
 // loadConfigWithEnvSubstitution loads a config file with environment variable substitution
@@ -222,6 +223,8 @@ func loadConfigWithEnvSubstitution(configPath string) error {
 	if strings.HasSuffix(configPath, ".json") {
 		configType = "json"
 	}
+
+	config.SetConfigPath(configPath)
 
 	// Use viper to parse the processed content
 	viper.SetConfigType(configType)
@@ -252,7 +255,6 @@ func configToUiTheme(theme config.Theme) ui.Theme {
 func init() {
 	cobra.OnInitialize(initConfig)
 	var theme config.Theme
-  config.SetConfigPath(viper.ConfigFileUsed())
 	err := config.FilepathOr("theme", &theme)
 	if err == nil && viper.InConfig("theme") {
 		uiTheme := configToUiTheme(theme)

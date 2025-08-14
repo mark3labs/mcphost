@@ -397,9 +397,11 @@ func FilepathOr[T any](key string, value *T) error {
 				filepath.Join(home, absPath[2:])
 			}
 			if !filepath.IsAbs(absPath) {
+				// base := GetConfigPath()
 				base := configPath
 				if base == "" {
-					base = "."
+					fmt.Fprintf(os.Stderr, "unable to build relative path to config.")
+					os.Exit(1)
 				}
 				absPath = filepath.Join(filepath.Dir(base), absPath)
 			}
