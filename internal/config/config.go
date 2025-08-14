@@ -6,6 +6,9 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/spf13/viper"
+	"gopkg.in/yaml.v3"
 )
 
 // MCPServerConfig represents configuration for an MCP server
@@ -97,6 +100,45 @@ func (s *MCPServerConfig) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+type AdaptiveColor struct {
+	Light string `json:"light,omitempty" yaml:"light,omitempty"`
+	Dark  string `json:"dark,omitempty" yaml:"dark,omitempty"`
+}
+
+type Theme struct {
+	Primary     AdaptiveColor `json:"primary" yaml:"primary"`
+	Secondary   AdaptiveColor `json:"secondary" yaml:"secondary"`
+	Success     AdaptiveColor `json:"success" yaml:"success"`
+	Warning     AdaptiveColor `json:"warning" yaml:"warning"`
+	Error       AdaptiveColor `json:"error" yaml:"error"`
+	Info        AdaptiveColor `json:"info" yaml:"info"`
+	Text        AdaptiveColor `json:"text" yaml:"text"`
+	Muted       AdaptiveColor `json:"muted" yaml:"muted"`
+	VeryMuted   AdaptiveColor `json:"very-muted" yaml:"very-muted"`
+	Background  AdaptiveColor `json:"background" yaml:"background"`
+	Border      AdaptiveColor `json:"border" yaml:"border"`
+	MutedBorder AdaptiveColor `json:"muted-border" yaml:"muted-border"`
+	System      AdaptiveColor `json:"system" yaml:"system"`
+	Tool        AdaptiveColor `json:"tool" yaml:"tool"`
+	Accent      AdaptiveColor `json:"accent" yaml:"accent"`
+	Highlight   AdaptiveColor `json:"highlight" yaml:"highlight"`
+}
+
+type MarkdownTheme struct {
+	Text    AdaptiveColor `json:"text" yaml:"text"`
+	Muted   AdaptiveColor `json:"muted" yaml:"muted"`
+	Heading AdaptiveColor `json:"heading" yaml:"heading"`
+	Emph    AdaptiveColor `json:"emph" yaml:"emph"`
+	Strong  AdaptiveColor `json:"strong" yaml:"strong"`
+	Link    AdaptiveColor `json:"link" yaml:"link"`
+	Code    AdaptiveColor `json:"code" yaml:"code"`
+	Error   AdaptiveColor `json:"error" yaml:"error"`
+	Keyword AdaptiveColor `json:"keyword" yaml:"keyword"`
+	String  AdaptiveColor `json:"string" yaml:"string"`
+	Number  AdaptiveColor `json:"number" yaml:"number"`
+	Comment AdaptiveColor `json:"comment" yaml:"comment"`
+}
+
 // Config represents the application configuration
 type Config struct {
 	MCPServers     map[string]MCPServerConfig `json:"mcpServers" yaml:"mcpServers"`
@@ -110,6 +152,8 @@ type Config struct {
 	Prompt         string                     `json:"prompt,omitempty" yaml:"prompt,omitempty"`
 	NoExit         bool                       `json:"no-exit,omitempty" yaml:"no-exit,omitempty"`
 	Stream         *bool                      `json:"stream,omitempty" yaml:"stream,omitempty"`
+	Theme          any                        `json:"theme" yaml:"theme"`
+	MarkdownTheme  any                        `json:"markdown-theme" yaml:"markdown-theme"`
 
 	// Model generation parameters
 	MaxTokens     int      `json:"max-tokens,omitempty" yaml:"max-tokens,omitempty"`
@@ -332,4 +376,58 @@ mcpServers:
 	}
 
 	return nil
+}
+
+func FilepathOr[T any](key string, value *T) error {
+	var field any
+	err := viper.UnmarshalKey(key, &field)
+	if err != nil {
+		value = nil
+		return err
+	}
+	switch f := field.(type) {
+	case string:
+		{
+			absPath := f
+			if strings.HasPrefix(absPath, "~/") {
+				home, err := os.UserHomeDir()
+				if err != nil {
+					return err
+				}
+				filepath.Join(home, absPath[2:])
+			}
+			if !filepath.IsAbs(absPath) {
+				// base := GetConfigPath()
+				base := configPath
+				if base == "" {
+					fmt.Fprintf(os.Stderr, "unable to build relative path to config.")
+					os.Exit(1)
+				}
+				absPath = filepath.Join(filepath.Dir(base), absPath)
+			}
+			b, err := os.ReadFile(absPath)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "%q", err)
+				os.Exit(1)
+			}
+			if filepath.Ext(absPath) == ".json" {
+				return json.Unmarshal(b, value)
+			}
+
+			if filepath.Ext(absPath) == ".yaml" {
+				return yaml.Unmarshal(b, value)
+			}
+		}
+	case map[string]any:
+		return viper.UnmarshalKey(key, value)
+	default:
+		return fmt.Errorf("invalid type for field %q", key)
+	}
+	return nil
+}
+
+var configPath string
+
+func SetConfigPath(path string) {
+	configPath = path
 }

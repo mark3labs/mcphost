@@ -4,6 +4,8 @@ import (
 	"github.com/charmbracelet/glamour"
 	"github.com/charmbracelet/glamour/ansi"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/mark3labs/mcphost/internal/config"
+	"github.com/spf13/viper"
 )
 
 const defaultMargin = 1
@@ -29,17 +31,42 @@ func GetMarkdownRenderer(width int) *glamour.TermRenderer {
 
 // generateMarkdownStyleConfig creates an ansi.StyleConfig for markdown rendering
 func generateMarkdownStyleConfig() ansi.StyleConfig {
-	// Define adaptive colors based on terminal background
+
 	var textColor, mutedColor string
-	if lipgloss.HasDarkBackground() {
+	var headingColor, emphColor, strongColor, linkColor, codeColor, errorColor, keywordColor, stringColor, numberColor, commentColor string
+	var mdTheme config.MarkdownTheme
+
+	err := config.FilepathOr("markdown-theme", &mdTheme)
+	fromConfig := err == nil && viper.InConfig("markdown-theme")
+	if fromConfig && lipgloss.HasDarkBackground() {
+		textColor = mdTheme.Text.Light
+		mutedColor = mdTheme.Muted.Light
+		headingColor = mdTheme.Heading.Light
+		emphColor = mdTheme.Emph.Light
+		strongColor = mdTheme.Strong.Light
+		linkColor = mdTheme.Link.Light
+		codeColor = mdTheme.Code.Light
+		errorColor = mdTheme.Error.Light
+		keywordColor = mdTheme.Keyword.Light
+		stringColor = mdTheme.String.Light
+		numberColor = mdTheme.Number.Light
+		commentColor = mdTheme.Comment.Light
+	} else if fromConfig {
+		textColor = mdTheme.Text.Dark
+		mutedColor = mdTheme.Muted.Dark
+		headingColor = mdTheme.Heading.Dark
+		emphColor = mdTheme.Emph.Dark
+		strongColor = mdTheme.Strong.Dark
+		linkColor = mdTheme.Link.Dark
+		codeColor = mdTheme.Code.Dark
+		errorColor = mdTheme.Error.Dark
+		keywordColor = mdTheme.Keyword.Dark
+		stringColor = mdTheme.String.Dark
+		numberColor = mdTheme.Number.Dark
+		commentColor = mdTheme.Comment.Dark
+	} else if lipgloss.HasDarkBackground() {
 		textColor = "#F9FAFB"  // Light text for dark backgrounds
 		mutedColor = "#9CA3AF" // Light muted for dark backgrounds
-	} else {
-		textColor = "#1F2937"  // Dark text for light backgrounds
-		mutedColor = "#6B7280" // Dark muted for light backgrounds
-	}
-	var headingColor, emphColor, strongColor, linkColor, codeColor, errorColor, keywordColor, stringColor, numberColor, commentColor string
-	if lipgloss.HasDarkBackground() {
 		// Dark background colors
 		headingColor = "#22D3EE" // Cyan
 		emphColor = "#FDE047"    // Yellow
@@ -52,6 +79,8 @@ func generateMarkdownStyleConfig() ansi.StyleConfig {
 		numberColor = "#FBBF24"  // Orange
 		commentColor = "#9CA3AF" // Muted gray
 	} else {
+		textColor = "#1F2937"  // Dark text for light backgrounds
+		mutedColor = "#6B7280" // Dark muted for light backgrounds
 		// Light background colors
 		headingColor = "#0891B2" // Dark cyan
 		emphColor = "#D97706"    // Orange
