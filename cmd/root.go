@@ -252,7 +252,7 @@ func configToUiTheme(theme config.Theme) ui.Theme {
 func init() {
 	cobra.OnInitialize(initConfig)
 	var theme config.Theme
-	config.SetConfigPath(viper.ConfigFileUsed())
+  config.SetConfigPath(viper.ConfigFileUsed())
 	err := config.FilepathOr("theme", &theme)
 	if err == nil && viper.InConfig("theme") {
 		uiTheme := configToUiTheme(theme)

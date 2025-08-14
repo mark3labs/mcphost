@@ -397,7 +397,7 @@ func FilepathOr[T any](key string, value *T) error {
 				filepath.Join(home, absPath[2:])
 			}
 			if !filepath.IsAbs(absPath) {
-				base := GetConfigPath()
+				base := configPath
 				if base == "" {
 					base = "."
 				}
@@ -428,8 +428,4 @@ var configPath string
 
 func SetConfigPath(path string) {
 	configPath = path
-}
-
-func GetConfigPath() string {
-	return configPath
 }
