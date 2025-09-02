@@ -126,10 +126,10 @@ func GetRootCommand(v string) *cobra.Command {
 	return rootCmd
 }
 
-func initConfig() {
+func InitConfig() {
 	if configFile != "" {
 		// Use config file from the flag
-		if err := loadConfigWithEnvSubstitution(configFile); err != nil {
+		if err := LoadConfigWithEnvSubstitution(configFile); err != nil {
 			fmt.Fprintf(os.Stderr, "Error reading config file '%s': %v\n", configFile, err)
 			os.Exit(1)
 		}
@@ -163,7 +163,7 @@ func initConfig() {
 			if err := viper.ReadInConfig(); err == nil {
 				// Config file found, now reload it with env substitution
 				configPath := viper.ConfigFileUsed()
-				if err := loadConfigWithEnvSubstitution(configPath); err != nil {
+				if err := LoadConfigWithEnvSubstitution(configPath); err != nil {
 					// Only exit on environment variable substitution errors
 					if strings.Contains(err.Error(), "environment variable substitution failed") {
 						fmt.Fprintf(os.Stderr, "Error reading config file '%s': %v\n", configPath, err)
@@ -202,8 +202,8 @@ func initConfig() {
 
 }
 
-// loadConfigWithEnvSubstitution loads a config file with environment variable substitution
-func loadConfigWithEnvSubstitution(configPath string) error {
+// LoadConfigWithEnvSubstitution loads a config file with environment variable substitution
+func LoadConfigWithEnvSubstitution(configPath string) error {
 	// Read raw config file content
 	rawContent, err := os.ReadFile(configPath)
 	if err != nil {
@@ -252,7 +252,7 @@ func configToUiTheme(theme config.Theme) ui.Theme {
 }
 
 func init() {
-	cobra.OnInitialize(initConfig)
+	cobra.OnInitialize(InitConfig)
 	var theme config.Theme
 	err := config.FilepathOr("theme", &theme)
 	if err == nil && viper.InConfig("theme") {
