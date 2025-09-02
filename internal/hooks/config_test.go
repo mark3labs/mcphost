@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"sort"
 	"testing"
 )
 
@@ -137,6 +138,8 @@ hooks:
 				}
 				paths = append(paths, path)
 			}
+			// Sort paths to ensure deterministic order
+			sort.Strings(paths)
 
 			// Load configuration
 			got, err := LoadHooksConfig(paths...)
