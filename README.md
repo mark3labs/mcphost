@@ -11,6 +11,7 @@ Discuss the Project on [Discord](https://discord.gg/RqSS2NQVsY)
 - [Requirements](#requirements-)
 - [Environment Setup](#environment-setup-)
 - [Installation](#installation-)
+- [SDK Usage](#sdk-usage-)
 - [Configuration](#configuration-)
   - [MCP Servers](#mcp-servers)
   - [Environment Variable Substitution](#environment-variable-substitution)
@@ -125,6 +126,52 @@ mcphost --provider-url https://192.168.1.100:443 --tls-skip-verify
 ```bash
 go install github.com/mark3labs/mcphost@latest
 ```
+
+## SDK Usage 🛠️
+
+MCPHost also provides a Go SDK for programmatic access without spawning OS processes. The SDK maintains identical behavior to the CLI, including configuration loading, environment variables, and defaults.
+
+### Quick Example
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "github.com/mark3labs/mcphost/sdk"
+)
+
+func main() {
+    ctx := context.Background()
+    
+    // Create MCPHost instance with default configuration
+    host, err := sdk.New(ctx, nil)
+    if err != nil {
+        panic(err)
+    }
+    defer host.Close()
+    
+    // Send a prompt and get response
+    response, err := host.Prompt(ctx, "What is 2+2?")
+    if err != nil {
+        panic(err)
+    }
+    
+    fmt.Println(response)
+}
+```
+
+### SDK Features
+
+- ✅ Programmatic access without spawning processes
+- ✅ Identical configuration behavior to CLI
+- ✅ Session management (save/load/clear)
+- ✅ Tool execution callbacks for monitoring
+- ✅ Streaming support
+- ✅ Full compatibility with all providers and MCP servers
+
+For detailed SDK documentation, examples, and API reference, see the [SDK README](sdk/README.md).
 
 ## Configuration ⚙️
 
