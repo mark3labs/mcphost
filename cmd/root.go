@@ -12,6 +12,7 @@ import (
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/cloudwego/eino/schema"
+	"github.com/joho/godotenv"
 	"github.com/mark3labs/mcphost/internal/agent"
 	"github.com/mark3labs/mcphost/internal/config"
 	"github.com/mark3labs/mcphost/internal/hooks"
@@ -127,6 +128,10 @@ func GetRootCommand(v string) *cobra.Command {
 }
 
 func InitConfig() {
+	// Load .env file if it exists (silently ignore if not present)
+	// This allows users to set environment variables without export
+	_ = godotenv.Load()
+
 	if configFile != "" {
 		// Use config file from the flag
 		if err := LoadConfigWithEnvSubstitution(configFile); err != nil {
