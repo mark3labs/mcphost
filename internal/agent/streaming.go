@@ -16,7 +16,16 @@ import (
 // - OpenAI/Others: Tool calls first or alone
 // - Mixed: Tool calls and content interleaved
 func StreamWithCallback(ctx context.Context, reader *schema.StreamReader[*schema.Message], callback func(string)) (*schema.Message, error) {
-	defer reader.Close()
+	// Close reader when done
+	// StreamReader.Close() doesn't return an error, but underlying operations might panic
+	// We wrap in recover to handle any panic from already-closed streams gracefully
+	defer func() {
+		if r := recover(); r != nil {
+			// Suppress panic from closing already-closed stream
+			// This can happen when providers close the stream themselves after EOF
+		}
+		reader.Close()
+	}()
 
 	var content strings.Builder
 	var accumulatedToolCalls map[string]*schema.ToolCall // Track tool calls by ID to handle incremental updates
