@@ -155,6 +155,73 @@ func (m *MCPToolManager) LoadTools(ctx context.Context, config *config.Config) e
 	return nil
 }
 
+// normalizeJSONSchema normalizes a JSON Schema to be compatible with OpenAPI 3.0
+// Specifically handles the case where 'type' can be an array in JSON Schema
+// but must be a string in OpenAPI 3.0
+func normalizeJSONSchema(schemaBytes []byte) ([]byte, error) {
+	var schema map[string]interface{}
+	if err := json.Unmarshal(schemaBytes, &schema); err != nil {
+		return nil, err
+	}
+
+	normalizeSchemaRecursive(schema)
+
+	return json.Marshal(schema)
+}
+
+// normalizeSchemaRecursive recursively normalizes type fields in a schema
+func normalizeSchemaRecursive(schema map[string]interface{}) {
+	// Handle 'type' field - if it's an array, take the first non-null type
+	if typeField, ok := schema["type"]; ok {
+		if typeArray, isArray := typeField.([]interface{}); isArray {
+			// Find the first non-null type
+			for _, t := range typeArray {
+				if typeStr, isString := t.(string); isString && typeStr != "null" {
+					schema["type"] = typeStr
+					// Set nullable flag for OpenAPI 3.0 compatibility
+					schema["nullable"] = true
+					break
+				}
+			}
+			// If all types were null or no valid type found, default to "string"
+			if _, stillArray := schema["type"].([]interface{}); stillArray {
+				schema["type"] = "string"
+				schema["nullable"] = true
+			}
+		}
+	}
+
+	// Recursively process 'properties'
+	if properties, ok := schema["properties"].(map[string]interface{}); ok {
+		for _, prop := range properties {
+			if propSchema, ok := prop.(map[string]interface{}); ok {
+				normalizeSchemaRecursive(propSchema)
+			}
+		}
+	}
+
+	// Recursively process 'items' (for arrays)
+	if items, ok := schema["items"].(map[string]interface{}); ok {
+		normalizeSchemaRecursive(items)
+	}
+
+	// Recursively process 'oneOf', 'anyOf', 'allOf'
+	for _, key := range []string{"oneOf", "anyOf", "allOf"} {
+		if variants, ok := schema[key].([]interface{}); ok {
+			for _, variant := range variants {
+				if variantSchema, ok := variant.(map[string]interface{}); ok {
+					normalizeSchemaRecursive(variantSchema)
+				}
+			}
+		}
+	}
+
+	// Recursively process 'additionalProperties' if it's an object
+	if additionalProps, ok := schema["additionalProperties"].(map[string]interface{}); ok {
+		normalizeSchemaRecursive(additionalProps)
+	}
+}
+
 // loadServerTools loads tools from a single MCP server
 func (m *MCPToolManager) loadServerTools(ctx context.Context, serverName string, serverConfig config.MCPServerConfig) error {
 	// Add debug logging
@@ -202,8 +269,16 @@ func (m *MCPToolManager) loadServerTools(ctx context.Context, serverName string,
 		if err != nil {
 			return fmt.Errorf("conv mcp tool input schema fail(marshal): %w, tool name: %s", err, mcpTool.Name)
 		}
+
+		// Normalize schema to handle type as array (JSON Schema spec allows this)
+		// OpenAPI 3.0 Schema expects type as string, so we need to convert
+		normalizedSchema, err := normalizeJSONSchema(marshaledInputSchema)
+		if err != nil {
+			return fmt.Errorf("conv mcp tool input schema fail(normalize): %w, tool name: %s", err, mcpTool.Name)
+		}
+
 		inputSchema := &openapi3.Schema{}
-		err = sonic.Unmarshal(marshaledInputSchema, inputSchema)
+		err = sonic.Unmarshal(normalizedSchema, inputSchema)
 		if err != nil {
 			return fmt.Errorf("conv mcp tool input schema fail(unmarshal): %w, tool name: %s", err, mcpTool.Name)
 		}
