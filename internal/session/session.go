@@ -151,6 +151,12 @@ func (m *Message) ConvertToSchemaMessage() *schema.Message {
 				}
 			}
 
+			// Ensure arguments is never empty - OpenAI API requires it
+			// Default to empty JSON object if missing or empty
+			if argsStr == "" || argsStr == "null" {
+				argsStr = "{}"
+			}
+
 			msg.ToolCalls[i] = schema.ToolCall{
 				ID: tc.ID,
 				Function: schema.FunctionCall{
