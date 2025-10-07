@@ -16,7 +16,7 @@ require (
 	github.com/cloudwego/eino-ext/components/model/openai v0.0.0-20250903035842-96774a3ec845
 	github.com/getkin/kin-openapi v0.120.0
 	github.com/mark3labs/mcp-filesystem-server v0.11.1
-	github.com/mark3labs/mcp-go v0.39.1
+	github.com/mark3labs/mcp-go v0.41.1
 	github.com/ollama/ollama v0.11.8
 	github.com/spf13/cobra v1.10.1
 	github.com/spf13/viper v1.20.1
