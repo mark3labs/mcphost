@@ -155,7 +155,9 @@ func (p *MCPConnectionPool) GetConnectionWithHealthCheck(ctx context.Context, se
 				delete(p.connections, serverName)
 			}
 		} else {
-			fmt.Printf("🔍 [POOL] Connection %s unhealthy, removing\n", serverName)
+			if p.debugLogger != nil && p.debugLogger.IsDebugEnabled() {
+				p.debugLogger.LogDebug(fmt.Sprintf("[POOL] Connection %s unhealthy, removing", serverName))
+			}
 			conn.client.Close()
 			delete(p.connections, serverName)
 		}
@@ -182,7 +184,9 @@ func (p *MCPConnectionPool) performHealthCheck(ctx context.Context, conn *MCPCon
 	// Try to list tools as a health check - this is a lightweight operation
 	_, err := conn.client.ListTools(healthCtx, mcp.ListToolsRequest{})
 	if err != nil {
-		fmt.Printf("⚠️ [HEALTH_CHECK] Connection %s failed health check: %v\n", conn.serverName, err)
+		if p.debugLogger != nil && p.debugLogger.IsDebugEnabled() {
+			p.debugLogger.LogDebug(fmt.Sprintf("[HEALTH_CHECK] Connection %s failed health check: %v", conn.serverName, err))
+		}
 		conn.mu.Lock()
 		conn.isHealthy = false
 		conn.errorCount++
@@ -410,12 +414,16 @@ func (p *MCPConnectionPool) checkConnectionsHealth() {
 
 		if time.Since(conn.lastUsed) > p.config.MaxIdleTime {
 			conn.isHealthy = false
-			fmt.Printf("🔍 [HEALTH_CHECK] Connection %s marked as unhealthy due to inactivity\n", serverName)
+			if p.debugLogger != nil && p.debugLogger.IsDebugEnabled() {
+				p.debugLogger.LogDebug(fmt.Sprintf("[HEALTH_CHECK] Connection %s marked as unhealthy due to inactivity", serverName))
+			}
 		}
 
 		if conn.errorCount > p.config.MaxErrorCount {
 			conn.isHealthy = false
-			fmt.Printf("🔍 [HEALTH_CHECK] Connection %s marked as unhealthy due to errors\n", serverName)
+			if p.debugLogger != nil && p.debugLogger.IsDebugEnabled() {
+				p.debugLogger.LogDebug(fmt.Sprintf("[HEALTH_CHECK] Connection %s marked as unhealthy due to errors", serverName))
+			}
 		}
 
 		conn.mu.Unlock()
