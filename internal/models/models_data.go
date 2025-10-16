@@ -42,7 +42,7 @@ func GetModelsData() map[string]ProviderInfo {
 	return map[string]ProviderInfo{
 		"alibaba": {
 			ID:   "alibaba",
-			Env:  []string{"DASHSCOPE_API_KEY" },
+			Env:  []string{"DASHSCOPE_API_KEY"},
 			NPM:  "@ai-sdk/openai-compatible",
 			Name: "Alibaba",
 			Models: map[string]ModelInfo{
@@ -53,9 +53,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1.2,
-						Output: 4.8,
-						CacheRead: nil,
+						Input:      1.2,
+						Output:     4.8,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -70,9 +70,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.05,
-						Output: 0.4,
-						CacheRead: nil,
+						Input:      0.05,
+						Output:     0.4,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -87,9 +87,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1.6,
-						Output: 6.4,
-						CacheRead: nil,
+						Input:      1.6,
+						Output:     6.4,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -104,9 +104,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  2.46,
-						Output: 7.37,
-						CacheRead: nil,
+						Input:      2.46,
+						Output:     7.37,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -121,9 +121,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.16,
-						Output: 0.49,
-						CacheRead: nil,
+						Input:      0.16,
+						Output:     0.49,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -138,9 +138,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.07,
-						Output: 0.27,
-						CacheRead: nil,
+						Input:      0.07,
+						Output:     0.27,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -155,9 +155,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.27,
-						Output: 1.07,
-						CacheRead: nil,
+						Input:      0.27,
+						Output:     1.07,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -172,9 +172,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.4,
-						Output: 1.2,
-						CacheRead: nil,
+						Input:      0.4,
+						Output:     1.2,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -189,9 +189,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.5,
-						Output: 1.4,
-						CacheRead: nil,
+						Input:      0.5,
+						Output:     1.4,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -206,9 +206,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.05,
-						Output: 0.2,
-						CacheRead: nil,
+						Input:      0.05,
+						Output:     0.2,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -223,9 +223,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.8,
-						Output: 3.2,
-						CacheRead: nil,
+						Input:      0.8,
+						Output:     3.2,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -240,9 +240,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.72,
-						Output: 0.72,
-						CacheRead: nil,
+						Input:      0.72,
+						Output:     0.72,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -257,9 +257,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.21,
-						Output: 0.63,
-						CacheRead: nil,
+						Input:      0.21,
+						Output:     0.63,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -274,9 +274,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.35,
-						Output: 1.4,
-						CacheRead: nil,
+						Input:      0.35,
+						Output:     1.4,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -291,9 +291,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.7,
-						Output: 2.8,
-						CacheRead: nil,
+						Input:      0.7,
+						Output:     2.8,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -308,9 +308,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1.4,
-						Output: 5.6,
-						CacheRead: nil,
+						Input:      1.4,
+						Output:     5.6,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -325,9 +325,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.175,
-						Output: 0.7,
-						CacheRead: nil,
+						Input:      0.175,
+						Output:     0.7,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -342,9 +342,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.1,
-						Output: 0.4,
-						CacheRead: nil,
+						Input:      0.1,
+						Output:     0.4,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -359,9 +359,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  2.8,
-						Output: 8.4,
-						CacheRead: nil,
+						Input:      2.8,
+						Output:     8.4,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -376,9 +376,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.35,
-						Output: 1.05,
-						CacheRead: nil,
+						Input:      0.35,
+						Output:     1.05,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -393,9 +393,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.35,
-						Output: 1.4,
-						CacheRead: nil,
+						Input:      0.35,
+						Output:     1.4,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -410,9 +410,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.7,
-						Output: 2.8,
-						CacheRead: nil,
+						Input:      0.7,
+						Output:     2.8,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -427,9 +427,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.7,
-						Output: 2.8,
-						CacheRead: nil,
+						Input:      0.7,
+						Output:     2.8,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -444,9 +444,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.18,
-						Output: 0.7,
-						CacheRead: nil,
+						Input:      0.18,
+						Output:     0.7,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -461,9 +461,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: false,
 					Cost: Cost{
-						Input:  0.035,
-						Output: 0.035,
-						CacheRead: nil,
+						Input:      0.035,
+						Output:     0.035,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -478,9 +478,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.45,
-						Output: 2.25,
-						CacheRead: nil,
+						Input:      0.45,
+						Output:     2.25,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -495,9 +495,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1.5,
-						Output: 7.5,
-						CacheRead: nil,
+						Input:      1.5,
+						Output:     7.5,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -512,9 +512,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.3,
-						Output: 1.5,
-						CacheRead: nil,
+						Input:      0.3,
+						Output:     1.5,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -529,9 +529,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1,
-						Output: 5,
-						CacheRead: nil,
+						Input:      1,
+						Output:     5,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -546,9 +546,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  10,
-						Output: 10,
-						CacheRead: nil,
+						Input:      10,
+						Output:     10,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -563,9 +563,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1.2,
-						Output: 6,
-						CacheRead: nil,
+						Input:      1.2,
+						Output:     6,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -580,9 +580,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.5,
-						Output: 2,
-						CacheRead: nil,
+						Input:      0.5,
+						Output:     2,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -597,9 +597,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.5,
-						Output: 6,
-						CacheRead: nil,
+						Input:      0.5,
+						Output:     6,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -614,9 +614,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.43,
-						Output: 1.66,
-						CacheRead: nil,
+						Input:      0.43,
+						Output:     1.66,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -631,9 +631,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.52,
-						Output: 1.99,
-						CacheRead: nil,
+						Input:      0.52,
+						Output:     1.99,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -648,9 +648,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.7,
-						Output: 2.8,
-						CacheRead: nil,
+						Input:      0.7,
+						Output:     2.8,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -665,9 +665,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.2,
-						Output: 0.8,
-						CacheRead: nil,
+						Input:      0.2,
+						Output:     0.8,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -682,9 +682,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.2,
-						Output: 1.6,
-						CacheRead: nil,
+						Input:      0.2,
+						Output:     1.6,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -699,9 +699,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.8,
-						Output: 2.4,
-						CacheRead: nil,
+						Input:      0.8,
+						Output:     2.4,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -713,7 +713,7 @@ func GetModelsData() map[string]ProviderInfo {
 		},
 		"alibaba-cn": {
 			ID:   "alibaba-cn",
-			Env:  []string{"DASHSCOPE_API_KEY" },
+			Env:  []string{"DASHSCOPE_API_KEY"},
 			NPM:  "@ai-sdk/openai-compatible",
 			Name: "Alibaba (China)",
 			Models: map[string]ModelInfo{
@@ -724,9 +724,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.574,
-						Output: 2.294,
-						CacheRead: nil,
+						Input:      0.574,
+						Output:     2.294,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -741,9 +741,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.574,
-						Output: 2.294,
-						CacheRead: nil,
+						Input:      0.574,
+						Output:     2.294,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -758,9 +758,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.287,
-						Output: 0.861,
-						CacheRead: nil,
+						Input:      0.287,
+						Output:     0.861,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -775,9 +775,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -792,9 +792,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -809,9 +809,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.144,
-						Output: 0.431,
-						CacheRead: nil,
+						Input:      0.144,
+						Output:     0.431,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -826,9 +826,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.287,
-						Output: 0.861,
-						CacheRead: nil,
+						Input:      0.287,
+						Output:     0.861,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -843,9 +843,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.072,
-						Output: 0.144,
-						CacheRead: nil,
+						Input:      0.072,
+						Output:     0.144,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -860,9 +860,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.287,
-						Output: 1.147,
-						CacheRead: nil,
+						Input:      0.287,
+						Output:     1.147,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -877,9 +877,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.574,
-						Output: 1.721,
-						CacheRead: nil,
+						Input:      0.574,
+						Output:     1.721,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -894,9 +894,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.287,
-						Output: 0.431,
-						CacheRead: nil,
+						Input:      0.287,
+						Output:     0.431,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -911,9 +911,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.574,
-						Output: 2.294,
-						CacheRead: nil,
+						Input:      0.574,
+						Output:     2.294,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -928,9 +928,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1.147,
-						Output: 4.588,
-						CacheRead: nil,
+						Input:      1.147,
+						Output:     4.588,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -945,9 +945,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  7.742,
-						Output: 23.367,
-						CacheRead: nil,
+						Input:      7.742,
+						Output:     23.367,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -962,9 +962,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.087,
-						Output: 0.144,
-						CacheRead: nil,
+						Input:      0.087,
+						Output:     0.144,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -979,9 +979,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.022,
-						Output: 0.216,
-						CacheRead: nil,
+						Input:      0.022,
+						Output:     0.216,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -996,9 +996,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.072,
-						Output: 0.287,
-						CacheRead: nil,
+						Input:      0.072,
+						Output:     0.287,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -1013,9 +1013,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.574,
-						Output: 1.721,
-						CacheRead: nil,
+						Input:      0.574,
+						Output:     1.721,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -1030,9 +1030,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.287,
-						Output: 0.861,
-						CacheRead: nil,
+						Input:      0.287,
+						Output:     0.861,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -1047,9 +1047,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.345,
-						Output: 1.377,
-						CacheRead: nil,
+						Input:      0.345,
+						Output:     1.377,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -1064,9 +1064,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.259,
-						Output: 0.775,
-						CacheRead: nil,
+						Input:      0.259,
+						Output:     0.775,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -1081,9 +1081,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.101,
-						Output: 0.28,
-						CacheRead: nil,
+						Input:      0.101,
+						Output:     0.28,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -1098,9 +1098,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.058,
-						Output: 0.23,
-						CacheRead: nil,
+						Input:      0.058,
+						Output:     0.23,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -1115,9 +1115,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.23,
-						Output: 0.918,
-						CacheRead: nil,
+						Input:      0.23,
+						Output:     0.918,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -1132,9 +1132,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.115,
-						Output: 0.287,
-						CacheRead: nil,
+						Input:      0.115,
+						Output:     0.287,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -1149,9 +1149,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.115,
-						Output: 0.287,
-						CacheRead: nil,
+						Input:      0.115,
+						Output:     0.287,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -1166,9 +1166,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.044,
-						Output: 0.087,
-						CacheRead: nil,
+						Input:      0.044,
+						Output:     0.087,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -1183,9 +1183,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.23,
-						Output: 0.574,
-						CacheRead: nil,
+						Input:      0.23,
+						Output:     0.574,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -1200,9 +1200,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.717,
-						Output: 0.717,
-						CacheRead: nil,
+						Input:      0.717,
+						Output:     0.717,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -1217,9 +1217,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.115,
-						Output: 0.287,
-						CacheRead: nil,
+						Input:      0.115,
+						Output:     0.287,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -1234,9 +1234,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.144,
-						Output: 0.431,
-						CacheRead: nil,
+						Input:      0.144,
+						Output:     0.431,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -1251,9 +1251,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.287,
-						Output: 0.861,
-						CacheRead: nil,
+						Input:      0.287,
+						Output:     0.861,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -1268,9 +1268,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.574,
-						Output: 1.721,
-						CacheRead: nil,
+						Input:      0.574,
+						Output:     1.721,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -1285,9 +1285,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.072,
-						Output: 0.144,
-						CacheRead: nil,
+						Input:      0.072,
+						Output:     0.144,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -1302,9 +1302,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.287,
-						Output: 0.861,
-						CacheRead: nil,
+						Input:      0.287,
+						Output:     0.861,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -1319,9 +1319,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.144,
-						Output: 0.287,
-						CacheRead: nil,
+						Input:      0.144,
+						Output:     0.287,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -1336,9 +1336,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.574,
-						Output: 1.721,
-						CacheRead: nil,
+						Input:      0.574,
+						Output:     1.721,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -1353,9 +1353,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.144,
-						Output: 0.287,
-						CacheRead: nil,
+						Input:      0.144,
+						Output:     0.287,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -1370,9 +1370,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.087,
-						Output: 0.345,
-						CacheRead: nil,
+						Input:      0.087,
+						Output:     0.345,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -1387,9 +1387,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  2.294,
-						Output: 6.881,
-						CacheRead: nil,
+						Input:      2.294,
+						Output:     6.881,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -1404,9 +1404,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.287,
-						Output: 0.717,
-						CacheRead: nil,
+						Input:      0.287,
+						Output:     0.717,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -1421,9 +1421,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.144,
-						Output: 0.574,
-						CacheRead: nil,
+						Input:      0.144,
+						Output:     0.574,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -1438,9 +1438,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.287,
-						Output: 1.147,
-						CacheRead: nil,
+						Input:      0.287,
+						Output:     1.147,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -1455,9 +1455,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.287,
-						Output: 1.147,
-						CacheRead: nil,
+						Input:      0.287,
+						Output:     1.147,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -1472,9 +1472,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.072,
-						Output: 0.287,
-						CacheRead: nil,
+						Input:      0.072,
+						Output:     0.287,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -1489,9 +1489,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: false,
 					Cost: Cost{
-						Input:  0.032,
-						Output: 0.032,
-						CacheRead: nil,
+						Input:      0.032,
+						Output:     0.032,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -1506,9 +1506,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.216,
-						Output: 0.861,
-						CacheRead: nil,
+						Input:      0.216,
+						Output:     0.861,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -1523,9 +1523,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.861,
-						Output: 3.441,
-						CacheRead: nil,
+						Input:      0.861,
+						Output:     3.441,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -1540,9 +1540,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.144,
-						Output: 0.574,
-						CacheRead: nil,
+						Input:      0.144,
+						Output:     0.574,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -1557,9 +1557,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1,
-						Output: 5,
-						CacheRead: nil,
+						Input:      1,
+						Output:     5,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -1574,9 +1574,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.861,
-						Output: 3.441,
-						CacheRead: nil,
+						Input:      0.861,
+						Output:     3.441,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -1591,9 +1591,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.144,
-						Output: 0.574,
-						CacheRead: nil,
+						Input:      0.144,
+						Output:     0.574,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -1608,9 +1608,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.144,
-						Output: 1.434,
-						CacheRead: nil,
+						Input:      0.144,
+						Output:     1.434,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -1625,9 +1625,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.058,
-						Output: 0.23,
-						CacheRead: nil,
+						Input:      0.058,
+						Output:     0.23,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -1642,9 +1642,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.23,
-						Output: 0.918,
-						CacheRead: nil,
+						Input:      0.23,
+						Output:     0.918,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -1659,9 +1659,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.286705,
-						Output: 1.14682,
-						CacheRead: nil,
+						Input:      0.286705,
+						Output:     1.14682,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -1676,9 +1676,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.108,
-						Output: 0.431,
-						CacheRead: nil,
+						Input:      0.108,
+						Output:     0.431,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -1693,9 +1693,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.143353,
-						Output: 1.433525,
-						CacheRead: nil,
+						Input:      0.143353,
+						Output:     1.433525,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -1710,9 +1710,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.287,
-						Output: 0.861,
-						CacheRead: nil,
+						Input:      0.287,
+						Output:     0.861,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -1727,9 +1727,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.23,
-						Output: 0.574,
-						CacheRead: nil,
+						Input:      0.23,
+						Output:     0.574,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -1744,9 +1744,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.058,
-						Output: 0.144,
-						CacheRead: nil,
+						Input:      0.058,
+						Output:     0.144,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -1758,7 +1758,7 @@ func GetModelsData() map[string]ProviderInfo {
 		},
 		"amazon-bedrock": {
 			ID:   "amazon-bedrock",
-			Env:  []string{"AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_REGION" },
+			Env:  []string{"AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_REGION"},
 			NPM:  "@ai-sdk/amazon-bedrock",
 			Name: "Amazon Bedrock",
 			Models: map[string]ModelInfo{
@@ -1769,9 +1769,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  2,
-						Output: 8,
-						CacheRead: nil,
+						Input:      2,
+						Output:     8,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -1786,9 +1786,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.2,
-						Output: 0.4,
-						CacheRead: nil,
+						Input:      0.2,
+						Output:     0.4,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -1803,9 +1803,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.06,
-						Output: 0.24,
-						CacheRead: &[]float64{0.015}[0],
+						Input:      0.06,
+						Output:     0.24,
+						CacheRead:  &[]float64{0.015}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -1820,9 +1820,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.035,
-						Output: 0.14,
-						CacheRead: &[]float64{0.00875}[0],
+						Input:      0.035,
+						Output:     0.14,
+						CacheRead:  &[]float64{0.00875}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -1837,9 +1837,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  2.5,
-						Output: 12.5,
-						CacheRead: nil,
+						Input:      2.5,
+						Output:     12.5,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -1854,9 +1854,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.8,
-						Output: 3.2,
-						CacheRead: &[]float64{0.2}[0],
+						Input:      0.8,
+						Output:     3.2,
+						CacheRead:  &[]float64{0.2}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -1871,9 +1871,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.8,
-						Output: 4,
-						CacheRead: &[]float64{0.08}[0],
+						Input:      0.8,
+						Output:     4,
+						CacheRead:  &[]float64{0.08}[0],
 						CacheWrite: &[]float64{1}[0],
 					},
 					Limit: Limit{
@@ -1888,9 +1888,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  3,
-						Output: 15,
-						CacheRead: &[]float64{0.3}[0],
+						Input:      3,
+						Output:     15,
+						CacheRead:  &[]float64{0.3}[0],
 						CacheWrite: &[]float64{3.75}[0],
 					},
 					Limit: Limit{
@@ -1905,9 +1905,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  3,
-						Output: 15,
-						CacheRead: &[]float64{0.3}[0],
+						Input:      3,
+						Output:     15,
+						CacheRead:  &[]float64{0.3}[0],
 						CacheWrite: &[]float64{3.75}[0],
 					},
 					Limit: Limit{
@@ -1922,9 +1922,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  3,
-						Output: 15,
-						CacheRead: &[]float64{0.3}[0],
+						Input:      3,
+						Output:     15,
+						CacheRead:  &[]float64{0.3}[0],
 						CacheWrite: &[]float64{3.75}[0],
 					},
 					Limit: Limit{
@@ -1939,9 +1939,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.25,
-						Output: 1.25,
-						CacheRead: nil,
+						Input:      0.25,
+						Output:     1.25,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -1956,9 +1956,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  15,
-						Output: 75,
-						CacheRead: nil,
+						Input:      15,
+						Output:     75,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -1973,9 +1973,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  3,
-						Output: 15,
-						CacheRead: nil,
+						Input:      3,
+						Output:     15,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -1990,9 +1990,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1,
-						Output: 5,
-						CacheRead: &[]float64{0.1}[0],
+						Input:      1,
+						Output:     5,
+						CacheRead:  &[]float64{0.1}[0],
 						CacheWrite: &[]float64{1.25}[0],
 					},
 					Limit: Limit{
@@ -2007,9 +2007,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.8,
-						Output: 2.4,
-						CacheRead: nil,
+						Input:      0.8,
+						Output:     2.4,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -2024,9 +2024,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  15,
-						Output: 75,
-						CacheRead: &[]float64{1.5}[0],
+						Input:      15,
+						Output:     75,
+						CacheRead:  &[]float64{1.5}[0],
 						CacheWrite: &[]float64{18.75}[0],
 					},
 					Limit: Limit{
@@ -2041,9 +2041,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  15,
-						Output: 75,
-						CacheRead: &[]float64{1.5}[0],
+						Input:      15,
+						Output:     75,
+						CacheRead:  &[]float64{1.5}[0],
 						CacheWrite: &[]float64{18.75}[0],
 					},
 					Limit: Limit{
@@ -2058,9 +2058,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  3,
-						Output: 15,
-						CacheRead: &[]float64{0.3}[0],
+						Input:      3,
+						Output:     15,
+						CacheRead:  &[]float64{0.3}[0],
 						CacheWrite: &[]float64{3.75}[0],
 					},
 					Limit: Limit{
@@ -2075,9 +2075,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  3,
-						Output: 15,
-						CacheRead: &[]float64{0.3}[0],
+						Input:      3,
+						Output:     15,
+						CacheRead:  &[]float64{0.3}[0],
 						CacheWrite: &[]float64{3.75}[0],
 					},
 					Limit: Limit{
@@ -2092,9 +2092,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  8,
-						Output: 24,
-						CacheRead: nil,
+						Input:      8,
+						Output:     24,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -2109,9 +2109,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  8,
-						Output: 24,
-						CacheRead: nil,
+						Input:      8,
+						Output:     24,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -2126,9 +2126,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.3,
-						Output: 0.6,
-						CacheRead: nil,
+						Input:      0.3,
+						Output:     0.6,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -2143,9 +2143,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  3,
-						Output: 15,
-						CacheRead: nil,
+						Input:      3,
+						Output:     15,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -2160,9 +2160,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.5,
-						Output: 1.5,
-						CacheRead: nil,
+						Input:      0.5,
+						Output:     1.5,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -2177,9 +2177,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1.5,
-						Output: 2,
-						CacheRead: nil,
+						Input:      1.5,
+						Output:     2,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -2194,9 +2194,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1.35,
-						Output: 5.4,
-						CacheRead: nil,
+						Input:      1.35,
+						Output:     5.4,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -2211,9 +2211,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.72,
-						Output: 0.72,
-						CacheRead: nil,
+						Input:      0.72,
+						Output:     0.72,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -2228,9 +2228,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.22,
-						Output: 0.22,
-						CacheRead: nil,
+						Input:      0.22,
+						Output:     0.22,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -2245,9 +2245,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.16,
-						Output: 0.16,
-						CacheRead: nil,
+						Input:      0.16,
+						Output:     0.16,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -2262,9 +2262,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.1,
-						Output: 0.1,
-						CacheRead: nil,
+						Input:      0.1,
+						Output:     0.1,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -2279,9 +2279,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.15,
-						Output: 0.15,
-						CacheRead: nil,
+						Input:      0.15,
+						Output:     0.15,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -2296,9 +2296,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.72,
-						Output: 0.72,
-						CacheRead: nil,
+						Input:      0.72,
+						Output:     0.72,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -2313,9 +2313,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.72,
-						Output: 0.72,
-						CacheRead: nil,
+						Input:      0.72,
+						Output:     0.72,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -2330,9 +2330,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  2.65,
-						Output: 3.5,
-						CacheRead: nil,
+						Input:      2.65,
+						Output:     3.5,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -2347,9 +2347,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.3,
-						Output: 0.6,
-						CacheRead: nil,
+						Input:      0.3,
+						Output:     0.6,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -2364,9 +2364,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.24,
-						Output: 0.97,
-						CacheRead: nil,
+						Input:      0.24,
+						Output:     0.97,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -2381,9 +2381,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.17,
-						Output: 0.66,
-						CacheRead: nil,
+						Input:      0.17,
+						Output:     0.66,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -2395,7 +2395,7 @@ func GetModelsData() map[string]ProviderInfo {
 		},
 		"anthropic": {
 			ID:   "anthropic",
-			Env:  []string{"ANTHROPIC_API_KEY" },
+			Env:  []string{"ANTHROPIC_API_KEY"},
 			NPM:  "@ai-sdk/anthropic",
 			Name: "Anthropic",
 			Models: map[string]ModelInfo{
@@ -2406,9 +2406,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.8,
-						Output: 4,
-						CacheRead: &[]float64{0.08}[0],
+						Input:      0.8,
+						Output:     4,
+						CacheRead:  &[]float64{0.08}[0],
 						CacheWrite: &[]float64{1}[0],
 					},
 					Limit: Limit{
@@ -2423,9 +2423,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.8,
-						Output: 4,
-						CacheRead: &[]float64{0.08}[0],
+						Input:      0.8,
+						Output:     4,
+						CacheRead:  &[]float64{0.08}[0],
 						CacheWrite: &[]float64{1}[0],
 					},
 					Limit: Limit{
@@ -2440,9 +2440,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  3,
-						Output: 15,
-						CacheRead: &[]float64{0.3}[0],
+						Input:      3,
+						Output:     15,
+						CacheRead:  &[]float64{0.3}[0],
 						CacheWrite: &[]float64{3.75}[0],
 					},
 					Limit: Limit{
@@ -2457,9 +2457,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  3,
-						Output: 15,
-						CacheRead: &[]float64{0.3}[0],
+						Input:      3,
+						Output:     15,
+						CacheRead:  &[]float64{0.3}[0],
 						CacheWrite: &[]float64{3.75}[0],
 					},
 					Limit: Limit{
@@ -2474,9 +2474,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  3,
-						Output: 15,
-						CacheRead: &[]float64{0.3}[0],
+						Input:      3,
+						Output:     15,
+						CacheRead:  &[]float64{0.3}[0],
 						CacheWrite: &[]float64{3.75}[0],
 					},
 					Limit: Limit{
@@ -2491,9 +2491,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  3,
-						Output: 15,
-						CacheRead: &[]float64{0.3}[0],
+						Input:      3,
+						Output:     15,
+						CacheRead:  &[]float64{0.3}[0],
 						CacheWrite: &[]float64{3.75}[0],
 					},
 					Limit: Limit{
@@ -2508,9 +2508,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.25,
-						Output: 1.25,
-						CacheRead: &[]float64{0.03}[0],
+						Input:      0.25,
+						Output:     1.25,
+						CacheRead:  &[]float64{0.03}[0],
 						CacheWrite: &[]float64{0.3}[0],
 					},
 					Limit: Limit{
@@ -2525,9 +2525,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  15,
-						Output: 75,
-						CacheRead: &[]float64{1.5}[0],
+						Input:      15,
+						Output:     75,
+						CacheRead:  &[]float64{1.5}[0],
 						CacheWrite: &[]float64{18.75}[0],
 					},
 					Limit: Limit{
@@ -2542,9 +2542,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  3,
-						Output: 15,
-						CacheRead: &[]float64{0.3}[0],
+						Input:      3,
+						Output:     15,
+						CacheRead:  &[]float64{0.3}[0],
 						CacheWrite: &[]float64{0.3}[0],
 					},
 					Limit: Limit{
@@ -2559,9 +2559,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1,
-						Output: 5,
-						CacheRead: &[]float64{0.1}[0],
+						Input:      1,
+						Output:     5,
+						CacheRead:  &[]float64{0.1}[0],
 						CacheWrite: &[]float64{1.25}[0],
 					},
 					Limit: Limit{
@@ -2576,9 +2576,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1,
-						Output: 5,
-						CacheRead: &[]float64{0.1}[0],
+						Input:      1,
+						Output:     5,
+						CacheRead:  &[]float64{0.1}[0],
 						CacheWrite: &[]float64{1.25}[0],
 					},
 					Limit: Limit{
@@ -2593,9 +2593,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  15,
-						Output: 75,
-						CacheRead: &[]float64{1.5}[0],
+						Input:      15,
+						Output:     75,
+						CacheRead:  &[]float64{1.5}[0],
 						CacheWrite: &[]float64{18.75}[0],
 					},
 					Limit: Limit{
@@ -2610,9 +2610,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  15,
-						Output: 75,
-						CacheRead: &[]float64{1.5}[0],
+						Input:      15,
+						Output:     75,
+						CacheRead:  &[]float64{1.5}[0],
 						CacheWrite: &[]float64{18.75}[0],
 					},
 					Limit: Limit{
@@ -2627,9 +2627,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  15,
-						Output: 75,
-						CacheRead: &[]float64{1.5}[0],
+						Input:      15,
+						Output:     75,
+						CacheRead:  &[]float64{1.5}[0],
 						CacheWrite: &[]float64{18.75}[0],
 					},
 					Limit: Limit{
@@ -2644,9 +2644,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  15,
-						Output: 75,
-						CacheRead: &[]float64{1.5}[0],
+						Input:      15,
+						Output:     75,
+						CacheRead:  &[]float64{1.5}[0],
 						CacheWrite: &[]float64{18.75}[0],
 					},
 					Limit: Limit{
@@ -2661,9 +2661,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  3,
-						Output: 15,
-						CacheRead: &[]float64{0.3}[0],
+						Input:      3,
+						Output:     15,
+						CacheRead:  &[]float64{0.3}[0],
 						CacheWrite: &[]float64{3.75}[0],
 					},
 					Limit: Limit{
@@ -2678,9 +2678,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  3,
-						Output: 15,
-						CacheRead: &[]float64{0.3}[0],
+						Input:      3,
+						Output:     15,
+						CacheRead:  &[]float64{0.3}[0],
 						CacheWrite: &[]float64{3.75}[0],
 					},
 					Limit: Limit{
@@ -2695,9 +2695,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  3,
-						Output: 15,
-						CacheRead: &[]float64{0.3}[0],
+						Input:      3,
+						Output:     15,
+						CacheRead:  &[]float64{0.3}[0],
 						CacheWrite: &[]float64{3.75}[0],
 					},
 					Limit: Limit{
@@ -2712,9 +2712,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  3,
-						Output: 15,
-						CacheRead: &[]float64{0.3}[0],
+						Input:      3,
+						Output:     15,
+						CacheRead:  &[]float64{0.3}[0],
 						CacheWrite: &[]float64{3.75}[0],
 					},
 					Limit: Limit{
@@ -2726,7 +2726,7 @@ func GetModelsData() map[string]ProviderInfo {
 		},
 		"azure": {
 			ID:   "azure",
-			Env:  []string{"AZURE_RESOURCE_NAME", "AZURE_API_KEY" },
+			Env:  []string{"AZURE_RESOURCE_NAME", "AZURE_API_KEY"},
 			NPM:  "@ai-sdk/azure",
 			Name: "Azure",
 			Models: map[string]ModelInfo{
@@ -2737,9 +2737,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: false,
 					Cost: Cost{
-						Input:  1.5,
-						Output: 6,
-						CacheRead: &[]float64{0.375}[0],
+						Input:      1.5,
+						Output:     6,
+						CacheRead:  &[]float64{0.375}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -2754,9 +2754,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.5,
-						Output: 1.5,
-						CacheRead: nil,
+						Input:      0.5,
+						Output:     1.5,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -2771,9 +2771,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1.5,
-						Output: 2,
-						CacheRead: nil,
+						Input:      1.5,
+						Output:     2,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -2788,9 +2788,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  3,
-						Output: 4,
-						CacheRead: nil,
+						Input:      3,
+						Output:     4,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -2805,9 +2805,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1,
-						Output: 2,
-						CacheRead: nil,
+						Input:      1,
+						Output:     2,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -2822,9 +2822,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1.5,
-						Output: 2,
-						CacheRead: nil,
+						Input:      1.5,
+						Output:     2,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -2839,9 +2839,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  60,
-						Output: 120,
-						CacheRead: nil,
+						Input:      60,
+						Output:     120,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -2856,9 +2856,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  60,
-						Output: 120,
-						CacheRead: nil,
+						Input:      60,
+						Output:     120,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -2873,9 +2873,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  10,
-						Output: 30,
-						CacheRead: nil,
+						Input:      10,
+						Output:     30,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -2890,9 +2890,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  10,
-						Output: 30,
-						CacheRead: nil,
+						Input:      10,
+						Output:     30,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -2907,9 +2907,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  2,
-						Output: 8,
-						CacheRead: &[]float64{0.5}[0],
+						Input:      2,
+						Output:     8,
+						CacheRead:  &[]float64{0.5}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -2924,9 +2924,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.4,
-						Output: 1.6,
-						CacheRead: &[]float64{0.1}[0],
+						Input:      0.4,
+						Output:     1.6,
+						CacheRead:  &[]float64{0.1}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -2941,9 +2941,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.1,
-						Output: 0.4,
-						CacheRead: &[]float64{0.03}[0],
+						Input:      0.1,
+						Output:     0.4,
+						CacheRead:  &[]float64{0.03}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -2958,9 +2958,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  2.5,
-						Output: 10,
-						CacheRead: &[]float64{1.25}[0],
+						Input:      2.5,
+						Output:     10,
+						CacheRead:  &[]float64{1.25}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -2975,9 +2975,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.15,
-						Output: 0.6,
-						CacheRead: &[]float64{0.08}[0],
+						Input:      0.15,
+						Output:     0.6,
+						CacheRead:  &[]float64{0.08}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -2992,9 +2992,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: false,
 					Cost: Cost{
-						Input:  1.25,
-						Output: 10,
-						CacheRead: &[]float64{0.13}[0],
+						Input:      1.25,
+						Output:     10,
+						CacheRead:  &[]float64{0.13}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -3009,9 +3009,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: false,
 					Cost: Cost{
-						Input:  1.25,
-						Output: 10,
-						CacheRead: &[]float64{0.13}[0],
+						Input:      1.25,
+						Output:     10,
+						CacheRead:  &[]float64{0.13}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -3026,9 +3026,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: false,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -3043,9 +3043,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: false,
 					Cost: Cost{
-						Input:  0.25,
-						Output: 2,
-						CacheRead: &[]float64{0.03}[0],
+						Input:      0.25,
+						Output:     2,
+						CacheRead:  &[]float64{0.03}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -3060,9 +3060,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: false,
 					Cost: Cost{
-						Input:  0.05,
-						Output: 0.4,
-						CacheRead: &[]float64{0.01}[0],
+						Input:      0.05,
+						Output:     0.4,
+						CacheRead:  &[]float64{0.01}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -3077,9 +3077,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: false,
 					Cost: Cost{
-						Input:  15,
-						Output: 60,
-						CacheRead: &[]float64{7.5}[0],
+						Input:      15,
+						Output:     60,
+						CacheRead:  &[]float64{7.5}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -3094,9 +3094,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: false,
 					Cost: Cost{
-						Input:  1.1,
-						Output: 4.4,
-						CacheRead: &[]float64{0.55}[0],
+						Input:      1.1,
+						Output:     4.4,
+						CacheRead:  &[]float64{0.55}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -3111,9 +3111,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: false,
 					Cost: Cost{
-						Input:  16.5,
-						Output: 66,
-						CacheRead: &[]float64{8.25}[0],
+						Input:      16.5,
+						Output:     66,
+						CacheRead:  &[]float64{8.25}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -3128,9 +3128,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: false,
 					Cost: Cost{
-						Input:  2,
-						Output: 8,
-						CacheRead: &[]float64{0.5}[0],
+						Input:      2,
+						Output:     8,
+						CacheRead:  &[]float64{0.5}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -3145,9 +3145,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: false,
 					Cost: Cost{
-						Input:  1.1,
-						Output: 4.4,
-						CacheRead: &[]float64{0.55}[0],
+						Input:      1.1,
+						Output:     4.4,
+						CacheRead:  &[]float64{0.55}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -3162,9 +3162,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: false,
 					Cost: Cost{
-						Input:  1.1,
-						Output: 4.4,
-						CacheRead: &[]float64{0.28}[0],
+						Input:      1.1,
+						Output:     4.4,
+						CacheRead:  &[]float64{0.28}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -3176,7 +3176,7 @@ func GetModelsData() map[string]ProviderInfo {
 		},
 		"baseten": {
 			ID:   "baseten",
-			Env:  []string{"BASETEN_API_KEY" },
+			Env:  []string{"BASETEN_API_KEY"},
 			NPM:  "@ai-sdk/openai-compatible",
 			Name: "Baseten",
 			Models: map[string]ModelInfo{
@@ -3187,9 +3187,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.38,
-						Output: 1.53,
-						CacheRead: nil,
+						Input:      0.38,
+						Output:     1.53,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -3204,9 +3204,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.6,
-						Output: 2.5,
-						CacheRead: nil,
+						Input:      0.6,
+						Output:     2.5,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -3218,7 +3218,7 @@ func GetModelsData() map[string]ProviderInfo {
 		},
 		"cerebras": {
 			ID:   "cerebras",
-			Env:  []string{"CEREBRAS_API_KEY" },
+			Env:  []string{"CEREBRAS_API_KEY"},
 			NPM:  "@ai-sdk/cerebras",
 			Name: "Cerebras",
 			Models: map[string]ModelInfo{
@@ -3229,9 +3229,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.25,
-						Output: 0.69,
-						CacheRead: nil,
+						Input:      0.25,
+						Output:     0.69,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -3246,9 +3246,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.6,
-						Output: 1.2,
-						CacheRead: nil,
+						Input:      0.6,
+						Output:     1.2,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -3263,9 +3263,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  2,
-						Output: 2,
-						CacheRead: nil,
+						Input:      2,
+						Output:     2,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -3277,7 +3277,7 @@ func GetModelsData() map[string]ProviderInfo {
 		},
 		"chutes": {
 			ID:   "chutes",
-			Env:  []string{"CHUTES_API_KEY" },
+			Env:  []string{"CHUTES_API_KEY"},
 			NPM:  "@ai-sdk/openai-compatible",
 			Name: "Chutes",
 			Models: map[string]ModelInfo{
@@ -3288,9 +3288,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.078,
-						Output: 0.312,
-						CacheRead: nil,
+						Input:      0.078,
+						Output:     0.312,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -3305,9 +3305,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.078,
-						Output: 0.312,
-						CacheRead: nil,
+						Input:      0.078,
+						Output:     0.312,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -3322,9 +3322,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.02,
-						Output: 0.08,
-						CacheRead: nil,
+						Input:      0.02,
+						Output:     0.08,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -3339,9 +3339,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.05,
-						Output: 0.2,
-						CacheRead: nil,
+						Input:      0.05,
+						Output:     0.2,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -3356,9 +3356,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.08,
-						Output: 0.29,
-						CacheRead: nil,
+						Input:      0.08,
+						Output:     0.29,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -3373,9 +3373,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -3390,9 +3390,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.2,
-						Output: 0.8,
-						CacheRead: nil,
+						Input:      0.2,
+						Output:     0.8,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -3407,9 +3407,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.1,
-						Output: 0.8,
-						CacheRead: nil,
+						Input:      0.1,
+						Output:     0.8,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -3424,9 +3424,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.1,
-						Output: 0.8,
-						CacheRead: nil,
+						Input:      0.1,
+						Output:     0.8,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -3441,9 +3441,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.02,
-						Output: 0.08,
-						CacheRead: nil,
+						Input:      0.02,
+						Output:     0.08,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -3458,9 +3458,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.02,
-						Output: 0.08,
-						CacheRead: nil,
+						Input:      0.02,
+						Output:     0.08,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -3475,9 +3475,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.18,
-						Output: 0.72,
-						CacheRead: nil,
+						Input:      0.18,
+						Output:     0.72,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -3492,9 +3492,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.02,
-						Output: 0.07,
-						CacheRead: nil,
+						Input:      0.02,
+						Output:     0.07,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -3509,9 +3509,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.03,
-						Output: 0.14,
-						CacheRead: nil,
+						Input:      0.03,
+						Output:     0.14,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -3526,9 +3526,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.18,
-						Output: 0.72,
-						CacheRead: nil,
+						Input:      0.18,
+						Output:     0.72,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -3543,9 +3543,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.2,
-						Output: 0.8,
-						CacheRead: nil,
+						Input:      0.2,
+						Output:     0.8,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -3560,9 +3560,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.25,
-						Output: 1,
-						CacheRead: nil,
+						Input:      0.25,
+						Output:     1,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -3577,9 +3577,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1,
-						Output: 3,
-						CacheRead: nil,
+						Input:      1,
+						Output:     3,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -3594,9 +3594,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.2,
-						Output: 0.8,
-						CacheRead: nil,
+						Input:      0.2,
+						Output:     0.8,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -3611,9 +3611,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.25,
-						Output: 0.35,
-						CacheRead: nil,
+						Input:      0.25,
+						Output:     0.35,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -3628,9 +3628,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.25,
-						Output: 1,
-						CacheRead: nil,
+						Input:      0.25,
+						Output:     1,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -3645,9 +3645,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.06664,
-						Output: 0.266688,
-						CacheRead: nil,
+						Input:      0.06664,
+						Output:     0.266688,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -3662,9 +3662,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.296176,
-						Output: 1.18528,
-						CacheRead: nil,
+						Input:      0.296176,
+						Output:     1.18528,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -3679,9 +3679,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.15,
-						Output: 0.59,
-						CacheRead: nil,
+						Input:      0.15,
+						Output:     0.59,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -3696,9 +3696,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.02499,
-						Output: 0.100008,
-						CacheRead: nil,
+						Input:      0.02499,
+						Output:     0.100008,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -3713,9 +3713,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.1,
-						Output: 0.41,
-						CacheRead: nil,
+						Input:      0.1,
+						Output:     0.41,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -3730,9 +3730,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.18,
-						Output: 0.72,
-						CacheRead: nil,
+						Input:      0.18,
+						Output:     0.72,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -3747,9 +3747,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.2,
-						Output: 0.8,
-						CacheRead: nil,
+						Input:      0.2,
+						Output:     0.8,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -3764,9 +3764,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -3781,9 +3781,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -3798,9 +3798,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1,
-						Output: 3,
-						CacheRead: nil,
+						Input:      1,
+						Output:     3,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -3815,9 +3815,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.39,
-						Output: 1.55,
-						CacheRead: nil,
+						Input:      0.39,
+						Output:     1.55,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -3832,9 +3832,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1.15,
-						Output: 3.25,
-						CacheRead: nil,
+						Input:      1.15,
+						Output:     3.25,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -3846,7 +3846,7 @@ func GetModelsData() map[string]ProviderInfo {
 		},
 		"cloudflare-workers-ai": {
 			ID:   "cloudflare-workers-ai",
-			Env:  []string{"CLOUDFLARE_ACCOUNT_ID", "CLOUDFLARE_API_KEY" },
+			Env:  []string{"CLOUDFLARE_ACCOUNT_ID", "CLOUDFLARE_API_KEY"},
 			NPM:  "workers-ai-provider",
 			Name: "Cloudflare Workers AI",
 			Models: map[string]ModelInfo{
@@ -3857,9 +3857,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: false,
 					Cost: Cost{
-						Input:  0.015,
-						Output: 0.015,
-						CacheRead: nil,
+						Input:      0.015,
+						Output:     0.015,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -3874,9 +3874,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: false,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -3891,9 +3891,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -3908,9 +3908,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -3925,9 +3925,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -3942,9 +3942,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.5,
-						Output: 4.88,
-						CacheRead: nil,
+						Input:      0.5,
+						Output:     4.88,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -3959,9 +3959,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -3976,9 +3976,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: false,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -3993,9 +3993,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -4010,9 +4010,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: false,
 					Cost: Cost{
-						Input:  5.3e-05,
-						Output: 0.00011,
-						CacheRead: nil,
+						Input:      5.3e-05,
+						Output:     0.00011,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -4027,9 +4027,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -4044,9 +4044,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.35,
-						Output: 0.56,
-						CacheRead: nil,
+						Input:      0.35,
+						Output:     0.56,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -4061,9 +4061,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -4078,9 +4078,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -4095,9 +4095,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: false,
 					Cost: Cost{
-						Input:  0.35,
-						Output: 0.75,
-						CacheRead: nil,
+						Input:      0.35,
+						Output:     0.75,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -4112,9 +4112,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: false,
 					Cost: Cost{
-						Input:  0.2,
-						Output: 0.3,
-						CacheRead: nil,
+						Input:      0.2,
+						Output:     0.3,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -4129,9 +4129,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -4146,9 +4146,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -4163,9 +4163,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.56,
-						Output: 6.67,
-						CacheRead: nil,
+						Input:      0.56,
+						Output:     6.67,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -4180,9 +4180,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -4197,9 +4197,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -4214,9 +4214,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.28,
-						Output: 0.83,
-						CacheRead: nil,
+						Input:      0.28,
+						Output:     0.83,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -4231,9 +4231,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.12,
-						Output: 0.27,
-						CacheRead: nil,
+						Input:      0.12,
+						Output:     0.27,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -4248,9 +4248,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -4265,9 +4265,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.28,
-						Output: 0.83,
-						CacheRead: nil,
+						Input:      0.28,
+						Output:     0.83,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -4282,9 +4282,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.12,
-						Output: 0.27,
-						CacheRead: nil,
+						Input:      0.12,
+						Output:     0.27,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -4299,9 +4299,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -4316,9 +4316,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.15,
-						Output: 0.29,
-						CacheRead: nil,
+						Input:      0.15,
+						Output:     0.29,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -4333,9 +4333,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.049,
-						Output: 0.68,
-						CacheRead: nil,
+						Input:      0.049,
+						Output:     0.68,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -4350,9 +4350,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.027,
-						Output: 0.2,
-						CacheRead: nil,
+						Input:      0.027,
+						Output:     0.2,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -4367,9 +4367,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.051,
-						Output: 0.34,
-						CacheRead: nil,
+						Input:      0.051,
+						Output:     0.34,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -4384,9 +4384,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.29,
-						Output: 2.25,
-						CacheRead: nil,
+						Input:      0.29,
+						Output:     2.25,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -4401,9 +4401,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.27,
-						Output: 0.85,
-						CacheRead: nil,
+						Input:      0.27,
+						Output:     0.85,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -4418,9 +4418,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.48,
-						Output: 0.03,
-						CacheRead: nil,
+						Input:      0.48,
+						Output:     0.03,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -4435,9 +4435,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -4452,9 +4452,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -4469,9 +4469,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: false,
 					Cost: Cost{
-						Input:  0.007,
-						Output: 0.007,
-						CacheRead: nil,
+						Input:      0.007,
+						Output:     0.007,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -4486,9 +4486,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: false,
 					Cost: Cost{
-						Input:  0.34,
-						Output: 0.34,
-						CacheRead: nil,
+						Input:      0.34,
+						Output:     0.34,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -4503,9 +4503,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: false,
 					Cost: Cost{
-						Input:  0.0002,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0.0002,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -4520,9 +4520,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.11,
-						Output: 0.19,
-						CacheRead: nil,
+						Input:      0.11,
+						Output:     0.19,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -4537,9 +4537,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -4554,9 +4554,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -4571,9 +4571,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -4588,9 +4588,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.35,
-						Output: 0.56,
-						CacheRead: nil,
+						Input:      0.35,
+						Output:     0.56,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -4605,9 +4605,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -4622,9 +4622,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: false,
 					Cost: Cost{
-						Input:  0.0052,
-						Output: 0.0052,
-						CacheRead: nil,
+						Input:      0.0052,
+						Output:     0.0052,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -4639,9 +4639,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -4656,9 +4656,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -4673,9 +4673,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -4690,9 +4690,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: false,
 					Cost: Cost{
-						Input:  0.0058,
-						Output: 0.0058,
-						CacheRead: nil,
+						Input:      0.0058,
+						Output:     0.0058,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -4707,9 +4707,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -4724,9 +4724,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -4741,9 +4741,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -4758,9 +4758,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -4775,9 +4775,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.66,
-						Output: 1,
-						CacheRead: nil,
+						Input:      0.66,
+						Output:     1,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -4792,9 +4792,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.66,
-						Output: 1,
-						CacheRead: nil,
+						Input:      0.66,
+						Output:     1,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -4809,9 +4809,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: false,
 					Cost: Cost{
-						Input:  2.5e-06,
-						Output: 0,
-						CacheRead: nil,
+						Input:      2.5e-06,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -4826,9 +4826,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -4843,9 +4843,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: false,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -4860,9 +4860,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: false,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -4877,9 +4877,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: false,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -4894,9 +4894,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: false,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -4911,9 +4911,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -4928,9 +4928,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -4945,9 +4945,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: false,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -4962,9 +4962,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -4979,9 +4979,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: false,
 					Cost: Cost{
-						Input:  0.00045,
-						Output: 0.00045,
-						CacheRead: nil,
+						Input:      0.00045,
+						Output:     0.00045,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -4996,9 +4996,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: false,
 					Cost: Cost{
-						Input:  0.00051,
-						Output: 0.00051,
-						CacheRead: nil,
+						Input:      0.00051,
+						Output:     0.00051,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -5013,9 +5013,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: false,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -5030,9 +5030,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -5044,7 +5044,7 @@ func GetModelsData() map[string]ProviderInfo {
 		},
 		"cortecs": {
 			ID:   "cortecs",
-			Env:  []string{"CORTECS_API_KEY" },
+			Env:  []string{"CORTECS_API_KEY"},
 			NPM:  "@ai-sdk/openai-compatible",
 			Name: "Cortecs",
 			Models: map[string]ModelInfo{
@@ -5055,9 +5055,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  3.259,
-						Output: 16.296,
-						CacheRead: nil,
+						Input:      3.259,
+						Output:     16.296,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -5072,9 +5072,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  3.307,
-						Output: 16.536,
-						CacheRead: nil,
+						Input:      3.307,
+						Output:     16.536,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -5089,9 +5089,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.551,
-						Output: 1.654,
-						CacheRead: nil,
+						Input:      0.551,
+						Output:     1.654,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -5106,9 +5106,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1.654,
-						Output: 11.024,
-						CacheRead: nil,
+						Input:      1.654,
+						Output:     11.024,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -5123,9 +5123,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  2.354,
-						Output: 9.417,
-						CacheRead: nil,
+						Input:      2.354,
+						Output:     9.417,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -5140,9 +5140,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -5157,9 +5157,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.551,
-						Output: 2.646,
-						CacheRead: nil,
+						Input:      0.551,
+						Output:     2.646,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -5174,9 +5174,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -5191,9 +5191,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1.016,
-						Output: 4.061,
-						CacheRead: nil,
+						Input:      1.016,
+						Output:     4.061,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -5208,9 +5208,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.099,
-						Output: 0.33,
-						CacheRead: nil,
+						Input:      0.099,
+						Output:     0.33,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -5225,9 +5225,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.441,
-						Output: 1.984,
-						CacheRead: nil,
+						Input:      0.441,
+						Output:     1.984,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -5239,7 +5239,7 @@ func GetModelsData() map[string]ProviderInfo {
 		},
 		"deepinfra": {
 			ID:   "deepinfra",
-			Env:  []string{"DEEPINFRA_API_KEY" },
+			Env:  []string{"DEEPINFRA_API_KEY"},
 			NPM:  "@ai-sdk/deepinfra",
 			Name: "Deep Infra",
 			Models: map[string]ModelInfo{
@@ -5250,9 +5250,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.4,
-						Output: 1.6,
-						CacheRead: nil,
+						Input:      0.4,
+						Output:     1.6,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -5267,9 +5267,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.3,
-						Output: 1.2,
-						CacheRead: nil,
+						Input:      0.3,
+						Output:     1.2,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -5284,9 +5284,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.5,
-						Output: 2,
-						CacheRead: nil,
+						Input:      0.5,
+						Output:     2,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -5301,9 +5301,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.6,
-						Output: 2.2,
-						CacheRead: nil,
+						Input:      0.6,
+						Output:     2.2,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -5315,7 +5315,7 @@ func GetModelsData() map[string]ProviderInfo {
 		},
 		"deepseek": {
 			ID:   "deepseek",
-			Env:  []string{"DEEPSEEK_API_KEY" },
+			Env:  []string{"DEEPSEEK_API_KEY"},
 			NPM:  "@ai-sdk/openai-compatible",
 			Name: "DeepSeek",
 			Models: map[string]ModelInfo{
@@ -5326,9 +5326,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.57,
-						Output: 1.68,
-						CacheRead: &[]float64{0.07}[0],
+						Input:      0.57,
+						Output:     1.68,
+						CacheRead:  &[]float64{0.07}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -5343,9 +5343,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.57,
-						Output: 1.68,
-						CacheRead: &[]float64{0.07}[0],
+						Input:      0.57,
+						Output:     1.68,
+						CacheRead:  &[]float64{0.07}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -5357,7 +5357,7 @@ func GetModelsData() map[string]ProviderInfo {
 		},
 		"fastrouter": {
 			ID:   "fastrouter",
-			Env:  []string{"FASTROUTER_API_KEY" },
+			Env:  []string{"FASTROUTER_API_KEY"},
 			NPM:  "@ai-sdk/openai-compatible",
 			Name: "FastRouter",
 			Models: map[string]ModelInfo{
@@ -5368,9 +5368,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  15,
-						Output: 75,
-						CacheRead: &[]float64{1.5}[0],
+						Input:      15,
+						Output:     75,
+						CacheRead:  &[]float64{1.5}[0],
 						CacheWrite: &[]float64{18.75}[0],
 					},
 					Limit: Limit{
@@ -5385,9 +5385,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  3,
-						Output: 15,
-						CacheRead: &[]float64{0.3}[0],
+						Input:      3,
+						Output:     15,
+						CacheRead:  &[]float64{0.3}[0],
 						CacheWrite: &[]float64{3.75}[0],
 					},
 					Limit: Limit{
@@ -5402,9 +5402,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.03,
-						Output: 0.14,
-						CacheRead: nil,
+						Input:      0.03,
+						Output:     0.14,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -5419,9 +5419,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.3,
-						Output: 2.5,
-						CacheRead: &[]float64{0.0375}[0],
+						Input:      0.3,
+						Output:     2.5,
+						CacheRead:  &[]float64{0.0375}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -5436,9 +5436,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1.25,
-						Output: 10,
-						CacheRead: &[]float64{0.31}[0],
+						Input:      1.25,
+						Output:     10,
+						CacheRead:  &[]float64{0.31}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -5453,9 +5453,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.55,
-						Output: 2.2,
-						CacheRead: nil,
+						Input:      0.55,
+						Output:     2.2,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -5470,9 +5470,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  2,
-						Output: 8,
-						CacheRead: &[]float64{0.5}[0],
+						Input:      2,
+						Output:     8,
+						CacheRead:  &[]float64{0.5}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -5487,9 +5487,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1.25,
-						Output: 10,
-						CacheRead: &[]float64{0.125}[0],
+						Input:      1.25,
+						Output:     10,
+						CacheRead:  &[]float64{0.125}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -5504,9 +5504,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.25,
-						Output: 2,
-						CacheRead: &[]float64{0.025}[0],
+						Input:      0.25,
+						Output:     2,
+						CacheRead:  &[]float64{0.025}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -5521,9 +5521,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.05,
-						Output: 0.4,
-						CacheRead: &[]float64{0.005}[0],
+						Input:      0.05,
+						Output:     0.4,
+						CacheRead:  &[]float64{0.005}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -5538,9 +5538,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.15,
-						Output: 0.6,
-						CacheRead: nil,
+						Input:      0.15,
+						Output:     0.6,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -5555,9 +5555,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.05,
-						Output: 0.2,
-						CacheRead: nil,
+						Input:      0.05,
+						Output:     0.2,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -5572,9 +5572,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.3,
-						Output: 1.2,
-						CacheRead: nil,
+						Input:      0.3,
+						Output:     1.2,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -5589,9 +5589,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  3,
-						Output: 15,
-						CacheRead: &[]float64{0.75}[0],
+						Input:      3,
+						Output:     15,
+						CacheRead:  &[]float64{0.75}[0],
 						CacheWrite: &[]float64{15}[0],
 					},
 					Limit: Limit{
@@ -5603,7 +5603,7 @@ func GetModelsData() map[string]ProviderInfo {
 		},
 		"fireworks-ai": {
 			ID:   "fireworks-ai",
-			Env:  []string{"FIREWORKS_API_KEY" },
+			Env:  []string{"FIREWORKS_API_KEY"},
 			NPM:  "@ai-sdk/openai-compatible",
 			Name: "Fireworks AI",
 			Models: map[string]ModelInfo{
@@ -5614,9 +5614,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  3,
-						Output: 8,
-						CacheRead: nil,
+						Input:      3,
+						Output:     8,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -5631,9 +5631,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.9,
-						Output: 0.9,
-						CacheRead: nil,
+						Input:      0.9,
+						Output:     0.9,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -5648,9 +5648,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.56,
-						Output: 1.68,
-						CacheRead: nil,
+						Input:      0.56,
+						Output:     1.68,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -5665,9 +5665,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.55,
-						Output: 2.19,
-						CacheRead: nil,
+						Input:      0.55,
+						Output:     2.19,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -5682,9 +5682,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.22,
-						Output: 0.88,
-						CacheRead: nil,
+						Input:      0.22,
+						Output:     0.88,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -5699,9 +5699,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.15,
-						Output: 0.6,
-						CacheRead: nil,
+						Input:      0.15,
+						Output:     0.6,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -5716,9 +5716,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.05,
-						Output: 0.2,
-						CacheRead: nil,
+						Input:      0.05,
+						Output:     0.2,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -5733,9 +5733,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1,
-						Output: 3,
-						CacheRead: nil,
+						Input:      1,
+						Output:     3,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -5750,9 +5750,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.22,
-						Output: 0.88,
-						CacheRead: nil,
+						Input:      0.22,
+						Output:     0.88,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -5767,9 +5767,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.45,
-						Output: 1.8,
-						CacheRead: nil,
+						Input:      0.45,
+						Output:     1.8,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -5781,7 +5781,7 @@ func GetModelsData() map[string]ProviderInfo {
 		},
 		"github-copilot": {
 			ID:   "github-copilot",
-			Env:  []string{"GITHUB_TOKEN" },
+			Env:  []string{"GITHUB_TOKEN"},
 			NPM:  "@ai-sdk/openai-compatible",
 			Name: "GitHub Copilot",
 			Models: map[string]ModelInfo{
@@ -5792,9 +5792,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -5809,9 +5809,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -5826,9 +5826,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -5843,9 +5843,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -5860,9 +5860,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: false,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -5877,9 +5877,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -5894,9 +5894,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -5911,9 +5911,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -5928,9 +5928,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -5945,9 +5945,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -5962,9 +5962,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -5979,9 +5979,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -5996,9 +5996,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -6013,9 +6013,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: false,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -6030,9 +6030,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -6047,9 +6047,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -6064,9 +6064,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: false,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -6081,9 +6081,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: false,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -6098,9 +6098,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: false,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -6112,7 +6112,7 @@ func GetModelsData() map[string]ProviderInfo {
 		},
 		"github-models": {
 			ID:   "github-models",
-			Env:  []string{"GITHUB_TOKEN" },
+			Env:  []string{"GITHUB_TOKEN"},
 			NPM:  "@ai-sdk/openai-compatible",
 			Name: "GitHub Models",
 			Models: map[string]ModelInfo{
@@ -6123,9 +6123,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -6140,9 +6140,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -6157,9 +6157,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -6174,9 +6174,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -6191,9 +6191,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -6208,9 +6208,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -6225,9 +6225,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -6242,9 +6242,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -6259,9 +6259,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -6276,9 +6276,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -6293,9 +6293,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -6310,9 +6310,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -6327,9 +6327,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -6344,9 +6344,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -6361,9 +6361,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -6378,9 +6378,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -6395,9 +6395,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -6412,9 +6412,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -6429,9 +6429,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -6446,9 +6446,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -6463,9 +6463,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -6480,9 +6480,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -6497,9 +6497,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -6514,9 +6514,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -6531,9 +6531,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -6548,9 +6548,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -6565,9 +6565,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -6582,9 +6582,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -6599,9 +6599,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -6616,9 +6616,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -6633,9 +6633,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -6650,9 +6650,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -6667,9 +6667,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -6684,9 +6684,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -6701,9 +6701,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -6718,9 +6718,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -6735,9 +6735,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -6752,9 +6752,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -6769,9 +6769,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -6786,9 +6786,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -6803,9 +6803,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -6820,9 +6820,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -6837,9 +6837,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -6854,9 +6854,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -6871,9 +6871,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -6888,9 +6888,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -6905,9 +6905,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -6922,9 +6922,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: false,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -6939,9 +6939,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: false,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -6956,9 +6956,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: false,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -6973,9 +6973,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: false,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -6990,9 +6990,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: false,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -7007,9 +7007,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: false,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -7024,9 +7024,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -7041,9 +7041,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -7055,7 +7055,7 @@ func GetModelsData() map[string]ProviderInfo {
 		},
 		"google": {
 			ID:   "google",
-			Env:  []string{"GOOGLE_API_KEY", "GEMINI_API_KEY", "GOOGLE_GENERATIVE_AI_API_KEY" },
+			Env:  []string{"GOOGLE_API_KEY", "GEMINI_API_KEY", "GOOGLE_GENERATIVE_AI_API_KEY"},
 			NPM:  "@ai-sdk/google",
 			Name: "Google",
 			Models: map[string]ModelInfo{
@@ -7066,9 +7066,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.075,
-						Output: 0.3,
-						CacheRead: &[]float64{0.01875}[0],
+						Input:      0.075,
+						Output:     0.3,
+						CacheRead:  &[]float64{0.01875}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -7083,9 +7083,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.0375,
-						Output: 0.15,
-						CacheRead: &[]float64{0.01}[0],
+						Input:      0.0375,
+						Output:     0.15,
+						CacheRead:  &[]float64{0.01}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -7100,9 +7100,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1.25,
-						Output: 5,
-						CacheRead: &[]float64{0.3125}[0],
+						Input:      1.25,
+						Output:     5,
+						CacheRead:  &[]float64{0.3125}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -7117,9 +7117,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.1,
-						Output: 0.4,
-						CacheRead: &[]float64{0.025}[0],
+						Input:      0.1,
+						Output:     0.4,
+						CacheRead:  &[]float64{0.025}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -7134,9 +7134,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.075,
-						Output: 0.3,
-						CacheRead: nil,
+						Input:      0.075,
+						Output:     0.3,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -7151,9 +7151,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.3,
-						Output: 2.5,
-						CacheRead: &[]float64{0.075}[0],
+						Input:      0.3,
+						Output:     2.5,
+						CacheRead:  &[]float64{0.075}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -7168,9 +7168,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.3,
-						Output: 30,
-						CacheRead: &[]float64{0.075}[0],
+						Input:      0.3,
+						Output:     30,
+						CacheRead:  &[]float64{0.075}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -7185,9 +7185,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.3,
-						Output: 30,
-						CacheRead: &[]float64{0.075}[0],
+						Input:      0.3,
+						Output:     30,
+						CacheRead:  &[]float64{0.075}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -7202,9 +7202,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.1,
-						Output: 0.4,
-						CacheRead: &[]float64{0.025}[0],
+						Input:      0.1,
+						Output:     0.4,
+						CacheRead:  &[]float64{0.025}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -7219,9 +7219,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.1,
-						Output: 0.4,
-						CacheRead: &[]float64{0.025}[0],
+						Input:      0.1,
+						Output:     0.4,
+						CacheRead:  &[]float64{0.025}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -7236,9 +7236,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.1,
-						Output: 0.4,
-						CacheRead: &[]float64{0.025}[0],
+						Input:      0.1,
+						Output:     0.4,
+						CacheRead:  &[]float64{0.025}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -7253,9 +7253,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.15,
-						Output: 0.6,
-						CacheRead: &[]float64{0.0375}[0],
+						Input:      0.15,
+						Output:     0.6,
+						CacheRead:  &[]float64{0.0375}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -7270,9 +7270,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.15,
-						Output: 0.6,
-						CacheRead: &[]float64{0.0375}[0],
+						Input:      0.15,
+						Output:     0.6,
+						CacheRead:  &[]float64{0.0375}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -7287,9 +7287,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.3,
-						Output: 2.5,
-						CacheRead: &[]float64{0.075}[0],
+						Input:      0.3,
+						Output:     2.5,
+						CacheRead:  &[]float64{0.075}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -7304,9 +7304,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: false,
 					Cost: Cost{
-						Input:  0.5,
-						Output: 10,
-						CacheRead: nil,
+						Input:      0.5,
+						Output:     10,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -7321,9 +7321,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1.25,
-						Output: 10,
-						CacheRead: &[]float64{0.31}[0],
+						Input:      1.25,
+						Output:     10,
+						CacheRead:  &[]float64{0.31}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -7338,9 +7338,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1.25,
-						Output: 10,
-						CacheRead: &[]float64{0.31}[0],
+						Input:      1.25,
+						Output:     10,
+						CacheRead:  &[]float64{0.31}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -7355,9 +7355,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1.25,
-						Output: 10,
-						CacheRead: &[]float64{0.31}[0],
+						Input:      1.25,
+						Output:     10,
+						CacheRead:  &[]float64{0.31}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -7372,9 +7372,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: false,
 					Cost: Cost{
-						Input:  1,
-						Output: 20,
-						CacheRead: nil,
+						Input:      1,
+						Output:     20,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -7389,9 +7389,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.3,
-						Output: 2.5,
-						CacheRead: &[]float64{0.075}[0],
+						Input:      0.3,
+						Output:     2.5,
+						CacheRead:  &[]float64{0.075}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -7406,9 +7406,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.1,
-						Output: 0.4,
-						CacheRead: &[]float64{0.025}[0],
+						Input:      0.1,
+						Output:     0.4,
+						CacheRead:  &[]float64{0.025}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -7423,9 +7423,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.5,
-						Output: 2,
-						CacheRead: nil,
+						Input:      0.5,
+						Output:     2,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -7440,9 +7440,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: false,
 					Cost: Cost{
-						Input:  0.5,
-						Output: 2,
-						CacheRead: nil,
+						Input:      0.5,
+						Output:     2,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -7454,7 +7454,7 @@ func GetModelsData() map[string]ProviderInfo {
 		},
 		"google-vertex": {
 			ID:   "google-vertex",
-			Env:  []string{"GOOGLE_VERTEX_PROJECT", "GOOGLE_VERTEX_LOCATION", "GOOGLE_APPLICATION_CREDENTIALS" },
+			Env:  []string{"GOOGLE_VERTEX_PROJECT", "GOOGLE_VERTEX_LOCATION", "GOOGLE_APPLICATION_CREDENTIALS"},
 			NPM:  "@ai-sdk/google-vertex",
 			Name: "Vertex",
 			Models: map[string]ModelInfo{
@@ -7465,9 +7465,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.1,
-						Output: 0.4,
-						CacheRead: &[]float64{0.025}[0],
+						Input:      0.1,
+						Output:     0.4,
+						CacheRead:  &[]float64{0.025}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -7482,9 +7482,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.075,
-						Output: 0.3,
-						CacheRead: nil,
+						Input:      0.075,
+						Output:     0.3,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -7499,9 +7499,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.3,
-						Output: 2.5,
-						CacheRead: &[]float64{0.075}[0],
+						Input:      0.3,
+						Output:     2.5,
+						CacheRead:  &[]float64{0.075}[0],
 						CacheWrite: &[]float64{0.383}[0],
 					},
 					Limit: Limit{
@@ -7516,9 +7516,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.1,
-						Output: 0.4,
-						CacheRead: &[]float64{0.025}[0],
+						Input:      0.1,
+						Output:     0.4,
+						CacheRead:  &[]float64{0.025}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -7533,9 +7533,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.1,
-						Output: 0.4,
-						CacheRead: &[]float64{0.025}[0],
+						Input:      0.1,
+						Output:     0.4,
+						CacheRead:  &[]float64{0.025}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -7550,9 +7550,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.1,
-						Output: 0.4,
-						CacheRead: &[]float64{0.025}[0],
+						Input:      0.1,
+						Output:     0.4,
+						CacheRead:  &[]float64{0.025}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -7567,9 +7567,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.15,
-						Output: 0.6,
-						CacheRead: &[]float64{0.0375}[0],
+						Input:      0.15,
+						Output:     0.6,
+						CacheRead:  &[]float64{0.0375}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -7584,9 +7584,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.15,
-						Output: 0.6,
-						CacheRead: &[]float64{0.0375}[0],
+						Input:      0.15,
+						Output:     0.6,
+						CacheRead:  &[]float64{0.0375}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -7601,9 +7601,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.3,
-						Output: 2.5,
-						CacheRead: &[]float64{0.075}[0],
+						Input:      0.3,
+						Output:     2.5,
+						CacheRead:  &[]float64{0.075}[0],
 						CacheWrite: &[]float64{0.383}[0],
 					},
 					Limit: Limit{
@@ -7618,9 +7618,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1.25,
-						Output: 10,
-						CacheRead: &[]float64{0.31}[0],
+						Input:      1.25,
+						Output:     10,
+						CacheRead:  &[]float64{0.31}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -7635,9 +7635,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1.25,
-						Output: 10,
-						CacheRead: &[]float64{0.31}[0],
+						Input:      1.25,
+						Output:     10,
+						CacheRead:  &[]float64{0.31}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -7652,9 +7652,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1.25,
-						Output: 10,
-						CacheRead: &[]float64{0.31}[0],
+						Input:      1.25,
+						Output:     10,
+						CacheRead:  &[]float64{0.31}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -7669,9 +7669,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.3,
-						Output: 2.5,
-						CacheRead: &[]float64{0.075}[0],
+						Input:      0.3,
+						Output:     2.5,
+						CacheRead:  &[]float64{0.075}[0],
 						CacheWrite: &[]float64{0.383}[0],
 					},
 					Limit: Limit{
@@ -7686,9 +7686,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.1,
-						Output: 0.4,
-						CacheRead: &[]float64{0.025}[0],
+						Input:      0.1,
+						Output:     0.4,
+						CacheRead:  &[]float64{0.025}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -7700,7 +7700,7 @@ func GetModelsData() map[string]ProviderInfo {
 		},
 		"google-vertex-anthropic": {
 			ID:   "google-vertex-anthropic",
-			Env:  []string{"GOOGLE_VERTEX_PROJECT", "GOOGLE_VERTEX_LOCATION", "GOOGLE_APPLICATION_CREDENTIALS" },
+			Env:  []string{"GOOGLE_VERTEX_PROJECT", "GOOGLE_VERTEX_LOCATION", "GOOGLE_APPLICATION_CREDENTIALS"},
 			NPM:  "@ai-sdk/google-vertex",
 			Name: "Vertex",
 			Models: map[string]ModelInfo{
@@ -7711,9 +7711,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.8,
-						Output: 4,
-						CacheRead: &[]float64{0.08}[0],
+						Input:      0.8,
+						Output:     4,
+						CacheRead:  &[]float64{0.08}[0],
 						CacheWrite: &[]float64{1}[0],
 					},
 					Limit: Limit{
@@ -7728,9 +7728,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  3,
-						Output: 15,
-						CacheRead: &[]float64{0.3}[0],
+						Input:      3,
+						Output:     15,
+						CacheRead:  &[]float64{0.3}[0],
 						CacheWrite: &[]float64{3.75}[0],
 					},
 					Limit: Limit{
@@ -7745,9 +7745,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  3,
-						Output: 15,
-						CacheRead: &[]float64{0.3}[0],
+						Input:      3,
+						Output:     15,
+						CacheRead:  &[]float64{0.3}[0],
 						CacheWrite: &[]float64{3.75}[0],
 					},
 					Limit: Limit{
@@ -7762,9 +7762,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  15,
-						Output: 75,
-						CacheRead: &[]float64{1.5}[0],
+						Input:      15,
+						Output:     75,
+						CacheRead:  &[]float64{1.5}[0],
 						CacheWrite: &[]float64{18.75}[0],
 					},
 					Limit: Limit{
@@ -7779,9 +7779,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  15,
-						Output: 75,
-						CacheRead: &[]float64{1.5}[0],
+						Input:      15,
+						Output:     75,
+						CacheRead:  &[]float64{1.5}[0],
 						CacheWrite: &[]float64{18.75}[0],
 					},
 					Limit: Limit{
@@ -7796,9 +7796,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  3,
-						Output: 15,
-						CacheRead: &[]float64{0.3}[0],
+						Input:      3,
+						Output:     15,
+						CacheRead:  &[]float64{0.3}[0],
 						CacheWrite: &[]float64{3.75}[0],
 					},
 					Limit: Limit{
@@ -7810,7 +7810,7 @@ func GetModelsData() map[string]ProviderInfo {
 		},
 		"groq": {
 			ID:   "groq",
-			Env:  []string{"GROQ_API_KEY" },
+			Env:  []string{"GROQ_API_KEY"},
 			NPM:  "@ai-sdk/groq",
 			Name: "Groq",
 			Models: map[string]ModelInfo{
@@ -7821,9 +7821,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.75,
-						Output: 0.99,
-						CacheRead: nil,
+						Input:      0.75,
+						Output:     0.99,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -7838,9 +7838,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.2,
-						Output: 0.2,
-						CacheRead: nil,
+						Input:      0.2,
+						Output:     0.2,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -7855,9 +7855,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.05,
-						Output: 0.08,
-						CacheRead: nil,
+						Input:      0.05,
+						Output:     0.08,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -7872,9 +7872,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.59,
-						Output: 0.79,
-						CacheRead: nil,
+						Input:      0.59,
+						Output:     0.79,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -7889,9 +7889,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.2,
-						Output: 0.2,
-						CacheRead: nil,
+						Input:      0.2,
+						Output:     0.2,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -7906,9 +7906,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.59,
-						Output: 0.79,
-						CacheRead: nil,
+						Input:      0.59,
+						Output:     0.79,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -7923,9 +7923,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.05,
-						Output: 0.08,
-						CacheRead: nil,
+						Input:      0.05,
+						Output:     0.08,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -7940,9 +7940,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.2,
-						Output: 0.6,
-						CacheRead: nil,
+						Input:      0.2,
+						Output:     0.6,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -7957,9 +7957,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.11,
-						Output: 0.34,
-						CacheRead: nil,
+						Input:      0.11,
+						Output:     0.34,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -7974,9 +7974,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.2,
-						Output: 0.2,
-						CacheRead: nil,
+						Input:      0.2,
+						Output:     0.2,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -7991,9 +7991,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.79,
-						Output: 0.79,
-						CacheRead: nil,
+						Input:      0.79,
+						Output:     0.79,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -8008,9 +8008,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1,
-						Output: 3,
-						CacheRead: nil,
+						Input:      1,
+						Output:     3,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -8025,9 +8025,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1,
-						Output: 3,
-						CacheRead: nil,
+						Input:      1,
+						Output:     3,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -8042,9 +8042,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.15,
-						Output: 0.75,
-						CacheRead: nil,
+						Input:      0.15,
+						Output:     0.75,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -8059,9 +8059,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.1,
-						Output: 0.5,
-						CacheRead: nil,
+						Input:      0.1,
+						Output:     0.5,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -8076,9 +8076,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.29,
-						Output: 0.39,
-						CacheRead: nil,
+						Input:      0.29,
+						Output:     0.39,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -8093,9 +8093,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.29,
-						Output: 0.59,
-						CacheRead: nil,
+						Input:      0.29,
+						Output:     0.59,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -8107,7 +8107,7 @@ func GetModelsData() map[string]ProviderInfo {
 		},
 		"huggingface": {
 			ID:   "huggingface",
-			Env:  []string{"HF_TOKEN" },
+			Env:  []string{"HF_TOKEN"},
 			NPM:  "@ai-sdk/openai-compatible",
 			Name: "Hugging Face",
 			Models: map[string]ModelInfo{
@@ -8118,9 +8118,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.3,
-						Output: 3,
-						CacheRead: nil,
+						Input:      0.3,
+						Output:     3,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -8135,9 +8135,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  2,
-						Output: 2,
-						CacheRead: nil,
+						Input:      2,
+						Output:     2,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -8152,9 +8152,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.25,
-						Output: 1,
-						CacheRead: nil,
+						Input:      0.25,
+						Output:     1,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -8169,9 +8169,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.3,
-						Output: 2,
-						CacheRead: nil,
+						Input:      0.3,
+						Output:     2,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -8186,9 +8186,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  3,
-						Output: 5,
-						CacheRead: nil,
+						Input:      3,
+						Output:     5,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -8203,9 +8203,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1.25,
-						Output: 1.25,
-						CacheRead: nil,
+						Input:      1.25,
+						Output:     1.25,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -8220,9 +8220,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1,
-						Output: 3,
-						CacheRead: nil,
+						Input:      1,
+						Output:     3,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -8237,9 +8237,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1,
-						Output: 3,
-						CacheRead: nil,
+						Input:      1,
+						Output:     3,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -8254,9 +8254,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.6,
-						Output: 2.2,
-						CacheRead: nil,
+						Input:      0.6,
+						Output:     2.2,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -8271,9 +8271,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.2,
-						Output: 1.1,
-						CacheRead: nil,
+						Input:      0.2,
+						Output:     1.1,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -8288,9 +8288,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.6,
-						Output: 2.2,
-						CacheRead: &[]float64{0.11}[0],
+						Input:      0.6,
+						Output:     2.2,
+						CacheRead:  &[]float64{0.11}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -8302,7 +8302,7 @@ func GetModelsData() map[string]ProviderInfo {
 		},
 		"inception": {
 			ID:   "inception",
-			Env:  []string{"INCEPTION_API_KEY" },
+			Env:  []string{"INCEPTION_API_KEY"},
 			NPM:  "@ai-sdk/openai-compatible",
 			Name: "Inception",
 			Models: map[string]ModelInfo{
@@ -8313,9 +8313,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.25,
-						Output: 1,
-						CacheRead: &[]float64{0.25}[0],
+						Input:      0.25,
+						Output:     1,
+						CacheRead:  &[]float64{0.25}[0],
 						CacheWrite: &[]float64{1}[0],
 					},
 					Limit: Limit{
@@ -8330,9 +8330,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.25,
-						Output: 1,
-						CacheRead: &[]float64{0.25}[0],
+						Input:      0.25,
+						Output:     1,
+						CacheRead:  &[]float64{0.25}[0],
 						CacheWrite: &[]float64{1}[0],
 					},
 					Limit: Limit{
@@ -8344,7 +8344,7 @@ func GetModelsData() map[string]ProviderInfo {
 		},
 		"inference": {
 			ID:   "inference",
-			Env:  []string{"INFERENCE_API_KEY" },
+			Env:  []string{"INFERENCE_API_KEY"},
 			NPM:  "@ai-sdk/openai-compatible",
 			Name: "Inference",
 			Models: map[string]ModelInfo{
@@ -8355,9 +8355,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.15,
-						Output: 0.3,
-						CacheRead: nil,
+						Input:      0.15,
+						Output:     0.3,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -8372,9 +8372,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.025,
-						Output: 0.025,
-						CacheRead: nil,
+						Input:      0.025,
+						Output:     0.025,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -8389,9 +8389,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.055,
-						Output: 0.055,
-						CacheRead: nil,
+						Input:      0.055,
+						Output:     0.055,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -8406,9 +8406,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.01,
-						Output: 0.01,
-						CacheRead: nil,
+						Input:      0.01,
+						Output:     0.01,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -8423,9 +8423,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.02,
-						Output: 0.02,
-						CacheRead: nil,
+						Input:      0.02,
+						Output:     0.02,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -8440,9 +8440,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.038,
-						Output: 0.1,
-						CacheRead: nil,
+						Input:      0.038,
+						Output:     0.1,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -8457,9 +8457,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.1,
-						Output: 0.5,
-						CacheRead: nil,
+						Input:      0.1,
+						Output:     0.5,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -8474,9 +8474,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.2,
-						Output: 0.2,
-						CacheRead: nil,
+						Input:      0.2,
+						Output:     0.2,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -8491,9 +8491,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: false,
 					Cost: Cost{
-						Input:  0.01,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0.01,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -8505,7 +8505,7 @@ func GetModelsData() map[string]ProviderInfo {
 		},
 		"llama": {
 			ID:   "llama",
-			Env:  []string{"LLAMA_API_KEY" },
+			Env:  []string{"LLAMA_API_KEY"},
 			NPM:  "@ai-sdk/openai-compatible",
 			Name: "Llama",
 			Models: map[string]ModelInfo{
@@ -8516,9 +8516,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -8533,9 +8533,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -8550,9 +8550,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -8567,9 +8567,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -8584,9 +8584,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -8601,9 +8601,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -8618,9 +8618,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -8632,7 +8632,7 @@ func GetModelsData() map[string]ProviderInfo {
 		},
 		"lmstudio": {
 			ID:   "lmstudio",
-			Env:  []string{"LMSTUDIO_API_KEY" },
+			Env:  []string{"LMSTUDIO_API_KEY"},
 			NPM:  "@ai-sdk/openai-compatible",
 			Name: "LMStudio",
 			Models: map[string]ModelInfo{
@@ -8643,9 +8643,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -8660,9 +8660,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -8677,9 +8677,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -8691,7 +8691,7 @@ func GetModelsData() map[string]ProviderInfo {
 		},
 		"lucidquery": {
 			ID:   "lucidquery",
-			Env:  []string{"LUCIDQUERY_API_KEY" },
+			Env:  []string{"LUCIDQUERY_API_KEY"},
 			NPM:  "@ai-sdk/openai-compatible",
 			Name: "LucidQuery AI",
 			Models: map[string]ModelInfo{
@@ -8702,9 +8702,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: false,
 					Cost: Cost{
-						Input:  2,
-						Output: 5,
-						CacheRead: nil,
+						Input:      2,
+						Output:     5,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -8719,9 +8719,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: false,
 					Cost: Cost{
-						Input:  2,
-						Output: 5,
-						CacheRead: nil,
+						Input:      2,
+						Output:     5,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -8733,7 +8733,7 @@ func GetModelsData() map[string]ProviderInfo {
 		},
 		"mistral": {
 			ID:   "mistral",
-			Env:  []string{"MISTRAL_API_KEY" },
+			Env:  []string{"MISTRAL_API_KEY"},
 			NPM:  "@ai-sdk/mistral",
 			Name: "Mistral",
 			Models: map[string]ModelInfo{
@@ -8744,9 +8744,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.3,
-						Output: 0.9,
-						CacheRead: nil,
+						Input:      0.3,
+						Output:     0.9,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -8761,9 +8761,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.4,
-						Output: 2,
-						CacheRead: nil,
+						Input:      0.4,
+						Output:     2,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -8778,9 +8778,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.1,
-						Output: 0.3,
-						CacheRead: nil,
+						Input:      0.1,
+						Output:     0.3,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -8795,9 +8795,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.1,
-						Output: 0.3,
-						CacheRead: nil,
+						Input:      0.1,
+						Output:     0.3,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -8812,9 +8812,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  2,
-						Output: 5,
-						CacheRead: nil,
+						Input:      2,
+						Output:     5,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -8829,9 +8829,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.5,
-						Output: 1.5,
-						CacheRead: nil,
+						Input:      0.5,
+						Output:     1.5,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -8846,9 +8846,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.04,
-						Output: 0.04,
-						CacheRead: nil,
+						Input:      0.04,
+						Output:     0.04,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -8863,9 +8863,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.1,
-						Output: 0.1,
-						CacheRead: nil,
+						Input:      0.1,
+						Output:     0.1,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -8880,9 +8880,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  2,
-						Output: 6,
-						CacheRead: nil,
+						Input:      2,
+						Output:     6,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -8897,9 +8897,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.4,
-						Output: 2,
-						CacheRead: nil,
+						Input:      0.4,
+						Output:     2,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -8914,9 +8914,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.4,
-						Output: 2,
-						CacheRead: nil,
+						Input:      0.4,
+						Output:     2,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -8931,9 +8931,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.4,
-						Output: 2,
-						CacheRead: nil,
+						Input:      0.4,
+						Output:     2,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -8948,9 +8948,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.15,
-						Output: 0.15,
-						CacheRead: nil,
+						Input:      0.15,
+						Output:     0.15,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -8965,9 +8965,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.1,
-						Output: 0.3,
-						CacheRead: nil,
+						Input:      0.1,
+						Output:     0.3,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -8982,9 +8982,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.25,
-						Output: 0.25,
-						CacheRead: nil,
+						Input:      0.25,
+						Output:     0.25,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -8999,9 +8999,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  2,
-						Output: 6,
-						CacheRead: nil,
+						Input:      2,
+						Output:     6,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -9016,9 +9016,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.7,
-						Output: 0.7,
-						CacheRead: nil,
+						Input:      0.7,
+						Output:     0.7,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -9033,9 +9033,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.15,
-						Output: 0.15,
-						CacheRead: nil,
+						Input:      0.15,
+						Output:     0.15,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -9050,9 +9050,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  2,
-						Output: 6,
-						CacheRead: nil,
+						Input:      2,
+						Output:     6,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -9064,7 +9064,7 @@ func GetModelsData() map[string]ProviderInfo {
 		},
 		"modelscope": {
 			ID:   "modelscope",
-			Env:  []string{"MODELSCOPE_API_KEY" },
+			Env:  []string{"MODELSCOPE_API_KEY"},
 			NPM:  "@ai-sdk/openai-compatible",
 			Name: "ModelScope",
 			Models: map[string]ModelInfo{
@@ -9075,9 +9075,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -9092,9 +9092,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -9109,9 +9109,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -9126,9 +9126,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -9143,9 +9143,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -9160,9 +9160,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -9174,7 +9174,7 @@ func GetModelsData() map[string]ProviderInfo {
 		},
 		"moonshotai": {
 			ID:   "moonshotai",
-			Env:  []string{"MOONSHOT_API_KEY" },
+			Env:  []string{"MOONSHOT_API_KEY"},
 			NPM:  "@ai-sdk/openai-compatible",
 			Name: "Moonshot AI",
 			Models: map[string]ModelInfo{
@@ -9185,9 +9185,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.6,
-						Output: 2.5,
-						CacheRead: &[]float64{0.15}[0],
+						Input:      0.6,
+						Output:     2.5,
+						CacheRead:  &[]float64{0.15}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -9202,9 +9202,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.6,
-						Output: 2.5,
-						CacheRead: &[]float64{0.15}[0],
+						Input:      0.6,
+						Output:     2.5,
+						CacheRead:  &[]float64{0.15}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -9219,9 +9219,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  2.4,
-						Output: 10,
-						CacheRead: &[]float64{0.6}[0],
+						Input:      2.4,
+						Output:     10,
+						CacheRead:  &[]float64{0.6}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -9233,7 +9233,7 @@ func GetModelsData() map[string]ProviderInfo {
 		},
 		"moonshotai-cn": {
 			ID:   "moonshotai-cn",
-			Env:  []string{"MOONSHOT_API_KEY" },
+			Env:  []string{"MOONSHOT_API_KEY"},
 			NPM:  "@ai-sdk/openai-compatible",
 			Name: "Moonshot AI (China)",
 			Models: map[string]ModelInfo{
@@ -9244,9 +9244,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.6,
-						Output: 2.5,
-						CacheRead: &[]float64{0.15}[0],
+						Input:      0.6,
+						Output:     2.5,
+						CacheRead:  &[]float64{0.15}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -9261,9 +9261,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.6,
-						Output: 2.5,
-						CacheRead: &[]float64{0.15}[0],
+						Input:      0.6,
+						Output:     2.5,
+						CacheRead:  &[]float64{0.15}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -9278,9 +9278,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  2.4,
-						Output: 10,
-						CacheRead: &[]float64{0.6}[0],
+						Input:      2.4,
+						Output:     10,
+						CacheRead:  &[]float64{0.6}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -9292,7 +9292,7 @@ func GetModelsData() map[string]ProviderInfo {
 		},
 		"morph": {
 			ID:   "morph",
-			Env:  []string{"MORPH_API_KEY" },
+			Env:  []string{"MORPH_API_KEY"},
 			NPM:  "@ai-sdk/openai-compatible",
 			Name: "Morph",
 			Models: map[string]ModelInfo{
@@ -9303,9 +9303,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: false,
 					Cost: Cost{
-						Input:  0.85,
-						Output: 1.55,
-						CacheRead: nil,
+						Input:      0.85,
+						Output:     1.55,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -9320,9 +9320,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: false,
 					Cost: Cost{
-						Input:  0.8,
-						Output: 1.2,
-						CacheRead: nil,
+						Input:      0.8,
+						Output:     1.2,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -9337,9 +9337,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: false,
 					Cost: Cost{
-						Input:  0.9,
-						Output: 1.9,
-						CacheRead: nil,
+						Input:      0.9,
+						Output:     1.9,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -9351,7 +9351,7 @@ func GetModelsData() map[string]ProviderInfo {
 		},
 		"nebius": {
 			ID:   "nebius",
-			Env:  []string{"NEBIUS_API_KEY" },
+			Env:  []string{"NEBIUS_API_KEY"},
 			NPM:  "@ai-sdk/openai-compatible",
 			Name: "Nebius AI Studio",
 			Models: map[string]ModelInfo{
@@ -9362,9 +9362,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1,
-						Output: 3,
-						CacheRead: nil,
+						Input:      1,
+						Output:     3,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -9379,9 +9379,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.13,
-						Output: 0.4,
-						CacheRead: nil,
+						Input:      0.13,
+						Output:     0.4,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -9396,9 +9396,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.5,
-						Output: 1.5,
-						CacheRead: nil,
+						Input:      0.5,
+						Output:     1.5,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -9413,9 +9413,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.13,
-						Output: 0.4,
-						CacheRead: nil,
+						Input:      0.13,
+						Output:     0.4,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -9430,9 +9430,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.25,
-						Output: 0.75,
-						CacheRead: nil,
+						Input:      0.25,
+						Output:     0.75,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -9447,9 +9447,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1,
-						Output: 3,
-						CacheRead: nil,
+						Input:      1,
+						Output:     3,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -9464,9 +9464,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.5,
-						Output: 2.4,
-						CacheRead: nil,
+						Input:      0.5,
+						Output:     2.4,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -9481,9 +9481,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.6,
-						Output: 1.8,
-						CacheRead: nil,
+						Input:      0.6,
+						Output:     1.8,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -9498,9 +9498,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.15,
-						Output: 0.6,
-						CacheRead: nil,
+						Input:      0.15,
+						Output:     0.6,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -9515,9 +9515,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.05,
-						Output: 0.2,
-						CacheRead: nil,
+						Input:      0.05,
+						Output:     0.2,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -9532,9 +9532,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.2,
-						Output: 0.6,
-						CacheRead: nil,
+						Input:      0.2,
+						Output:     0.6,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -9549,9 +9549,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.2,
-						Output: 0.8,
-						CacheRead: nil,
+						Input:      0.2,
+						Output:     0.8,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -9566,9 +9566,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.4,
-						Output: 1.8,
-						CacheRead: nil,
+						Input:      0.4,
+						Output:     1.8,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -9583,9 +9583,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.6,
-						Output: 2.2,
-						CacheRead: nil,
+						Input:      0.6,
+						Output:     2.2,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -9600,9 +9600,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.2,
-						Output: 1.2,
-						CacheRead: nil,
+						Input:      0.2,
+						Output:     1.2,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -9614,7 +9614,7 @@ func GetModelsData() map[string]ProviderInfo {
 		},
 		"nvidia": {
 			ID:   "nvidia",
-			Env:  []string{"NVIDIA_API_KEY" },
+			Env:  []string{"NVIDIA_API_KEY"},
 			NPM:  "@ai-sdk/openai-compatible",
 			Name: "Nvidia",
 			Models: map[string]ModelInfo{
@@ -9625,9 +9625,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -9642,9 +9642,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -9659,9 +9659,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -9676,9 +9676,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -9693,9 +9693,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -9710,9 +9710,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -9727,9 +9727,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -9744,9 +9744,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -9761,9 +9761,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: false,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -9778,9 +9778,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: false,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -9795,9 +9795,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -9812,9 +9812,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: false,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -9829,9 +9829,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -9846,9 +9846,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -9860,7 +9860,7 @@ func GetModelsData() map[string]ProviderInfo {
 		},
 		"openai": {
 			ID:   "openai",
-			Env:  []string{"OPENAI_API_KEY" },
+			Env:  []string{"OPENAI_API_KEY"},
 			NPM:  "@ai-sdk/openai",
 			Name: "OpenAI",
 			Models: map[string]ModelInfo{
@@ -9871,9 +9871,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: false,
 					Cost: Cost{
-						Input:  1.5,
-						Output: 6,
-						CacheRead: &[]float64{0.375}[0],
+						Input:      1.5,
+						Output:     6,
+						CacheRead:  &[]float64{0.375}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -9888,9 +9888,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.5,
-						Output: 1.5,
-						CacheRead: &[]float64{1.25}[0],
+						Input:      0.5,
+						Output:     1.5,
+						CacheRead:  &[]float64{1.25}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -9905,9 +9905,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  30,
-						Output: 60,
-						CacheRead: nil,
+						Input:      30,
+						Output:     60,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -9922,9 +9922,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  10,
-						Output: 30,
-						CacheRead: nil,
+						Input:      10,
+						Output:     30,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -9939,9 +9939,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  2,
-						Output: 8,
-						CacheRead: &[]float64{0.5}[0],
+						Input:      2,
+						Output:     8,
+						CacheRead:  &[]float64{0.5}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -9956,9 +9956,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.4,
-						Output: 1.6,
-						CacheRead: &[]float64{0.1}[0],
+						Input:      0.4,
+						Output:     1.6,
+						CacheRead:  &[]float64{0.1}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -9973,9 +9973,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.1,
-						Output: 0.4,
-						CacheRead: &[]float64{0.03}[0],
+						Input:      0.1,
+						Output:     0.4,
+						CacheRead:  &[]float64{0.03}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -9990,9 +9990,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  2.5,
-						Output: 10,
-						CacheRead: &[]float64{1.25}[0],
+						Input:      2.5,
+						Output:     10,
+						CacheRead:  &[]float64{1.25}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -10007,9 +10007,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  5,
-						Output: 15,
-						CacheRead: nil,
+						Input:      5,
+						Output:     15,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -10024,9 +10024,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  2.5,
-						Output: 10,
-						CacheRead: &[]float64{1.25}[0],
+						Input:      2.5,
+						Output:     10,
+						CacheRead:  &[]float64{1.25}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -10041,9 +10041,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  2.5,
-						Output: 10,
-						CacheRead: &[]float64{1.25}[0],
+						Input:      2.5,
+						Output:     10,
+						CacheRead:  &[]float64{1.25}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -10058,9 +10058,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.15,
-						Output: 0.6,
-						CacheRead: &[]float64{0.08}[0],
+						Input:      0.15,
+						Output:     0.6,
+						CacheRead:  &[]float64{0.08}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -10075,9 +10075,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: false,
 					Cost: Cost{
-						Input:  1.25,
-						Output: 10,
-						CacheRead: &[]float64{0.13}[0],
+						Input:      1.25,
+						Output:     10,
+						CacheRead:  &[]float64{0.13}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -10092,9 +10092,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1.25,
-						Output: 10,
-						CacheRead: nil,
+						Input:      1.25,
+						Output:     10,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -10109,9 +10109,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: false,
 					Cost: Cost{
-						Input:  1.25,
-						Output: 10,
-						CacheRead: &[]float64{0.125}[0],
+						Input:      1.25,
+						Output:     10,
+						CacheRead:  &[]float64{0.125}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -10126,9 +10126,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: false,
 					Cost: Cost{
-						Input:  0.25,
-						Output: 2,
-						CacheRead: &[]float64{0.03}[0],
+						Input:      0.25,
+						Output:     2,
+						CacheRead:  &[]float64{0.03}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -10143,9 +10143,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: false,
 					Cost: Cost{
-						Input:  0.05,
-						Output: 0.4,
-						CacheRead: &[]float64{0.01}[0],
+						Input:      0.05,
+						Output:     0.4,
+						CacheRead:  &[]float64{0.01}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -10160,9 +10160,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: false,
 					Cost: Cost{
-						Input:  15,
-						Output: 60,
-						CacheRead: &[]float64{7.5}[0],
+						Input:      15,
+						Output:     60,
+						CacheRead:  &[]float64{7.5}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -10177,9 +10177,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: false,
 					Cost: Cost{
-						Input:  1.1,
-						Output: 4.4,
-						CacheRead: &[]float64{0.55}[0],
+						Input:      1.1,
+						Output:     4.4,
+						CacheRead:  &[]float64{0.55}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -10194,9 +10194,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  15,
-						Output: 60,
-						CacheRead: &[]float64{7.5}[0],
+						Input:      15,
+						Output:     60,
+						CacheRead:  &[]float64{7.5}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -10211,9 +10211,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: false,
 					Cost: Cost{
-						Input:  150,
-						Output: 600,
-						CacheRead: nil,
+						Input:      150,
+						Output:     600,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -10228,9 +10228,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: false,
 					Cost: Cost{
-						Input:  2,
-						Output: 8,
-						CacheRead: &[]float64{0.5}[0],
+						Input:      2,
+						Output:     8,
+						CacheRead:  &[]float64{0.5}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -10245,9 +10245,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: false,
 					Cost: Cost{
-						Input:  10,
-						Output: 40,
-						CacheRead: &[]float64{2.5}[0],
+						Input:      10,
+						Output:     40,
+						CacheRead:  &[]float64{2.5}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -10262,9 +10262,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: false,
 					Cost: Cost{
-						Input:  1.1,
-						Output: 4.4,
-						CacheRead: &[]float64{0.55}[0],
+						Input:      1.1,
+						Output:     4.4,
+						CacheRead:  &[]float64{0.55}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -10279,9 +10279,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: false,
 					Cost: Cost{
-						Input:  20,
-						Output: 80,
-						CacheRead: nil,
+						Input:      20,
+						Output:     80,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -10296,9 +10296,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: false,
 					Cost: Cost{
-						Input:  1.1,
-						Output: 4.4,
-						CacheRead: &[]float64{0.28}[0],
+						Input:      1.1,
+						Output:     4.4,
+						CacheRead:  &[]float64{0.28}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -10313,9 +10313,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: false,
 					Cost: Cost{
-						Input:  2,
-						Output: 8,
-						CacheRead: &[]float64{0.5}[0],
+						Input:      2,
+						Output:     8,
+						CacheRead:  &[]float64{0.5}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -10327,7 +10327,7 @@ func GetModelsData() map[string]ProviderInfo {
 		},
 		"opencode": {
 			ID:   "opencode",
-			Env:  []string{"OPENCODE_API_KEY" },
+			Env:  []string{"OPENCODE_API_KEY"},
 			NPM:  "@ai-sdk/openai-compatible",
 			Name: "OpenCode Zen",
 			Models: map[string]ModelInfo{
@@ -10338,9 +10338,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.5,
-						Output: 2,
-						CacheRead: nil,
+						Input:      0.5,
+						Output:     2,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -10355,9 +10355,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.8,
-						Output: 4,
-						CacheRead: &[]float64{0.08}[0],
+						Input:      0.8,
+						Output:     4,
+						CacheRead:  &[]float64{0.08}[0],
 						CacheWrite: &[]float64{1}[0],
 					},
 					Limit: Limit{
@@ -10372,9 +10372,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1,
-						Output: 1.25,
-						CacheRead: &[]float64{0.1}[0],
+						Input:      1,
+						Output:     1.25,
+						CacheRead:  &[]float64{0.1}[0],
 						CacheWrite: &[]float64{1.25}[0],
 					},
 					Limit: Limit{
@@ -10389,9 +10389,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  15,
-						Output: 75,
-						CacheRead: &[]float64{1.5}[0],
+						Input:      15,
+						Output:     75,
+						CacheRead:  &[]float64{1.5}[0],
 						CacheWrite: &[]float64{18.75}[0],
 					},
 					Limit: Limit{
@@ -10406,9 +10406,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  3,
-						Output: 15,
-						CacheRead: &[]float64{0.3}[0],
+						Input:      3,
+						Output:     15,
+						CacheRead:  &[]float64{0.3}[0],
 						CacheWrite: &[]float64{3.75}[0],
 					},
 					Limit: Limit{
@@ -10423,9 +10423,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  3,
-						Output: 15,
-						CacheRead: &[]float64{0.3}[0],
+						Input:      3,
+						Output:     15,
+						CacheRead:  &[]float64{0.3}[0],
 						CacheWrite: &[]float64{3.75}[0],
 					},
 					Limit: Limit{
@@ -10440,9 +10440,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: &[]float64{0}[0],
+						Input:      0,
+						Output:     0,
+						CacheRead:  &[]float64{0}[0],
 						CacheWrite: &[]float64{0}[0],
 					},
 					Limit: Limit{
@@ -10457,9 +10457,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.6,
-						Output: 1.9,
-						CacheRead: nil,
+						Input:      0.6,
+						Output:     1.9,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -10474,9 +10474,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: false,
 					Cost: Cost{
-						Input:  1.25,
-						Output: 10,
-						CacheRead: &[]float64{0.125}[0],
+						Input:      1.25,
+						Output:     10,
+						CacheRead:  &[]float64{0.125}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -10491,9 +10491,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: false,
 					Cost: Cost{
-						Input:  1.25,
-						Output: 10,
-						CacheRead: &[]float64{0.125}[0],
+						Input:      1.25,
+						Output:     10,
+						CacheRead:  &[]float64{0.125}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -10508,9 +10508,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: &[]float64{0}[0],
+						Input:      0,
+						Output:     0,
+						CacheRead:  &[]float64{0}[0],
 						CacheWrite: &[]float64{0}[0],
 					},
 					Limit: Limit{
@@ -10525,9 +10525,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.6,
-						Output: 2.5,
-						CacheRead: &[]float64{0.36}[0],
+						Input:      0.6,
+						Output:     2.5,
+						CacheRead:  &[]float64{0.36}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -10542,9 +10542,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.45,
-						Output: 1.8,
-						CacheRead: nil,
+						Input:      0.45,
+						Output:     1.8,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -10556,7 +10556,7 @@ func GetModelsData() map[string]ProviderInfo {
 		},
 		"openrouter": {
 			ID:   "openrouter",
-			Env:  []string{"OPENROUTER_API_KEY" },
+			Env:  []string{"OPENROUTER_API_KEY"},
 			NPM:  "@ai-sdk/openai-compatible",
 			Name: "OpenRouter",
 			Models: map[string]ModelInfo{
@@ -10567,9 +10567,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.8,
-						Output: 4,
-						CacheRead: &[]float64{0.08}[0],
+						Input:      0.8,
+						Output:     4,
+						CacheRead:  &[]float64{0.08}[0],
 						CacheWrite: &[]float64{1}[0],
 					},
 					Limit: Limit{
@@ -10584,9 +10584,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  15,
-						Output: 75,
-						CacheRead: &[]float64{1.5}[0],
+						Input:      15,
+						Output:     75,
+						CacheRead:  &[]float64{1.5}[0],
 						CacheWrite: &[]float64{18.75}[0],
 					},
 					Limit: Limit{
@@ -10601,9 +10601,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1,
-						Output: 5,
-						CacheRead: &[]float64{0.1}[0],
+						Input:      1,
+						Output:     5,
+						CacheRead:  &[]float64{0.1}[0],
 						CacheWrite: &[]float64{1.25}[0],
 					},
 					Limit: Limit{
@@ -10618,9 +10618,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  15,
-						Output: 75,
-						CacheRead: &[]float64{1.5}[0],
+						Input:      15,
+						Output:     75,
+						CacheRead:  &[]float64{1.5}[0],
 						CacheWrite: &[]float64{18.75}[0],
 					},
 					Limit: Limit{
@@ -10635,9 +10635,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  15,
-						Output: 75,
-						CacheRead: &[]float64{1.5}[0],
+						Input:      15,
+						Output:     75,
+						CacheRead:  &[]float64{1.5}[0],
 						CacheWrite: &[]float64{18.75}[0],
 					},
 					Limit: Limit{
@@ -10652,9 +10652,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  3,
-						Output: 15,
-						CacheRead: &[]float64{0.3}[0],
+						Input:      3,
+						Output:     15,
+						CacheRead:  &[]float64{0.3}[0],
 						CacheWrite: &[]float64{3.75}[0],
 					},
 					Limit: Limit{
@@ -10669,9 +10669,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  3,
-						Output: 15,
-						CacheRead: &[]float64{0.3}[0],
+						Input:      3,
+						Output:     15,
+						CacheRead:  &[]float64{0.3}[0],
 						CacheWrite: &[]float64{3.75}[0],
 					},
 					Limit: Limit{
@@ -10686,9 +10686,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -10703,9 +10703,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -10720,9 +10720,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -10737,9 +10737,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.2,
-						Output: 0.8,
-						CacheRead: nil,
+						Input:      0.2,
+						Output:     0.8,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -10754,9 +10754,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -10771,9 +10771,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -10788,9 +10788,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -10805,9 +10805,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -10822,9 +10822,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -10839,9 +10839,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -10856,9 +10856,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.27,
-						Output: 1,
-						CacheRead: nil,
+						Input:      0.27,
+						Output:     1,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -10873,9 +10873,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -10890,9 +10890,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.1,
-						Output: 0.4,
-						CacheRead: &[]float64{0.025}[0],
+						Input:      0.1,
+						Output:     0.4,
+						CacheRead:  &[]float64{0.025}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -10907,9 +10907,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -10924,9 +10924,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.3,
-						Output: 2.5,
-						CacheRead: &[]float64{0.0375}[0],
+						Input:      0.3,
+						Output:     2.5,
+						CacheRead:  &[]float64{0.0375}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -10941,9 +10941,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.1,
-						Output: 0.4,
-						CacheRead: &[]float64{0.025}[0],
+						Input:      0.1,
+						Output:     0.4,
+						CacheRead:  &[]float64{0.025}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -10958,9 +10958,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.1,
-						Output: 0.4,
-						CacheRead: &[]float64{0.025}[0],
+						Input:      0.1,
+						Output:     0.4,
+						CacheRead:  &[]float64{0.025}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -10975,9 +10975,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.3,
-						Output: 2.5,
-						CacheRead: &[]float64{0.031}[0],
+						Input:      0.3,
+						Output:     2.5,
+						CacheRead:  &[]float64{0.031}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -10992,9 +10992,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1.25,
-						Output: 10,
-						CacheRead: &[]float64{0.31}[0],
+						Input:      1.25,
+						Output:     10,
+						CacheRead:  &[]float64{0.31}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -11009,9 +11009,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1.25,
-						Output: 10,
-						CacheRead: &[]float64{0.31}[0],
+						Input:      1.25,
+						Output:     10,
+						CacheRead:  &[]float64{0.31}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -11026,9 +11026,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1.25,
-						Output: 10,
-						CacheRead: &[]float64{0.31}[0],
+						Input:      1.25,
+						Output:     10,
+						CacheRead:  &[]float64{0.31}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -11043,9 +11043,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -11060,9 +11060,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -11077,9 +11077,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -11094,9 +11094,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -11111,9 +11111,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -11128,9 +11128,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -11145,9 +11145,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -11162,9 +11162,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -11179,9 +11179,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -11196,9 +11196,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.3,
-						Output: 0.9,
-						CacheRead: nil,
+						Input:      0.3,
+						Output:     0.9,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -11213,9 +11213,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.4,
-						Output: 2,
-						CacheRead: nil,
+						Input:      0.4,
+						Output:     2,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -11230,9 +11230,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.06,
-						Output: 0.12,
-						CacheRead: nil,
+						Input:      0.06,
+						Output:     0.12,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -11247,9 +11247,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -11264,9 +11264,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.1,
-						Output: 0.3,
-						CacheRead: nil,
+						Input:      0.1,
+						Output:     0.3,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -11281,9 +11281,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -11298,9 +11298,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.4,
-						Output: 2,
-						CacheRead: nil,
+						Input:      0.4,
+						Output:     2,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -11315,9 +11315,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.4,
-						Output: 2,
-						CacheRead: nil,
+						Input:      0.4,
+						Output:     2,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -11332,9 +11332,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -11349,9 +11349,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -11366,9 +11366,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -11383,9 +11383,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -11400,9 +11400,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -11417,9 +11417,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.55,
-						Output: 2.2,
-						CacheRead: nil,
+						Input:      0.55,
+						Output:     2.2,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -11434,9 +11434,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.6,
-						Output: 2.5,
-						CacheRead: nil,
+						Input:      0.6,
+						Output:     2.5,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -11451,9 +11451,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -11468,9 +11468,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -11485,9 +11485,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1,
-						Output: 3,
-						CacheRead: nil,
+						Input:      1,
+						Output:     3,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -11502,9 +11502,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.13,
-						Output: 0.4,
-						CacheRead: nil,
+						Input:      0.13,
+						Output:     0.4,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -11519,9 +11519,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  2,
-						Output: 8,
-						CacheRead: &[]float64{0.5}[0],
+						Input:      2,
+						Output:     8,
+						CacheRead:  &[]float64{0.5}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -11536,9 +11536,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.4,
-						Output: 1.6,
-						CacheRead: &[]float64{0.1}[0],
+						Input:      0.4,
+						Output:     1.6,
+						CacheRead:  &[]float64{0.1}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -11553,9 +11553,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.15,
-						Output: 0.6,
-						CacheRead: &[]float64{0.08}[0],
+						Input:      0.15,
+						Output:     0.6,
+						CacheRead:  &[]float64{0.08}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -11570,9 +11570,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1.25,
-						Output: 10,
-						CacheRead: nil,
+						Input:      1.25,
+						Output:     10,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -11587,9 +11587,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1.25,
-						Output: 10,
-						CacheRead: nil,
+						Input:      1.25,
+						Output:     10,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -11604,9 +11604,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1.25,
-						Output: 10,
-						CacheRead: &[]float64{0.125}[0],
+						Input:      1.25,
+						Output:     10,
+						CacheRead:  &[]float64{0.125}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -11621,9 +11621,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  5,
-						Output: 10,
-						CacheRead: &[]float64{1.25}[0],
+						Input:      5,
+						Output:     10,
+						CacheRead:  &[]float64{1.25}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -11638,9 +11638,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.25,
-						Output: 2,
-						CacheRead: nil,
+						Input:      0.25,
+						Output:     2,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -11655,9 +11655,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.05,
-						Output: 0.4,
-						CacheRead: nil,
+						Input:      0.05,
+						Output:     0.4,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -11672,9 +11672,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.072,
-						Output: 0.28,
-						CacheRead: nil,
+						Input:      0.072,
+						Output:     0.28,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -11689,9 +11689,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.05,
-						Output: 0.2,
-						CacheRead: nil,
+						Input:      0.05,
+						Output:     0.2,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -11706,9 +11706,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1.1,
-						Output: 4.4,
-						CacheRead: &[]float64{0.28}[0],
+						Input:      1.1,
+						Output:     4.4,
+						CacheRead:  &[]float64{0.28}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -11723,9 +11723,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -11740,9 +11740,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: false,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -11757,9 +11757,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: false,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -11774,9 +11774,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: false,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -11791,9 +11791,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: false,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -11808,9 +11808,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -11825,9 +11825,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -11842,9 +11842,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -11859,9 +11859,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -11876,9 +11876,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -11893,9 +11893,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.15,
-						Output: 0.85,
-						CacheRead: nil,
+						Input:      0.15,
+						Output:     0.85,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -11910,9 +11910,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -11927,9 +11927,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.078,
-						Output: 0.312,
-						CacheRead: nil,
+						Input:      0.078,
+						Output:     0.312,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -11944,9 +11944,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -11961,9 +11961,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.2,
-						Output: 0.8,
-						CacheRead: nil,
+						Input:      0.2,
+						Output:     0.8,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -11978,9 +11978,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.2,
-						Output: 0.8,
-						CacheRead: nil,
+						Input:      0.2,
+						Output:     0.8,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -11995,9 +11995,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -12012,9 +12012,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -12029,9 +12029,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -12046,9 +12046,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.3,
-						Output: 1.2,
-						CacheRead: nil,
+						Input:      0.3,
+						Output:     1.2,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -12063,9 +12063,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -12080,9 +12080,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1.2,
-						Output: 6,
-						CacheRead: nil,
+						Input:      1.2,
+						Output:     6,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -12097,9 +12097,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.14,
-						Output: 1.4,
-						CacheRead: nil,
+						Input:      0.14,
+						Output:     1.4,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -12114,9 +12114,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.14,
-						Output: 1.4,
-						CacheRead: nil,
+						Input:      0.14,
+						Output:     1.4,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -12131,9 +12131,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -12148,9 +12148,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -12165,9 +12165,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -12182,9 +12182,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -12199,9 +12199,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -12216,9 +12216,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  3,
-						Output: 15,
-						CacheRead: &[]float64{0.75}[0],
+						Input:      3,
+						Output:     15,
+						CacheRead:  &[]float64{0.75}[0],
 						CacheWrite: &[]float64{15}[0],
 					},
 					Limit: Limit{
@@ -12233,9 +12233,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  3,
-						Output: 15,
-						CacheRead: &[]float64{0.75}[0],
+						Input:      3,
+						Output:     15,
+						CacheRead:  &[]float64{0.75}[0],
 						CacheWrite: &[]float64{15}[0],
 					},
 					Limit: Limit{
@@ -12250,9 +12250,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.3,
-						Output: 0.5,
-						CacheRead: &[]float64{0.075}[0],
+						Input:      0.3,
+						Output:     0.5,
+						CacheRead:  &[]float64{0.075}[0],
 						CacheWrite: &[]float64{0.5}[0],
 					},
 					Limit: Limit{
@@ -12267,9 +12267,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.3,
-						Output: 0.5,
-						CacheRead: &[]float64{0.075}[0],
+						Input:      0.3,
+						Output:     0.5,
+						CacheRead:  &[]float64{0.075}[0],
 						CacheWrite: &[]float64{0.5}[0],
 					},
 					Limit: Limit{
@@ -12284,9 +12284,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  3,
-						Output: 15,
-						CacheRead: &[]float64{0.75}[0],
+						Input:      3,
+						Output:     15,
+						CacheRead:  &[]float64{0.75}[0],
 						CacheWrite: &[]float64{15}[0],
 					},
 					Limit: Limit{
@@ -12301,9 +12301,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.2,
-						Output: 0.5,
-						CacheRead: &[]float64{0.05}[0],
+						Input:      0.2,
+						Output:     0.5,
+						CacheRead:  &[]float64{0.05}[0],
 						CacheWrite: &[]float64{0.05}[0],
 					},
 					Limit: Limit{
@@ -12318,9 +12318,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: &[]float64{0}[0],
+						Input:      0,
+						Output:     0,
+						CacheRead:  &[]float64{0}[0],
 						CacheWrite: &[]float64{0}[0],
 					},
 					Limit: Limit{
@@ -12335,9 +12335,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.2,
-						Output: 1.5,
-						CacheRead: &[]float64{0.02}[0],
+						Input:      0.2,
+						Output:     1.5,
+						CacheRead:  &[]float64{0.02}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -12352,9 +12352,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.6,
-						Output: 2.2,
-						CacheRead: nil,
+						Input:      0.6,
+						Output:     2.2,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -12369,9 +12369,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.2,
-						Output: 1.1,
-						CacheRead: nil,
+						Input:      0.2,
+						Output:     1.1,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -12386,9 +12386,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -12403,9 +12403,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.6,
-						Output: 1.8,
-						CacheRead: nil,
+						Input:      0.6,
+						Output:     1.8,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -12420,9 +12420,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.6,
-						Output: 2.2,
-						CacheRead: &[]float64{0.11}[0],
+						Input:      0.6,
+						Output:     2.2,
+						CacheRead:  &[]float64{0.11}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -12434,7 +12434,7 @@ func GetModelsData() map[string]ProviderInfo {
 		},
 		"perplexity": {
 			ID:   "perplexity",
-			Env:  []string{"PERPLEXITY_API_KEY" },
+			Env:  []string{"PERPLEXITY_API_KEY"},
 			NPM:  "@perplexity-ai/perplexity_ai",
 			Name: "Perplexity",
 			Models: map[string]ModelInfo{
@@ -12445,9 +12445,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1,
-						Output: 1,
-						CacheRead: nil,
+						Input:      1,
+						Output:     1,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -12462,9 +12462,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  3,
-						Output: 15,
-						CacheRead: nil,
+						Input:      3,
+						Output:     15,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -12479,9 +12479,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1,
-						Output: 5,
-						CacheRead: nil,
+						Input:      1,
+						Output:     5,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -12496,9 +12496,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  2,
-						Output: 8,
-						CacheRead: nil,
+						Input:      2,
+						Output:     8,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -12510,7 +12510,7 @@ func GetModelsData() map[string]ProviderInfo {
 		},
 		"requesty": {
 			ID:   "requesty",
-			Env:  []string{"REQUESTY_API_KEY" },
+			Env:  []string{"REQUESTY_API_KEY"},
 			NPM:  "@ai-sdk/openai-compatible",
 			Name: "Requesty",
 			Models: map[string]ModelInfo{
@@ -12521,9 +12521,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  3,
-						Output: 15,
-						CacheRead: &[]float64{0.3}[0],
+						Input:      3,
+						Output:     15,
+						CacheRead:  &[]float64{0.3}[0],
 						CacheWrite: &[]float64{3.75}[0],
 					},
 					Limit: Limit{
@@ -12538,9 +12538,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  3,
-						Output: 15,
-						CacheRead: &[]float64{0.3}[0],
+						Input:      3,
+						Output:     15,
+						CacheRead:  &[]float64{0.3}[0],
 						CacheWrite: &[]float64{3.75}[0],
 					},
 					Limit: Limit{
@@ -12555,9 +12555,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  15,
-						Output: 75,
-						CacheRead: &[]float64{1.5}[0],
+						Input:      15,
+						Output:     75,
+						CacheRead:  &[]float64{1.5}[0],
 						CacheWrite: &[]float64{18.75}[0],
 					},
 					Limit: Limit{
@@ -12572,9 +12572,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  15,
-						Output: 75,
-						CacheRead: &[]float64{1.5}[0],
+						Input:      15,
+						Output:     75,
+						CacheRead:  &[]float64{1.5}[0],
 						CacheWrite: &[]float64{18.75}[0],
 					},
 					Limit: Limit{
@@ -12589,9 +12589,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.3,
-						Output: 2.5,
-						CacheRead: &[]float64{0.075}[0],
+						Input:      0.3,
+						Output:     2.5,
+						CacheRead:  &[]float64{0.075}[0],
 						CacheWrite: &[]float64{0.55}[0],
 					},
 					Limit: Limit{
@@ -12606,9 +12606,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1.25,
-						Output: 10,
-						CacheRead: &[]float64{0.31}[0],
+						Input:      1.25,
+						Output:     10,
+						CacheRead:  &[]float64{0.31}[0],
 						CacheWrite: &[]float64{2.375}[0],
 					},
 					Limit: Limit{
@@ -12623,9 +12623,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  2,
-						Output: 8,
-						CacheRead: &[]float64{0.5}[0],
+						Input:      2,
+						Output:     8,
+						CacheRead:  &[]float64{0.5}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -12640,9 +12640,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.4,
-						Output: 1.6,
-						CacheRead: &[]float64{0.1}[0],
+						Input:      0.4,
+						Output:     1.6,
+						CacheRead:  &[]float64{0.1}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -12657,9 +12657,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.15,
-						Output: 0.6,
-						CacheRead: &[]float64{0.08}[0],
+						Input:      0.15,
+						Output:     0.6,
+						CacheRead:  &[]float64{0.08}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -12674,9 +12674,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: false,
 					Cost: Cost{
-						Input:  1.25,
-						Output: 10,
-						CacheRead: &[]float64{0.13}[0],
+						Input:      1.25,
+						Output:     10,
+						CacheRead:  &[]float64{0.13}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -12691,9 +12691,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: false,
 					Cost: Cost{
-						Input:  0.25,
-						Output: 2,
-						CacheRead: &[]float64{0.03}[0],
+						Input:      0.25,
+						Output:     2,
+						CacheRead:  &[]float64{0.03}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -12708,9 +12708,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: false,
 					Cost: Cost{
-						Input:  0.05,
-						Output: 0.4,
-						CacheRead: &[]float64{0.01}[0],
+						Input:      0.05,
+						Output:     0.4,
+						CacheRead:  &[]float64{0.01}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -12725,9 +12725,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1.1,
-						Output: 4.4,
-						CacheRead: &[]float64{0.28}[0],
+						Input:      1.1,
+						Output:     4.4,
+						CacheRead:  &[]float64{0.28}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -12739,7 +12739,7 @@ func GetModelsData() map[string]ProviderInfo {
 		},
 		"submodel": {
 			ID:   "submodel",
-			Env:  []string{"SUBMODEL_INSTAGEN_ACCESS_KEY" },
+			Env:  []string{"SUBMODEL_INSTAGEN_ACCESS_KEY"},
 			NPM:  "@ai-sdk/openai-compatible",
 			Name: "submodel",
 			Models: map[string]ModelInfo{
@@ -12750,9 +12750,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.2,
-						Output: 0.3,
-						CacheRead: nil,
+						Input:      0.2,
+						Output:     0.3,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -12767,9 +12767,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.2,
-						Output: 0.6,
-						CacheRead: nil,
+						Input:      0.2,
+						Output:     0.6,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -12784,9 +12784,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.2,
-						Output: 0.8,
-						CacheRead: nil,
+						Input:      0.2,
+						Output:     0.8,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -12801,9 +12801,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.5,
-						Output: 2.15,
-						CacheRead: nil,
+						Input:      0.5,
+						Output:     2.15,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -12818,9 +12818,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.2,
-						Output: 0.8,
-						CacheRead: nil,
+						Input:      0.2,
+						Output:     0.8,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -12835,9 +12835,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.2,
-						Output: 0.8,
-						CacheRead: nil,
+						Input:      0.2,
+						Output:     0.8,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -12852,9 +12852,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.1,
-						Output: 0.5,
-						CacheRead: nil,
+						Input:      0.1,
+						Output:     0.5,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -12869,9 +12869,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.1,
-						Output: 0.5,
-						CacheRead: nil,
+						Input:      0.1,
+						Output:     0.5,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -12886,9 +12886,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.2,
-						Output: 0.8,
-						CacheRead: nil,
+						Input:      0.2,
+						Output:     0.8,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -12900,7 +12900,7 @@ func GetModelsData() map[string]ProviderInfo {
 		},
 		"synthetic": {
 			ID:   "synthetic",
-			Env:  []string{"SYNTHETIC_API_KEY" },
+			Env:  []string{"SYNTHETIC_API_KEY"},
 			NPM:  "@ai-sdk/openai-compatible",
 			Name: "Synthetic",
 			Models: map[string]ModelInfo{
@@ -12911,9 +12911,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.8,
-						Output: 0.8,
-						CacheRead: nil,
+						Input:      0.8,
+						Output:     0.8,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -12928,9 +12928,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.2,
-						Output: 0.6,
-						CacheRead: nil,
+						Input:      0.2,
+						Output:     0.6,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -12945,9 +12945,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.65,
-						Output: 3,
-						CacheRead: nil,
+						Input:      0.65,
+						Output:     3,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -12962,9 +12962,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  2,
-						Output: 2,
-						CacheRead: nil,
+						Input:      2,
+						Output:     2,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -12979,9 +12979,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.55,
-						Output: 2.19,
-						CacheRead: nil,
+						Input:      0.55,
+						Output:     2.19,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -12996,9 +12996,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  3,
-						Output: 8,
-						CacheRead: nil,
+						Input:      3,
+						Output:     8,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -13013,9 +13013,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1.25,
-						Output: 1.25,
-						CacheRead: nil,
+						Input:      1.25,
+						Output:     1.25,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -13030,9 +13030,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1.2,
-						Output: 1.2,
-						CacheRead: nil,
+						Input:      1.2,
+						Output:     1.2,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -13047,9 +13047,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.56,
-						Output: 1.68,
-						CacheRead: nil,
+						Input:      0.56,
+						Output:     1.68,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -13064,9 +13064,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1.2,
-						Output: 1.2,
-						CacheRead: nil,
+						Input:      1.2,
+						Output:     1.2,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -13081,9 +13081,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  3,
-						Output: 3,
-						CacheRead: nil,
+						Input:      3,
+						Output:     3,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -13098,9 +13098,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.9,
-						Output: 0.9,
-						CacheRead: nil,
+						Input:      0.9,
+						Output:     0.9,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -13115,9 +13115,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.2,
-						Output: 0.2,
-						CacheRead: nil,
+						Input:      0.2,
+						Output:     0.2,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -13132,9 +13132,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.9,
-						Output: 0.9,
-						CacheRead: nil,
+						Input:      0.9,
+						Output:     0.9,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -13149,9 +13149,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.22,
-						Output: 0.88,
-						CacheRead: nil,
+						Input:      0.22,
+						Output:     0.88,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -13166,9 +13166,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.15,
-						Output: 0.6,
-						CacheRead: nil,
+						Input:      0.15,
+						Output:     0.6,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -13183,9 +13183,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.6,
-						Output: 2.5,
-						CacheRead: nil,
+						Input:      0.6,
+						Output:     2.5,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -13200,9 +13200,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1.2,
-						Output: 1.2,
-						CacheRead: nil,
+						Input:      1.2,
+						Output:     1.2,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -13217,9 +13217,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.1,
-						Output: 0.1,
-						CacheRead: nil,
+						Input:      0.1,
+						Output:     0.1,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -13234,9 +13234,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.55,
-						Output: 2.19,
-						CacheRead: nil,
+						Input:      0.55,
+						Output:     2.19,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -13251,9 +13251,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.55,
-						Output: 2.19,
-						CacheRead: nil,
+						Input:      0.55,
+						Output:     2.19,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -13265,7 +13265,7 @@ func GetModelsData() map[string]ProviderInfo {
 		},
 		"togetherai": {
 			ID:   "togetherai",
-			Env:  []string{"TOGETHER_API_KEY" },
+			Env:  []string{"TOGETHER_API_KEY"},
 			NPM:  "@ai-sdk/togetherai",
 			Name: "Together AI",
 			Models: map[string]ModelInfo{
@@ -13276,9 +13276,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  2,
-						Output: 2,
-						CacheRead: nil,
+						Input:      2,
+						Output:     2,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -13293,9 +13293,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  3,
-						Output: 7,
-						CacheRead: nil,
+						Input:      3,
+						Output:     7,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -13310,9 +13310,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1.25,
-						Output: 1.25,
-						CacheRead: nil,
+						Input:      1.25,
+						Output:     1.25,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -13327,9 +13327,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.88,
-						Output: 0.88,
-						CacheRead: nil,
+						Input:      0.88,
+						Output:     0.88,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -13344,9 +13344,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1,
-						Output: 3,
-						CacheRead: nil,
+						Input:      1,
+						Output:     3,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -13361,9 +13361,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.15,
-						Output: 0.6,
-						CacheRead: nil,
+						Input:      0.15,
+						Output:     0.6,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -13375,7 +13375,7 @@ func GetModelsData() map[string]ProviderInfo {
 		},
 		"upstage": {
 			ID:   "upstage",
-			Env:  []string{"UPSTAGE_API_KEY" },
+			Env:  []string{"UPSTAGE_API_KEY"},
 			NPM:  "@ai-sdk/openai-compatible",
 			Name: "Upstage",
 			Models: map[string]ModelInfo{
@@ -13386,9 +13386,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.15,
-						Output: 0.15,
-						CacheRead: nil,
+						Input:      0.15,
+						Output:     0.15,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -13403,9 +13403,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.25,
-						Output: 0.25,
-						CacheRead: nil,
+						Input:      0.25,
+						Output:     0.25,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -13417,7 +13417,7 @@ func GetModelsData() map[string]ProviderInfo {
 		},
 		"v0": {
 			ID:   "v0",
-			Env:  []string{"V0_API_KEY" },
+			Env:  []string{"V0_API_KEY"},
 			NPM:  "@ai-sdk/vercel",
 			Name: "v0",
 			Models: map[string]ModelInfo{
@@ -13428,9 +13428,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  3,
-						Output: 15,
-						CacheRead: nil,
+						Input:      3,
+						Output:     15,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -13445,9 +13445,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  15,
-						Output: 75,
-						CacheRead: nil,
+						Input:      15,
+						Output:     75,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -13462,9 +13462,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  3,
-						Output: 15,
-						CacheRead: nil,
+						Input:      3,
+						Output:     15,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -13476,7 +13476,7 @@ func GetModelsData() map[string]ProviderInfo {
 		},
 		"venice": {
 			ID:   "venice",
-			Env:  []string{"VENICE_API_KEY" },
+			Env:  []string{"VENICE_API_KEY"},
 			NPM:  "@ai-sdk/openai-compatible",
 			Name: "Venice AI",
 			Models: map[string]ModelInfo{
@@ -13487,9 +13487,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.5,
-						Output: 2,
-						CacheRead: nil,
+						Input:      0.5,
+						Output:     2,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -13504,9 +13504,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  3.5,
-						Output: 14,
-						CacheRead: nil,
+						Input:      3.5,
+						Output:     14,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -13521,9 +13521,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.7,
-						Output: 2.8,
-						CacheRead: nil,
+						Input:      0.7,
+						Output:     2.8,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -13538,9 +13538,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1.5,
-						Output: 6,
-						CacheRead: nil,
+						Input:      1.5,
+						Output:     6,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -13555,9 +13555,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.15,
-						Output: 0.6,
-						CacheRead: nil,
+						Input:      0.15,
+						Output:     0.6,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -13572,9 +13572,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.7,
-						Output: 2.8,
-						CacheRead: nil,
+						Input:      0.7,
+						Output:     2.8,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -13589,9 +13589,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.5,
-						Output: 2,
-						CacheRead: nil,
+						Input:      0.5,
+						Output:     2,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -13606,9 +13606,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.5,
-						Output: 2,
-						CacheRead: nil,
+						Input:      0.5,
+						Output:     2,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -13623,9 +13623,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.5,
-						Output: 2,
-						CacheRead: nil,
+						Input:      0.5,
+						Output:     2,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -13640,9 +13640,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.7,
-						Output: 2.8,
-						CacheRead: nil,
+						Input:      0.7,
+						Output:     2.8,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -13657,9 +13657,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1.5,
-						Output: 6,
-						CacheRead: nil,
+						Input:      1.5,
+						Output:     6,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -13674,9 +13674,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.15,
-						Output: 0.6,
-						CacheRead: nil,
+						Input:      0.15,
+						Output:     0.6,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -13691,9 +13691,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.5,
-						Output: 2,
-						CacheRead: nil,
+						Input:      0.5,
+						Output:     2,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -13705,7 +13705,7 @@ func GetModelsData() map[string]ProviderInfo {
 		},
 		"vercel": {
 			ID:   "vercel",
-			Env:  []string{"AI_GATEWAY_API_KEY" },
+			Env:  []string{"AI_GATEWAY_API_KEY"},
 			NPM:  "@ai-sdk/gateway",
 			Name: "Vercel AI Gateway",
 			Models: map[string]ModelInfo{
@@ -13716,9 +13716,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1,
-						Output: 5,
-						CacheRead: nil,
+						Input:      1,
+						Output:     5,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -13733,9 +13733,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1.2,
-						Output: 6,
-						CacheRead: nil,
+						Input:      1.2,
+						Output:     6,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -13750,9 +13750,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.5,
-						Output: 2,
-						CacheRead: nil,
+						Input:      0.5,
+						Output:     2,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -13767,9 +13767,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.5,
-						Output: 6,
-						CacheRead: nil,
+						Input:      0.5,
+						Output:     6,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -13784,9 +13784,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.7,
-						Output: 2.8,
-						CacheRead: nil,
+						Input:      0.7,
+						Output:     2.8,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -13801,9 +13801,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.7,
-						Output: 8.4,
-						CacheRead: nil,
+						Input:      0.7,
+						Output:     8.4,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -13818,9 +13818,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.06,
-						Output: 0.24,
-						CacheRead: &[]float64{0.015}[0],
+						Input:      0.06,
+						Output:     0.24,
+						CacheRead:  &[]float64{0.015}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -13835,9 +13835,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.035,
-						Output: 0.14,
-						CacheRead: &[]float64{0.00875}[0],
+						Input:      0.035,
+						Output:     0.14,
+						CacheRead:  &[]float64{0.00875}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -13852,9 +13852,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.8,
-						Output: 3.2,
-						CacheRead: &[]float64{0.2}[0],
+						Input:      0.8,
+						Output:     3.2,
+						CacheRead:  &[]float64{0.2}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -13869,9 +13869,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.8,
-						Output: 4,
-						CacheRead: &[]float64{0.08}[0],
+						Input:      0.8,
+						Output:     4,
+						CacheRead:  &[]float64{0.08}[0],
 						CacheWrite: &[]float64{1}[0],
 					},
 					Limit: Limit{
@@ -13886,9 +13886,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.25,
-						Output: 1.25,
-						CacheRead: &[]float64{0.03}[0],
+						Input:      0.25,
+						Output:     1.25,
+						CacheRead:  &[]float64{0.03}[0],
 						CacheWrite: &[]float64{0.3}[0],
 					},
 					Limit: Limit{
@@ -13903,9 +13903,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  15,
-						Output: 75,
-						CacheRead: &[]float64{1.5}[0],
+						Input:      15,
+						Output:     75,
+						CacheRead:  &[]float64{1.5}[0],
 						CacheWrite: &[]float64{18.75}[0],
 					},
 					Limit: Limit{
@@ -13920,9 +13920,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  3,
-						Output: 15,
-						CacheRead: &[]float64{0.3}[0],
+						Input:      3,
+						Output:     15,
+						CacheRead:  &[]float64{0.3}[0],
 						CacheWrite: &[]float64{3.75}[0],
 					},
 					Limit: Limit{
@@ -13937,9 +13937,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  3,
-						Output: 15,
-						CacheRead: &[]float64{0.3}[0],
+						Input:      3,
+						Output:     15,
+						CacheRead:  &[]float64{0.3}[0],
 						CacheWrite: &[]float64{3.75}[0],
 					},
 					Limit: Limit{
@@ -13954,9 +13954,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  15,
-						Output: 75,
-						CacheRead: &[]float64{1.5}[0],
+						Input:      15,
+						Output:     75,
+						CacheRead:  &[]float64{1.5}[0],
 						CacheWrite: &[]float64{18.75}[0],
 					},
 					Limit: Limit{
@@ -13971,9 +13971,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  15,
-						Output: 75,
-						CacheRead: &[]float64{1.5}[0],
+						Input:      15,
+						Output:     75,
+						CacheRead:  &[]float64{1.5}[0],
 						CacheWrite: &[]float64{18.75}[0],
 					},
 					Limit: Limit{
@@ -13988,9 +13988,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  3,
-						Output: 15,
-						CacheRead: &[]float64{0.3}[0],
+						Input:      3,
+						Output:     15,
+						CacheRead:  &[]float64{0.3}[0],
 						CacheWrite: &[]float64{3.75}[0],
 					},
 					Limit: Limit{
@@ -14005,9 +14005,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  3,
-						Output: 15,
-						CacheRead: &[]float64{0.3}[0],
+						Input:      3,
+						Output:     15,
+						CacheRead:  &[]float64{0.3}[0],
 						CacheWrite: &[]float64{3.75}[0],
 					},
 					Limit: Limit{
@@ -14022,9 +14022,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1,
-						Output: 1.25,
-						CacheRead: &[]float64{0.1}[0],
+						Input:      1,
+						Output:     1.25,
+						CacheRead:  &[]float64{0.1}[0],
 						CacheWrite: &[]float64{1.25}[0],
 					},
 					Limit: Limit{
@@ -14039,9 +14039,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  2,
-						Output: 2,
-						CacheRead: nil,
+						Input:      2,
+						Output:     2,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -14056,9 +14056,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1.35,
-						Output: 5.4,
-						CacheRead: nil,
+						Input:      1.35,
+						Output:     5.4,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -14073,9 +14073,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.75,
-						Output: 0.99,
-						CacheRead: nil,
+						Input:      0.75,
+						Output:     0.99,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -14090,9 +14090,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.27,
-						Output: 1,
-						CacheRead: nil,
+						Input:      0.27,
+						Output:     1,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -14107,9 +14107,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.28,
-						Output: 0.42,
-						CacheRead: nil,
+						Input:      0.28,
+						Output:     0.42,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -14124,9 +14124,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.28,
-						Output: 0.42,
-						CacheRead: nil,
+						Input:      0.28,
+						Output:     0.42,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -14141,9 +14141,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.1,
-						Output: 0.4,
-						CacheRead: &[]float64{0.025}[0],
+						Input:      0.1,
+						Output:     0.4,
+						CacheRead:  &[]float64{0.025}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -14158,9 +14158,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.075,
-						Output: 0.3,
-						CacheRead: nil,
+						Input:      0.075,
+						Output:     0.3,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -14175,9 +14175,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.3,
-						Output: 2.5,
-						CacheRead: &[]float64{0.075}[0],
+						Input:      0.3,
+						Output:     2.5,
+						CacheRead:  &[]float64{0.075}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -14192,9 +14192,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.1,
-						Output: 0.4,
-						CacheRead: &[]float64{0.025}[0],
+						Input:      0.1,
+						Output:     0.4,
+						CacheRead:  &[]float64{0.025}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -14209,9 +14209,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.1,
-						Output: 0.4,
-						CacheRead: &[]float64{0.025}[0],
+						Input:      0.1,
+						Output:     0.4,
+						CacheRead:  &[]float64{0.025}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -14226,9 +14226,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.3,
-						Output: 2.5,
-						CacheRead: &[]float64{0.075}[0],
+						Input:      0.3,
+						Output:     2.5,
+						CacheRead:  &[]float64{0.075}[0],
 						CacheWrite: &[]float64{0.383}[0],
 					},
 					Limit: Limit{
@@ -14243,9 +14243,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1.25,
-						Output: 10,
-						CacheRead: &[]float64{0.31}[0],
+						Input:      1.25,
+						Output:     10,
+						CacheRead:  &[]float64{0.31}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -14260,9 +14260,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -14277,9 +14277,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -14294,9 +14294,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -14311,9 +14311,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.3,
-						Output: 0.9,
-						CacheRead: nil,
+						Input:      0.3,
+						Output:     0.9,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -14328,9 +14328,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  2,
-						Output: 5,
-						CacheRead: nil,
+						Input:      2,
+						Output:     5,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -14345,9 +14345,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.5,
-						Output: 1.5,
-						CacheRead: nil,
+						Input:      0.5,
+						Output:     1.5,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -14362,9 +14362,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.04,
-						Output: 0.04,
-						CacheRead: nil,
+						Input:      0.04,
+						Output:     0.04,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -14379,9 +14379,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.1,
-						Output: 0.1,
-						CacheRead: nil,
+						Input:      0.1,
+						Output:     0.1,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -14396,9 +14396,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  2,
-						Output: 6,
-						CacheRead: nil,
+						Input:      2,
+						Output:     6,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -14413,9 +14413,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.1,
-						Output: 0.3,
-						CacheRead: nil,
+						Input:      0.1,
+						Output:     0.3,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -14430,9 +14430,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  2,
-						Output: 6,
-						CacheRead: nil,
+						Input:      2,
+						Output:     6,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -14447,9 +14447,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.15,
-						Output: 0.15,
-						CacheRead: nil,
+						Input:      0.15,
+						Output:     0.15,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -14464,9 +14464,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  2,
-						Output: 6,
-						CacheRead: nil,
+						Input:      2,
+						Output:     6,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -14481,9 +14481,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1,
-						Output: 3,
-						CacheRead: nil,
+						Input:      1,
+						Output:     3,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -14498,9 +14498,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: false,
 					Cost: Cost{
-						Input:  0.8,
-						Output: 1.2,
-						CacheRead: nil,
+						Input:      0.8,
+						Output:     1.2,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -14515,9 +14515,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: false,
 					Cost: Cost{
-						Input:  0.9,
-						Output: 1.9,
-						CacheRead: nil,
+						Input:      0.9,
+						Output:     1.9,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -14532,9 +14532,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  10,
-						Output: 30,
-						CacheRead: nil,
+						Input:      10,
+						Output:     30,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -14549,9 +14549,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  2,
-						Output: 8,
-						CacheRead: &[]float64{0.5}[0],
+						Input:      2,
+						Output:     8,
+						CacheRead:  &[]float64{0.5}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -14566,9 +14566,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.4,
-						Output: 1.6,
-						CacheRead: &[]float64{0.1}[0],
+						Input:      0.4,
+						Output:     1.6,
+						CacheRead:  &[]float64{0.1}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -14583,9 +14583,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.1,
-						Output: 0.4,
-						CacheRead: &[]float64{0.03}[0],
+						Input:      0.1,
+						Output:     0.4,
+						CacheRead:  &[]float64{0.03}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -14600,9 +14600,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  2.5,
-						Output: 10,
-						CacheRead: &[]float64{1.25}[0],
+						Input:      2.5,
+						Output:     10,
+						CacheRead:  &[]float64{1.25}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -14617,9 +14617,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.15,
-						Output: 0.6,
-						CacheRead: &[]float64{0.08}[0],
+						Input:      0.15,
+						Output:     0.6,
+						CacheRead:  &[]float64{0.08}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -14634,9 +14634,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: false,
 					Cost: Cost{
-						Input:  1.25,
-						Output: 10,
-						CacheRead: &[]float64{0.13}[0],
+						Input:      1.25,
+						Output:     10,
+						CacheRead:  &[]float64{0.13}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -14651,9 +14651,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: false,
 					Cost: Cost{
-						Input:  1.25,
-						Output: 10,
-						CacheRead: &[]float64{0.125}[0],
+						Input:      1.25,
+						Output:     10,
+						CacheRead:  &[]float64{0.125}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -14668,9 +14668,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: false,
 					Cost: Cost{
-						Input:  0.25,
-						Output: 2,
-						CacheRead: &[]float64{0.03}[0],
+						Input:      0.25,
+						Output:     2,
+						CacheRead:  &[]float64{0.03}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -14685,9 +14685,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: false,
 					Cost: Cost{
-						Input:  0.05,
-						Output: 0.4,
-						CacheRead: &[]float64{0.01}[0],
+						Input:      0.05,
+						Output:     0.4,
+						CacheRead:  &[]float64{0.01}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -14702,9 +14702,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.1,
-						Output: 0.5,
-						CacheRead: nil,
+						Input:      0.1,
+						Output:     0.5,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -14719,9 +14719,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.07,
-						Output: 0.3,
-						CacheRead: nil,
+						Input:      0.07,
+						Output:     0.3,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -14736,9 +14736,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: false,
 					Cost: Cost{
-						Input:  15,
-						Output: 60,
-						CacheRead: &[]float64{7.5}[0],
+						Input:      15,
+						Output:     60,
+						CacheRead:  &[]float64{7.5}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -14753,9 +14753,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: false,
 					Cost: Cost{
-						Input:  2,
-						Output: 8,
-						CacheRead: &[]float64{0.5}[0],
+						Input:      2,
+						Output:     8,
+						CacheRead:  &[]float64{0.5}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -14770,9 +14770,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: false,
 					Cost: Cost{
-						Input:  1.1,
-						Output: 4.4,
-						CacheRead: &[]float64{0.55}[0],
+						Input:      1.1,
+						Output:     4.4,
+						CacheRead:  &[]float64{0.55}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -14787,9 +14787,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: false,
 					Cost: Cost{
-						Input:  1.1,
-						Output: 4.4,
-						CacheRead: &[]float64{0.28}[0],
+						Input:      1.1,
+						Output:     4.4,
+						CacheRead:  &[]float64{0.28}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -14804,9 +14804,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1,
-						Output: 1,
-						CacheRead: nil,
+						Input:      1,
+						Output:     1,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -14821,9 +14821,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  3,
-						Output: 15,
-						CacheRead: nil,
+						Input:      3,
+						Output:     15,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -14838,9 +14838,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1,
-						Output: 5,
-						CacheRead: nil,
+						Input:      1,
+						Output:     5,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -14855,9 +14855,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  2,
-						Output: 8,
-						CacheRead: nil,
+						Input:      2,
+						Output:     8,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -14872,9 +14872,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  3,
-						Output: 15,
-						CacheRead: nil,
+						Input:      3,
+						Output:     15,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -14889,9 +14889,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  3,
-						Output: 15,
-						CacheRead: nil,
+						Input:      3,
+						Output:     15,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -14906,9 +14906,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  2,
-						Output: 10,
-						CacheRead: &[]float64{2}[0],
+						Input:      2,
+						Output:     10,
+						CacheRead:  &[]float64{2}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -14923,9 +14923,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  2,
-						Output: 10,
-						CacheRead: &[]float64{2}[0],
+						Input:      2,
+						Output:     10,
+						CacheRead:  &[]float64{2}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -14940,9 +14940,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  3,
-						Output: 15,
-						CacheRead: &[]float64{0.75}[0],
+						Input:      3,
+						Output:     15,
+						CacheRead:  &[]float64{0.75}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -14957,9 +14957,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  5,
-						Output: 25,
-						CacheRead: &[]float64{1.25}[0],
+						Input:      5,
+						Output:     25,
+						CacheRead:  &[]float64{1.25}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -14974,9 +14974,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.3,
-						Output: 0.5,
-						CacheRead: &[]float64{0.075}[0],
+						Input:      0.3,
+						Output:     0.5,
+						CacheRead:  &[]float64{0.075}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -14991,9 +14991,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.6,
-						Output: 4,
-						CacheRead: &[]float64{0.15}[0],
+						Input:      0.6,
+						Output:     4,
+						CacheRead:  &[]float64{0.15}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -15008,9 +15008,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  3,
-						Output: 15,
-						CacheRead: &[]float64{0.75}[0],
+						Input:      3,
+						Output:     15,
+						CacheRead:  &[]float64{0.75}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -15025,9 +15025,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.2,
-						Output: 0.5,
-						CacheRead: &[]float64{0.05}[0],
+						Input:      0.2,
+						Output:     0.5,
+						CacheRead:  &[]float64{0.05}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -15042,9 +15042,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.2,
-						Output: 0.5,
-						CacheRead: &[]float64{0.05}[0],
+						Input:      0.2,
+						Output:     0.5,
+						CacheRead:  &[]float64{0.05}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -15059,9 +15059,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.2,
-						Output: 1.5,
-						CacheRead: &[]float64{0.02}[0],
+						Input:      0.2,
+						Output:     1.5,
+						CacheRead:  &[]float64{0.02}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -15076,9 +15076,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.6,
-						Output: 2.2,
-						CacheRead: nil,
+						Input:      0.6,
+						Output:     2.2,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -15093,9 +15093,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.2,
-						Output: 1.1,
-						CacheRead: nil,
+						Input:      0.2,
+						Output:     1.1,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -15110,9 +15110,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.6,
-						Output: 1.8,
-						CacheRead: nil,
+						Input:      0.6,
+						Output:     1.8,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -15127,9 +15127,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.6,
-						Output: 2.2,
-						CacheRead: nil,
+						Input:      0.6,
+						Output:     2.2,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -15141,7 +15141,7 @@ func GetModelsData() map[string]ProviderInfo {
 		},
 		"wandb": {
 			ID:   "wandb",
-			Env:  []string{"WANDB_API_KEY" },
+			Env:  []string{"WANDB_API_KEY"},
 			NPM:  "@ai-sdk/openai-compatible",
 			Name: "Weights & Biases",
 			Models: map[string]ModelInfo{
@@ -15152,9 +15152,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.1,
-						Output: 0.1,
-						CacheRead: nil,
+						Input:      0.1,
+						Output:     0.1,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -15169,9 +15169,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.1,
-						Output: 0.1,
-						CacheRead: nil,
+						Input:      0.1,
+						Output:     0.1,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -15186,9 +15186,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1,
-						Output: 1.5,
-						CacheRead: nil,
+						Input:      1,
+						Output:     1.5,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -15203,9 +15203,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1.35,
-						Output: 5.4,
-						CacheRead: nil,
+						Input:      1.35,
+						Output:     5.4,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -15220,9 +15220,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1.14,
-						Output: 2.75,
-						CacheRead: nil,
+						Input:      1.14,
+						Output:     2.75,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -15237,9 +15237,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.22,
-						Output: 0.22,
-						CacheRead: nil,
+						Input:      0.22,
+						Output:     0.22,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -15254,9 +15254,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.71,
-						Output: 0.71,
-						CacheRead: nil,
+						Input:      0.71,
+						Output:     0.71,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -15271,9 +15271,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.17,
-						Output: 0.66,
-						CacheRead: nil,
+						Input:      0.17,
+						Output:     0.66,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -15288,9 +15288,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.08,
-						Output: 0.35,
-						CacheRead: nil,
+						Input:      0.08,
+						Output:     0.35,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -15305,9 +15305,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  1.35,
-						Output: 4,
-						CacheRead: nil,
+						Input:      1.35,
+						Output:     4,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -15319,7 +15319,7 @@ func GetModelsData() map[string]ProviderInfo {
 		},
 		"xai": {
 			ID:   "xai",
-			Env:  []string{"XAI_API_KEY" },
+			Env:  []string{"XAI_API_KEY"},
 			NPM:  "@ai-sdk/xai",
 			Name: "xAI",
 			Models: map[string]ModelInfo{
@@ -15330,9 +15330,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  2,
-						Output: 10,
-						CacheRead: &[]float64{2}[0],
+						Input:      2,
+						Output:     10,
+						CacheRead:  &[]float64{2}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -15347,9 +15347,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  2,
-						Output: 10,
-						CacheRead: &[]float64{2}[0],
+						Input:      2,
+						Output:     10,
+						CacheRead:  &[]float64{2}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -15364,9 +15364,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  2,
-						Output: 10,
-						CacheRead: &[]float64{2}[0],
+						Input:      2,
+						Output:     10,
+						CacheRead:  &[]float64{2}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -15381,9 +15381,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  2,
-						Output: 10,
-						CacheRead: &[]float64{2}[0],
+						Input:      2,
+						Output:     10,
+						CacheRead:  &[]float64{2}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -15398,9 +15398,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  2,
-						Output: 10,
-						CacheRead: &[]float64{2}[0],
+						Input:      2,
+						Output:     10,
+						CacheRead:  &[]float64{2}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -15415,9 +15415,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  2,
-						Output: 10,
-						CacheRead: &[]float64{2}[0],
+						Input:      2,
+						Output:     10,
+						CacheRead:  &[]float64{2}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -15432,9 +15432,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  3,
-						Output: 15,
-						CacheRead: &[]float64{0.75}[0],
+						Input:      3,
+						Output:     15,
+						CacheRead:  &[]float64{0.75}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -15449,9 +15449,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  5,
-						Output: 25,
-						CacheRead: &[]float64{1.25}[0],
+						Input:      5,
+						Output:     25,
+						CacheRead:  &[]float64{1.25}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -15466,9 +15466,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  5,
-						Output: 25,
-						CacheRead: &[]float64{1.25}[0],
+						Input:      5,
+						Output:     25,
+						CacheRead:  &[]float64{1.25}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -15483,9 +15483,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  3,
-						Output: 15,
-						CacheRead: &[]float64{0.75}[0],
+						Input:      3,
+						Output:     15,
+						CacheRead:  &[]float64{0.75}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -15500,9 +15500,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.3,
-						Output: 0.5,
-						CacheRead: &[]float64{0.075}[0],
+						Input:      0.3,
+						Output:     0.5,
+						CacheRead:  &[]float64{0.075}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -15517,9 +15517,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.6,
-						Output: 4,
-						CacheRead: &[]float64{0.15}[0],
+						Input:      0.6,
+						Output:     4,
+						CacheRead:  &[]float64{0.15}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -15534,9 +15534,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.6,
-						Output: 4,
-						CacheRead: &[]float64{0.15}[0],
+						Input:      0.6,
+						Output:     4,
+						CacheRead:  &[]float64{0.15}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -15551,9 +15551,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.3,
-						Output: 0.5,
-						CacheRead: &[]float64{0.075}[0],
+						Input:      0.3,
+						Output:     0.5,
+						CacheRead:  &[]float64{0.075}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -15568,9 +15568,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  3,
-						Output: 15,
-						CacheRead: &[]float64{0.75}[0],
+						Input:      3,
+						Output:     15,
+						CacheRead:  &[]float64{0.75}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -15585,9 +15585,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.2,
-						Output: 0.5,
-						CacheRead: &[]float64{0.05}[0],
+						Input:      0.2,
+						Output:     0.5,
+						CacheRead:  &[]float64{0.05}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -15602,9 +15602,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.2,
-						Output: 0.5,
-						CacheRead: &[]float64{0.05}[0],
+						Input:      0.2,
+						Output:     0.5,
+						CacheRead:  &[]float64{0.05}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -15619,9 +15619,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  5,
-						Output: 15,
-						CacheRead: &[]float64{5}[0],
+						Input:      5,
+						Output:     15,
+						CacheRead:  &[]float64{5}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -15636,9 +15636,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.2,
-						Output: 1.5,
-						CacheRead: &[]float64{0.02}[0],
+						Input:      0.2,
+						Output:     1.5,
+						CacheRead:  &[]float64{0.02}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -15653,9 +15653,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   false,
 					Temperature: true,
 					Cost: Cost{
-						Input:  5,
-						Output: 15,
-						CacheRead: &[]float64{5}[0],
+						Input:      5,
+						Output:     15,
+						CacheRead:  &[]float64{5}[0],
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -15667,7 +15667,7 @@ func GetModelsData() map[string]ProviderInfo {
 		},
 		"zai": {
 			ID:   "zai",
-			Env:  []string{"ZHIPU_API_KEY" },
+			Env:  []string{"ZHIPU_API_KEY"},
 			NPM:  "@ai-sdk/openai-compatible",
 			Name: "Z.AI",
 			Models: map[string]ModelInfo{
@@ -15678,9 +15678,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.6,
-						Output: 2.2,
-						CacheRead: &[]float64{0.11}[0],
+						Input:      0.6,
+						Output:     2.2,
+						CacheRead:  &[]float64{0.11}[0],
 						CacheWrite: &[]float64{0}[0],
 					},
 					Limit: Limit{
@@ -15695,9 +15695,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.2,
-						Output: 1.1,
-						CacheRead: &[]float64{0.03}[0],
+						Input:      0.2,
+						Output:     1.1,
+						CacheRead:  &[]float64{0.03}[0],
 						CacheWrite: &[]float64{0}[0],
 					},
 					Limit: Limit{
@@ -15712,9 +15712,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: &[]float64{0}[0],
+						Input:      0,
+						Output:     0,
+						CacheRead:  &[]float64{0}[0],
 						CacheWrite: &[]float64{0}[0],
 					},
 					Limit: Limit{
@@ -15729,9 +15729,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.6,
-						Output: 1.8,
-						CacheRead: nil,
+						Input:      0.6,
+						Output:     1.8,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -15746,9 +15746,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.6,
-						Output: 2.2,
-						CacheRead: &[]float64{0.11}[0],
+						Input:      0.6,
+						Output:     2.2,
+						CacheRead:  &[]float64{0.11}[0],
 						CacheWrite: &[]float64{0}[0],
 					},
 					Limit: Limit{
@@ -15760,7 +15760,7 @@ func GetModelsData() map[string]ProviderInfo {
 		},
 		"zai-coding-plan": {
 			ID:   "zai-coding-plan",
-			Env:  []string{"ZHIPU_API_KEY" },
+			Env:  []string{"ZHIPU_API_KEY"},
 			NPM:  "@ai-sdk/openai-compatible",
 			Name: "Z.AI Coding Plan",
 			Models: map[string]ModelInfo{
@@ -15771,9 +15771,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: &[]float64{0}[0],
+						Input:      0,
+						Output:     0,
+						CacheRead:  &[]float64{0}[0],
 						CacheWrite: &[]float64{0}[0],
 					},
 					Limit: Limit{
@@ -15788,9 +15788,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: &[]float64{0}[0],
+						Input:      0,
+						Output:     0,
+						CacheRead:  &[]float64{0}[0],
 						CacheWrite: &[]float64{0}[0],
 					},
 					Limit: Limit{
@@ -15805,9 +15805,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: &[]float64{0}[0],
+						Input:      0,
+						Output:     0,
+						CacheRead:  &[]float64{0}[0],
 						CacheWrite: &[]float64{0}[0],
 					},
 					Limit: Limit{
@@ -15822,9 +15822,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -15839,9 +15839,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: &[]float64{0}[0],
+						Input:      0,
+						Output:     0,
+						CacheRead:  &[]float64{0}[0],
 						CacheWrite: &[]float64{0}[0],
 					},
 					Limit: Limit{
@@ -15853,7 +15853,7 @@ func GetModelsData() map[string]ProviderInfo {
 		},
 		"zhipuai": {
 			ID:   "zhipuai",
-			Env:  []string{"ZHIPU_API_KEY" },
+			Env:  []string{"ZHIPU_API_KEY"},
 			NPM:  "@ai-sdk/openai-compatible",
 			Name: "Zhipu AI",
 			Models: map[string]ModelInfo{
@@ -15864,9 +15864,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.6,
-						Output: 2.2,
-						CacheRead: &[]float64{0.11}[0],
+						Input:      0.6,
+						Output:     2.2,
+						CacheRead:  &[]float64{0.11}[0],
 						CacheWrite: &[]float64{0}[0],
 					},
 					Limit: Limit{
@@ -15881,9 +15881,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.2,
-						Output: 1.1,
-						CacheRead: &[]float64{0.03}[0],
+						Input:      0.2,
+						Output:     1.1,
+						CacheRead:  &[]float64{0.03}[0],
 						CacheWrite: &[]float64{0}[0],
 					},
 					Limit: Limit{
@@ -15898,9 +15898,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: &[]float64{0}[0],
+						Input:      0,
+						Output:     0,
+						CacheRead:  &[]float64{0}[0],
 						CacheWrite: &[]float64{0}[0],
 					},
 					Limit: Limit{
@@ -15915,9 +15915,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.6,
-						Output: 1.8,
-						CacheRead: nil,
+						Input:      0.6,
+						Output:     1.8,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -15932,9 +15932,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0.6,
-						Output: 2.2,
-						CacheRead: &[]float64{0.11}[0],
+						Input:      0.6,
+						Output:     2.2,
+						CacheRead:  &[]float64{0.11}[0],
 						CacheWrite: &[]float64{0}[0],
 					},
 					Limit: Limit{
@@ -15946,7 +15946,7 @@ func GetModelsData() map[string]ProviderInfo {
 		},
 		"zhipuai-coding-plan": {
 			ID:   "zhipuai-coding-plan",
-			Env:  []string{"ZHIPU_API_KEY" },
+			Env:  []string{"ZHIPU_API_KEY"},
 			NPM:  "@ai-sdk/openai-compatible",
 			Name: "Zhipu AI Coding Plan",
 			Models: map[string]ModelInfo{
@@ -15957,9 +15957,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: &[]float64{0}[0],
+						Input:      0,
+						Output:     0,
+						CacheRead:  &[]float64{0}[0],
 						CacheWrite: &[]float64{0}[0],
 					},
 					Limit: Limit{
@@ -15974,9 +15974,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: &[]float64{0}[0],
+						Input:      0,
+						Output:     0,
+						CacheRead:  &[]float64{0}[0],
 						CacheWrite: &[]float64{0}[0],
 					},
 					Limit: Limit{
@@ -15991,9 +15991,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: &[]float64{0}[0],
+						Input:      0,
+						Output:     0,
+						CacheRead:  &[]float64{0}[0],
 						CacheWrite: &[]float64{0}[0],
 					},
 					Limit: Limit{
@@ -16008,9 +16008,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: nil,
+						Input:      0,
+						Output:     0,
+						CacheRead:  nil,
 						CacheWrite: nil,
 					},
 					Limit: Limit{
@@ -16025,9 +16025,9 @@ func GetModelsData() map[string]ProviderInfo {
 					Reasoning:   true,
 					Temperature: true,
 					Cost: Cost{
-						Input:  0,
-						Output: 0,
-						CacheRead: &[]float64{0}[0],
+						Input:      0,
+						Output:     0,
+						CacheRead:  &[]float64{0}[0],
 						CacheWrite: &[]float64{0}[0],
 					},
 					Limit: Limit{
