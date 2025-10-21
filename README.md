@@ -88,8 +88,6 @@ nano deploy.sh  # Change MODEL="openrouter:your_preferred_model"
 - `meta-llama/llama-3.1-8b-instruct:free` - Versatile general purpose
 - `qwen/qwen2.5-coder-32b-instruct` - Specialized for code
 
-**⚠️ Security Note**: Your `.env` file is already gitignored to prevent accidentally committing API keys.
-
 ## Overview 🌟
 
 MCPHost acts as a host in the MCP client-server architecture, where:
