@@ -17,6 +17,8 @@ import (
 	einoopenai "github.com/cloudwego/eino-ext/components/model/openai"
 	"github.com/cloudwego/eino/components/model"
 	"github.com/mark3labs/mcphost/internal/models/anthropic"
+	"github.com/mark3labs/mcphost/internal/models/huggingface"
+	"github.com/mark3labs/mcphost/internal/models/openrouter"
 	"github.com/mark3labs/mcphost/internal/models/openai"
 	"github.com/mark3labs/mcphost/internal/ui/progress"
 	"github.com/ollama/ollama/api"
@@ -108,8 +110,8 @@ func CreateProvider(ctx context.Context, config *ProviderConfig) (*ProviderResul
 	// Get the global registry for validation
 	registry := GetGlobalRegistry()
 
-	// Validate the model exists (skip for ollama as it's not in models.dev, and skip when using custom provider URL)
-	if provider != "ollama" && config.ProviderURL == "" {
+	// Validate the model exists (skip for ollama, huggingface, openrouter as they are not in models.dev, and skip when using custom provider URL)
+	if provider != "ollama" && provider != "huggingface" && provider != "openrouter" && config.ProviderURL == "" {
 		modelInfo, err := registry.ValidateModel(provider, modelName)
 		if err != nil {
 			// Provide helpful suggestions
@@ -158,9 +160,107 @@ func CreateProvider(ctx context.Context, config *ProviderConfig) (*ProviderResul
 			return nil, err
 		}
 		return &ProviderResult{Model: model, Message: ""}, nil
+	case "huggingface":
+		model, err := createHuggingFaceProvider(ctx, config, modelName)
+		if err != nil {
+			return nil, err
+		}
+		return &ProviderResult{Model: model, Message: ""}, nil
+	case "openrouter":
+		model, err := createOpenRouterProvider(ctx, config, modelName)
+		if err != nil {
+			return nil, err
+		}
+		return &ProviderResult{Model: model, Message: ""}, nil
 	default:
 		return nil, fmt.Errorf("unsupported provider: %s", provider)
 	}
+}
+
+func createHuggingFaceProvider(ctx context.Context, config *ProviderConfig, modelName string) (model.ToolCallingChatModel, error) {
+	apiKey := config.ProviderAPIKey
+	if apiKey == "" {
+		apiKey = os.Getenv("HUGGINGFACE_API_KEY")
+	}
+	if apiKey == "" {
+		return nil, fmt.Errorf("Hugging Face API key not provided. Use --provider-api-key flag or HUGGINGFACE_API_KEY environment variable")
+	}
+
+	openaiConfig := &einoopenai.ChatModelConfig{
+		APIKey: apiKey,
+		Model:  modelName,
+	}
+
+	if config.ProviderURL != "" {
+		openaiConfig.BaseURL = config.ProviderURL
+	} else {
+		openaiConfig.BaseURL = "https://api-inference.huggingface.co/v1"
+	}
+
+	if config.TLSSkipVerify {
+		openaiConfig.HTTPClient = createHTTPClientWithTLSConfig(true)
+	}
+
+	if config.MaxTokens > 0 {
+		openaiConfig.MaxTokens = &config.MaxTokens
+	}
+
+	if config.Temperature != nil {
+		openaiConfig.Temperature = config.Temperature
+	}
+
+	if config.TopP != nil {
+		openaiConfig.TopP = config.TopP
+	}
+
+	if len(config.StopSequences) > 0 {
+		openaiConfig.Stop = config.StopSequences
+	}
+
+	return huggingface.NewChatModel(ctx, openaiConfig)
+}
+
+func createOpenRouterProvider(ctx context.Context, config *ProviderConfig, modelName string) (model.ToolCallingChatModel, error) {
+	apiKey := config.ProviderAPIKey
+	if apiKey == "" {
+		apiKey = os.Getenv("OPENROUTER_API_KEY")
+	}
+	if apiKey == "" {
+		return nil, fmt.Errorf("Open Router API key not provided. Use --provider-api-key flag or OPENROUTER_API_KEY environment variable")
+	}
+
+	openaiConfig := &einoopenai.ChatModelConfig{
+		APIKey: apiKey,
+		Model:  modelName,
+	}
+
+	if config.ProviderURL != "" {
+		openaiConfig.BaseURL = config.ProviderURL
+	} else {
+		openaiConfig.BaseURL = "https://openrouter.ai/api/v1"
+	}
+
+	if config.TLSSkipVerify {
+		openaiConfig.HTTPClient = createHTTPClientWithTLSConfig(true)
+	}
+
+	if config.MaxTokens > 0 {
+		openaiConfig.MaxTokens = &config.MaxTokens
+	}
+
+	if config.Temperature != nil {
+		openaiConfig.Temperature = config.Temperature
+	}
+
+	if config.TopP != nil {
+		openaiConfig.TopP = config.TopP
+	}
+
+	if len(config.StopSequences) > 0 {
+		openaiConfig.Stop = config.StopSequences
+	}
+
+	return openrouter.NewChatModel(ctx, openaiConfig)
 }
 
 // validateModelConfig validates configuration parameters against model capabilities

@@ -107,6 +107,35 @@ func (c *CLI) GetPrompt() (string, error) {
 	return "", fmt.Errorf("unexpected model type")
 }
 
+// GetModelName gets the model name from the user
+func (c *CLI) GetModelName(provider string) (string, error) {
+	c.messageContainer.messages = nil // clear previous messages
+	c.lastStreamHeight = 0            // Reset last stream height
+
+	input := NewSlashCommandInput(c.width, fmt.Sprintf("Enter the model name for %s:", provider))
+
+	p := tea.NewProgram(input)
+	finalModel, err := p.Run()
+	if err != nil {
+		return "", err
+	}
+
+	if finalInput, ok := finalModel.(*SlashCommandInput); ok {
+		linesToClear := finalInput.RenderedLines()
+		for i := 0; i < linesToClear-1; i++ {
+			fmt.Print("\033[1A\033[2K") // Move up one line and clear it
+		}
+
+		if finalInput.Cancelled() {
+			return "", io.EOF
+		}
+		value := strings.TrimSpace(finalInput.Value())
+		return value, nil
+	}
+
+	return "", fmt.Errorf("unexpected model type")
+}
+
 // ShowSpinner displays a spinner with the given message and executes the action
 func (c *CLI) ShowSpinner(message string, action func() error) error {
 	spinner := NewSpinner(message)

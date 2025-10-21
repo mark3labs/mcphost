@@ -390,8 +390,29 @@ func runNormalMode(ctx context.Context) error {
 	numGPU := int32(viper.GetInt("num-gpu-layers"))
 	mainGPU := int32(viper.GetInt("main-gpu"))
 
+	modelString := viper.GetString("model")
+	parts := strings.SplitN(modelString, ":", 2)
+	provider := parts[0]
+	modelName := ""
+	if len(parts) > 1 {
+		modelName = parts[1]
+	}
+
+	if (provider == "huggingface" || provider == "openrouter") && modelName == "" {
+		// Create a new CLI to get the model name
+		tempCli, err := ui.NewCLI(viper.GetBool("debug"), viper.GetBool("compact"))
+		if err != nil {
+			return fmt.Errorf("failed to create temporary CLI: %v", err)
+		}
+		modelName, err = tempCli.GetModelName(provider)
+		if err != nil {
+			return fmt.Errorf("failed to get model name: %v", err)
+		}
+		modelString = fmt.Sprintf("%s:%s", provider, modelName)
+	}
+
 	modelConfig := &models.ProviderConfig{
-		ModelString:    viper.GetString("model"),
+		ModelString:    modelString,
 		SystemPrompt:   systemPrompt,
 		ProviderAPIKey: viper.GetString("provider-api-key"),
 		ProviderURL:    viper.GetString("provider-url"),
@@ -443,14 +464,6 @@ func runNormalMode(ctx context.Context) error {
 	defer mcpAgent.Close()
 
 	// Initialize hook executor if hooks are configured
-	// Get model name for display
-	modelString := viper.GetString("model")
-	parts := strings.SplitN(modelString, ":", 2)
-	modelName := "Unknown"
-	if len(parts) == 2 {
-		modelName = parts[1]
-	}
-
 	var hookExecutor *hooks.Executor
 	if hooksConfig := viper.Get("hooks"); hooksConfig != nil {
 		if hc, ok := hooksConfig.(*hooks.HookConfig); ok {
@@ -460,7 +473,7 @@ func runNormalMode(ctx context.Context) error {
 			hookExecutor = hooks.NewExecutor(hc, sessionID, transcriptPath)
 
 			// Set model and interactive mode
-			hookExecutor.SetModel(modelString)
+			hookExecutor.SetModel(modelConfig.ModelString)
 			hookExecutor.SetInteractive(promptFlag == "") // Interactive if no prompt flag
 		}
 	}
