@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 	"time"
@@ -17,6 +18,8 @@ import (
 	einoopenai "github.com/cloudwego/eino-ext/components/model/openai"
 	"github.com/cloudwego/eino/components/model"
 	"github.com/mark3labs/mcphost/internal/models/anthropic"
+	"github.com/mark3labs/mcphost/internal/models/huggingface"
+	"github.com/mark3labs/mcphost/internal/models/openrouter"
 	"github.com/mark3labs/mcphost/internal/models/openai"
 	"github.com/mark3labs/mcphost/internal/ui/progress"
 	"github.com/ollama/ollama/api"
@@ -108,8 +111,8 @@ func CreateProvider(ctx context.Context, config *ProviderConfig) (*ProviderResul
 	// Get the global registry for validation
 	registry := GetGlobalRegistry()
 
-	// Validate the model exists (skip for ollama as it's not in models.dev, and skip when using custom provider URL)
-	if provider != "ollama" && config.ProviderURL == "" {
+	// Validate the model exists (skip for ollama, huggingface, openrouter as they are not in models.dev, and skip when using custom provider URL)
+	if provider != "ollama" && provider != "huggingface" && provider != "openrouter" && config.ProviderURL == "" {
 		modelInfo, err := registry.ValidateModel(provider, modelName)
 		if err != nil {
 			// Provide helpful suggestions
@@ -158,9 +161,127 @@ func CreateProvider(ctx context.Context, config *ProviderConfig) (*ProviderResul
 			return nil, err
 		}
 		return &ProviderResult{Model: model, Message: ""}, nil
+	case "huggingface":
+		model, err := createHuggingFaceProvider(ctx, config, modelName)
+		if err != nil {
+			return nil, err
+		}
+		return &ProviderResult{Model: model, Message: ""}, nil
+	case "openrouter":
+		model, err := createOpenRouterProvider(ctx, config, modelName)
+		if err != nil {
+			return nil, err
+		}
+		return &ProviderResult{Model: model, Message: ""}, nil
 	default:
 		return nil, fmt.Errorf("unsupported provider: %s", provider)
 	}
+}
+
+func validateProviderURL(providerURL string) {
+	if providerURL == "" {
+		return
+	}
+	u, err := url.Parse(providerURL)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Warning: Invalid provider URL %q: %v\n", providerURL, err)
+		return
+	}
+	if u.Scheme == "" || u.Host == "" {
+		fmt.Fprintf(os.Stderr, "Warning: Invalid provider URL %q: missing scheme or host\n", providerURL)
+		return
+	}
+	if u.Scheme != "https" {
+		fmt.Fprintf(os.Stderr, "Warning: Provider URL %q is not using https. This is insecure.\n", providerURL)
+	}
+}
+
+func createHuggingFaceProvider(ctx context.Context, config *ProviderConfig, modelName string) (model.ToolCallingChatModel, error) {
+	apiKey := config.ProviderAPIKey
+	if apiKey == "" {
+		apiKey = os.Getenv("HUGGINGFACE_API_KEY")
+	}
+	if apiKey == "" {
+		return nil, fmt.Errorf("Hugging Face API key not provided. Please set it using the HUGGINGFACE_API_KEY environment variable. You can get a key from https://huggingface.co/settings/tokens")
+	}
+
+	openaiConfig := &einoopenai.ChatModelConfig{
+		APIKey: apiKey,
+		Model:  modelName,
+	}
+
+	if config.ProviderURL != "" {
+		validateProviderURL(config.ProviderURL)
+		openaiConfig.BaseURL = config.ProviderURL
+	} else {
+		openaiConfig.BaseURL = "https://api-inference.huggingface.co/v1"
+	}
+
+	if config.TLSSkipVerify {
+		openaiConfig.HTTPClient = createHTTPClientWithTLSConfig(true)
+	}
+
+	if config.MaxTokens > 0 {
+		openaiConfig.MaxTokens = &config.MaxTokens
+	}
+
+	if config.Temperature != nil {
+		openaiConfig.Temperature = config.Temperature
+	}
+
+	if config.TopP != nil {
+		openaiConfig.TopP = config.TopP
+	}
+
+	if len(config.StopSequences) > 0 {
+		openaiConfig.Stop = config.StopSequences
+	}
+
+	return huggingface.NewChatModel(ctx, openaiConfig)
+}
+
+func createOpenRouterProvider(ctx context.Context, config *ProviderConfig, modelName string) (model.ToolCallingChatModel, error) {
+	apiKey := config.ProviderAPIKey
+	if apiKey == "" {
+		apiKey = os.Getenv("OPENROUTER_API_KEY")
+	}
+	if apiKey == "" {
+		return nil, fmt.Errorf("Open Router API key not provided. Please set it using the OPENROUTER_API_KEY environment variable. You can get a key from https://openrouter.ai/keys")
+	}
+
+	openaiConfig := &einoopenai.ChatModelConfig{
+		APIKey: apiKey,
+		Model:  modelName,
+	}
+
+	if config.ProviderURL != "" {
+		validateProviderURL(config.ProviderURL)
+		openaiConfig.BaseURL = config.ProviderURL
+	} else {
+		openaiConfig.BaseURL = "https://openrouter.ai/api/v1"
+	}
+
+	if config.TLSSkipVerify {
+		openaiConfig.HTTPClient = createHTTPClientWithTLSConfig(true)
+	}
+
+	if config.MaxTokens > 0 {
+		openaiConfig.MaxTokens = &config.MaxTokens
+	}
+
+	if config.Temperature != nil {
+		openaiConfig.Temperature = config.Temperature
+	}
+
+	if config.TopP != nil {
+		openaiConfig.TopP = config.TopP
+	}
+
+	if len(config.StopSequences) > 0 {
+		openaiConfig.Stop = config.StopSequences
+	}
+
+	return openrouter.NewChatModel(ctx, openaiConfig)
 }
 
 // validateModelConfig validates configuration parameters against model capabilities
@@ -196,6 +317,7 @@ func createAzureOpenAIProvider(ctx context.Context, config *ProviderConfig, mode
 	}
 
 	if config.ProviderURL != "" {
+		validateProviderURL(config.ProviderURL)
 		azureConfig.BaseURL = config.ProviderURL
 	} else {
 		azureConfig.BaseURL = os.Getenv("AZURE_OPENAI_BASE_URL")
@@ -268,6 +390,7 @@ func createAnthropicProvider(ctx context.Context, config *ProviderConfig, modelN
 	}
 
 	if config.ProviderURL != "" {
+		validateProviderURL(config.ProviderURL)
 		claudeConfig.BaseURL = &config.ProviderURL
 	}
 
@@ -305,6 +428,7 @@ func createOpenAIProvider(ctx context.Context, config *ProviderConfig, modelName
 	}
 
 	if config.ProviderURL != "" {
+		validateProviderURL(config.ProviderURL)
 		openaiConfig.BaseURL = config.ProviderURL
 	}
 
@@ -596,6 +720,7 @@ func createOllamaProviderWithResult(ctx context.Context, config *ProviderConfig,
 
 	// Override with ProviderURL if provided
 	if config.ProviderURL != "" {
+		validateProviderURL(config.ProviderURL)
 		baseURL = config.ProviderURL
 	}
 

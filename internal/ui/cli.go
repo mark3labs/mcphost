@@ -2,7 +2,6 @@ package ui
 
 import (
 	"fmt"
-	"io"
 	"os"
 	"strings"
 	"time"
@@ -14,7 +13,8 @@ import (
 )
 
 var (
-	promptStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("12"))
+	promptStyle      = lipgloss.NewStyle().Foreground(lipgloss.Color("12"))
+	ErrUserCancelled = fmt.Errorf("user cancelled")
 )
 
 // CLI handles the command line interface with improved message rendering
@@ -90,15 +90,36 @@ func (c *CLI) GetPrompt() (string, error) {
 
 	// Get the value from the final model
 	if finalInput, ok := finalModel.(*SlashCommandInput); ok {
-		// Clear the input field from the display
-		linesToClear := finalInput.RenderedLines()
-		// We need to clear linesToClear - 1 lines because we're already on the line after the last rendered line
-		for i := 0; i < linesToClear-1; i++ {
-			fmt.Print("\033[1A\033[2K") // Move up one line and clear it
-		}
-
 		if finalInput.Cancelled() {
-			return "", io.EOF // Signal clean exit
+			fmt.Println("Cancelled.")
+			return "", ErrUserCancelled // Signal clean exit
+		}
+		value := strings.TrimSpace(finalInput.Value())
+		return value, nil
+	}
+
+	return "", fmt.Errorf("unexpected model type")
+}
+
+// GetModelName gets the model name from the user
+func (c *CLI) GetModelName(provider string) (string, error) {
+	if c.messageContainer != nil {
+		c.messageContainer.messages = nil // clear previous messages
+	}
+	c.lastStreamHeight = 0 // Reset last stream height
+
+	input := NewSlashCommandInput(c.width, fmt.Sprintf("Enter the model name for %s:", provider))
+
+	p := tea.NewProgram(input)
+	finalModel, err := p.Run()
+	if err != nil {
+		return "", err
+	}
+
+	if finalInput, ok := finalModel.(*SlashCommandInput); ok {
+		if finalInput.Cancelled() {
+			fmt.Println("Cancelled.")
+			return "", ErrUserCancelled
 		}
 		value := strings.TrimSpace(finalInput.Value())
 		return value, nil

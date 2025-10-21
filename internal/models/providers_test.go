@@ -1,6 +1,7 @@
 package models
 
 import (
+	"context"
 	"net/http"
 	"testing"
 )
@@ -120,4 +121,90 @@ func TestProviderConfigTLSSkipVerify(t *testing.T) {
 	if !config.TLSSkipVerify {
 		t.Error("expected TLSSkipVerify to be true")
 	}
+}
+
+func TestCreateHuggingFaceProvider(t *testing.T) {
+	// Test case 1: API key provided via flag
+	t.Run("API key from flag", func(t *testing.T) {
+		config := &ProviderConfig{
+			ModelString:    "huggingface:test-model",
+			ProviderAPIKey: "test-api-key",
+		}
+		provider, err := createHuggingFaceProvider(context.Background(), config, "test-model")
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if provider == nil {
+			t.Error("expected provider to be not nil")
+		}
+	})
+
+	// Test case 2: API key from environment variable
+	t.Run("API key from env", func(t *testing.T) {
+		t.Setenv("HUGGINGFACE_API_KEY", "test-env-key")
+		config := &ProviderConfig{
+			ModelString: "huggingface:test-model",
+		}
+		provider, err := createHuggingFaceProvider(context.Background(), config, "test-model")
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if provider == nil {
+			t.Error("expected provider to be not nil")
+		}
+	})
+
+	// Test case 3: No API key provided
+	t.Run("No API key", func(t *testing.T) {
+		config := &ProviderConfig{
+			ModelString: "huggingface:test-model",
+		}
+		_, err := createHuggingFaceProvider(context.Background(), config, "test-model")
+		if err == nil {
+			t.Error("expected an error, but got nil")
+		}
+	})
+}
+
+func TestCreateOpenRouterProvider(t *testing.T) {
+	// Test case 1: API key provided via flag
+	t.Run("API key from flag", func(t *testing.T) {
+		config := &ProviderConfig{
+			ModelString:    "openrouter:test-model",
+			ProviderAPIKey: "test-api-key",
+		}
+		provider, err := createOpenRouterProvider(context.Background(), config, "test-model")
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if provider == nil {
+			t.Error("expected provider to be not nil")
+		}
+	})
+
+	// Test case 2: API key from environment variable
+	t.Run("API key from env", func(t *testing.T) {
+		t.Setenv("OPENROUTER_API_KEY", "test-env-key")
+		config := &ProviderConfig{
+			ModelString: "openrouter:test-model",
+		}
+		provider, err := createOpenRouterProvider(context.Background(), config, "test-model")
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if provider == nil {
+			t.Error("expected provider to be not nil")
+		}
+	})
+
+	// Test case 3: No API key provided
+	t.Run("No API key", func(t *testing.T) {
+		config := &ProviderConfig{
+			ModelString: "openrouter:test-model",
+		}
+		_, err := createOpenRouterProvider(context.Background(), config, "test-model")
+		if err == nil {
+			t.Error("expected an error, but got nil")
+		}
+	})
 }
