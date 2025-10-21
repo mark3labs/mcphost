@@ -38,6 +38,56 @@ Discuss the Project on [Discord](https://discord.gg/RqSS2NQVsY)
 - [License](#license-)
 - [Acknowledgments](#acknowledgments-)
 
+## Quick Deployment 🚀
+
+Get MCPHost running with your preferred model in minutes:
+
+### 1. Build the Project
+```bash
+# Clone and build
+git clone https://github.com/mark3labs/mcphost.git
+cd mcphost
+./contribute/build.sh
+```
+
+### 2. Set Up API Keys
+Create a `.env` file in the project root:
+```bash
+# OpenRouter (recommended for free models)
+OPENROUTER_API_KEY="your_openrouter_key_here"
+
+# Or for other providers:
+# OPENAI_API_KEY="your_openai_key"
+# ANTHROPIC_API_KEY="your_anthropic_key"
+# GOOGLE_API_KEY="your_google_key"
+```
+
+### 3. Configure and Deploy
+
+**Option A: Use the deployment script** (easiest)
+```bash
+# Edit the model in deploy.sh (defaults to deepseek/deepseek-chat-v3.1:free)
+nano deploy.sh  # Change MODEL="openrouter:your_preferred_model"
+
+# Run with your configured model
+./deploy.sh
+```
+
+**Option B: Manual configuration**
+```bash
+# Interactive mode with your model
+./output/mcphost --provider-api-key="$(grep OPENROUTER_API_KEY .env | cut -d'=' -f2)" --model openrouter:deepseek/deepseek-chat-v3.1:free
+
+# Non-interactive mode
+./output/mcphost --provider-api-key="$(grep OPENROUTER_API_KEY .env | cut -d'=' -f2)" --model openrouter:deepseek/deepseek-chat-v3.1:free --prompt "Hello, what model are you?" --quiet
+```
+
+### Popular Free Models on OpenRouter
+- `deepseek/deepseek-chat-v3.1:free` - Fast and capable for coding
+- `microsoft/wizardlm-2-8x22b` - Great for coding and analysis
+- `meta-llama/llama-3.1-8b-instruct:free` - Versatile general purpose
+- `qwen/qwen2.5-coder-32b-instruct` - Specialized for code
+
 ## Overview 🌟
 
 MCPHost acts as a host in the MCP client-server architecture, where:

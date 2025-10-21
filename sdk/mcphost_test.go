@@ -8,6 +8,7 @@ import (
 )
 
 func TestNew(t *testing.T) {
+	t.Setenv("ANTHROPIC_API_KEY", "test")
 	ctx := context.Background()
 
 	// Test default initialization
@@ -23,6 +24,7 @@ func TestNew(t *testing.T) {
 }
 
 func TestNewWithOptions(t *testing.T) {
+	t.Setenv("ANTHROPIC_API_KEY", "test")
 	ctx := context.Background()
 
 	opts := &sdk.Options{
@@ -43,6 +45,7 @@ func TestNewWithOptions(t *testing.T) {
 }
 
 func TestSessionManagement(t *testing.T) {
+	t.Setenv("ANTHROPIC_API_KEY", "test")
 	ctx := context.Background()
 
 	host, err := sdk.New(ctx, &sdk.Options{Quiet: true})
