@@ -19,6 +19,7 @@ import (
 	"github.com/mark3labs/mcphost/internal/session"
 	"github.com/mark3labs/mcphost/internal/tokens"
 	"github.com/mark3labs/mcphost/internal/tools"
+	"github.com/joho/godotenv"
 	"github.com/mark3labs/mcphost/internal/ui"
 	"github.com/mattn/go-isatty"
 	"github.com/spf13/cobra"
@@ -128,6 +129,9 @@ func GetRootCommand(v string) *cobra.Command {
 }
 
 func InitConfig() {
+	// Load .env file if it exists
+	godotenv.Load()
+
 	if configFile != "" {
 		// Use config file from the flag
 		if err := LoadConfigWithEnvSubstitution(configFile); err != nil {

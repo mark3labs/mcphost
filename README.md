@@ -84,6 +84,26 @@ Currently supports:
 
 ## Environment Setup 🔧
 
+### Using a `.env` File (Recommended)
+
+You can manage your API keys and other environment variables by creating a `.env` file in the root of the project directory. This is the recommended approach for local development as it keeps all your secrets in one place.
+
+Create a file named `.env` and add your keys like this:
+
+```
+OPENAI_API_KEY="your-openai-key"
+ANTHROPIC_API_KEY="your-anthropic-key"
+GOOGLE_API_KEY="your-google-key"
+HUGGINGFACE_API_KEY="your-huggingface-key"
+OPENROUTER_API_KEY="your-openrouter-key"
+```
+
+The application will automatically load these variables when it starts.
+
+### Using Shell Environment Variables
+
+You can also set environment variables directly in your shell.
+
 1. API Keys:
 ```bash
 # For all providers (use --provider-api-key flag or these environment variables)
