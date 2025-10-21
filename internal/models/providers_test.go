@@ -1,6 +1,7 @@
 package models
 
 import (
+	"context"
 	"net/http"
 	"testing"
 )
@@ -129,7 +130,7 @@ func TestCreateHuggingFaceProvider(t *testing.T) {
 			ModelString:    "huggingface:test-model",
 			ProviderAPIKey: "test-api-key",
 		}
-		provider, err := createHuggingFaceProvider(nil, config, "test-model")
+		provider, err := createHuggingFaceProvider(context.Background(), config, "test-model")
 		if err != nil {
 			t.Errorf("unexpected error: %v", err)
 		}
@@ -144,7 +145,7 @@ func TestCreateHuggingFaceProvider(t *testing.T) {
 		config := &ProviderConfig{
 			ModelString: "huggingface:test-model",
 		}
-		provider, err := createHuggingFaceProvider(nil, config, "test-model")
+		provider, err := createHuggingFaceProvider(context.Background(), config, "test-model")
 		if err != nil {
 			t.Errorf("unexpected error: %v", err)
 		}
@@ -158,7 +159,7 @@ func TestCreateHuggingFaceProvider(t *testing.T) {
 		config := &ProviderConfig{
 			ModelString: "huggingface:test-model",
 		}
-		_, err := createHuggingFaceProvider(nil, config, "test-model")
+		_, err := createHuggingFaceProvider(context.Background(), config, "test-model")
 		if err == nil {
 			t.Error("expected an error, but got nil")
 		}
@@ -172,7 +173,7 @@ func TestCreateOpenRouterProvider(t *testing.T) {
 			ModelString:    "openrouter:test-model",
 			ProviderAPIKey: "test-api-key",
 		}
-		provider, err := createOpenRouterProvider(nil, config, "test-model")
+		provider, err := createOpenRouterProvider(context.Background(), config, "test-model")
 		if err != nil {
 			t.Errorf("unexpected error: %v", err)
 		}
@@ -187,7 +188,7 @@ func TestCreateOpenRouterProvider(t *testing.T) {
 		config := &ProviderConfig{
 			ModelString: "openrouter:test-model",
 		}
-		provider, err := createOpenRouterProvider(nil, config, "test-model")
+		provider, err := createOpenRouterProvider(context.Background(), config, "test-model")
 		if err != nil {
 			t.Errorf("unexpected error: %v", err)
 		}
@@ -201,7 +202,7 @@ func TestCreateOpenRouterProvider(t *testing.T) {
 		config := &ProviderConfig{
 			ModelString: "openrouter:test-model",
 		}
-		_, err := createOpenRouterProvider(nil, config, "test-model")
+		_, err := createOpenRouterProvider(context.Background(), config, "test-model")
 		if err == nil {
 			t.Error("expected an error, but got nil")
 		}

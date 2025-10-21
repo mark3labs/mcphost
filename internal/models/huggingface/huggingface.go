@@ -2,6 +2,7 @@ package huggingface
 
 import (
 	"context"
+	"fmt"
 
 	einoopenai "github.com/cloudwego/eino-ext/components/model/openai"
 	"github.com/cloudwego/eino/components/model"
@@ -42,7 +43,13 @@ func (c *ChatModel) WithTools(tools []*schema.ToolInfo) (model.ToolCallingChatMo
 	if err != nil {
 		return nil, err
 	}
-	return &ChatModel{wrapped: wrappedWithTools.(*einoopenai.ChatModel)}, nil
+
+	wrapped, ok := wrappedWithTools.(*einoopenai.ChatModel)
+	if !ok {
+		return nil, fmt.Errorf("unexpected wrapped model type: %T", wrappedWithTools)
+	}
+
+	return &ChatModel{wrapped: wrapped}, nil
 }
 
 // BindTools implements model.ToolCallingChatModel
@@ -57,7 +64,7 @@ func (c *ChatModel) BindForcedTools(tools []*schema.ToolInfo) error {
 
 // GetType implements model.ChatModel
 func (c *ChatModel) GetType() string {
-	return "Huggingface"
+	return "HuggingFace"
 }
 
 // IsCallbacksEnabled implements model.ChatModel

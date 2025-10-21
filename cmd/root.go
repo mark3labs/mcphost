@@ -20,6 +20,7 @@ import (
 	"github.com/mark3labs/mcphost/internal/tokens"
 	"github.com/mark3labs/mcphost/internal/tools"
 	"github.com/mark3labs/mcphost/internal/ui"
+	"github.com/mattn/go-isatty"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -399,6 +400,9 @@ func runNormalMode(ctx context.Context) error {
 	}
 
 	if (provider == "huggingface" || provider == "openrouter") && modelName == "" {
+		if !isatty.IsTerminal(os.Stdout.Fd()) {
+			return fmt.Errorf("model name is required for %s provider in non-interactive mode", provider)
+		}
 		// Create a new CLI to get the model name
 		tempCli, err := ui.NewCLI(viper.GetBool("debug"), viper.GetBool("compact"))
 		if err != nil {
