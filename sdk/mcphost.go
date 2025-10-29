@@ -142,6 +142,7 @@ func (m *MCPHost) Prompt(ctx context.Context, message string) (string, error) {
 		nil, // onToolResult
 		nil, // onResponse
 		nil, // onToolCallContent
+		nil, // onToolApproval
 	)
 	if err != nil {
 		return "", err
@@ -181,6 +182,7 @@ func (m *MCPHost) PromptWithCallbacks(
 		nil, // onResponse
 		nil, // onToolCallContent
 		onStreaming,
+		nil, // onToolApproval
 	)
 	if err != nil {
 		return "", err
