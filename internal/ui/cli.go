@@ -13,9 +13,7 @@ import (
 	"golang.org/x/term"
 )
 
-var (
-	promptStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("12"))
-)
+var promptStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("12"))
 
 // CLI handles the command line interface with improved message rendering
 type CLI struct {
@@ -83,7 +81,6 @@ func (c *CLI) GetPrompt() (string, error) {
 	// Run as a tea program
 	p := tea.NewProgram(input)
 	finalModel, err := p.Run()
-
 	if err != nil {
 		return "", err
 	}
@@ -151,7 +148,6 @@ func (c *CLI) DisplayAssistantMessageWithModel(message, modelName string) error 
 
 // DisplayToolCallMessage displays a tool call in progress
 func (c *CLI) DisplayToolCallMessage(toolName, toolArgs string) {
-
 	c.messageContainer.messages = nil // clear previous messages (they should have been printed already)
 	c.lastStreamHeight = 0            // Reset last stream height for new prompt
 
@@ -331,6 +327,20 @@ func (c *CLI) IsSlashCommand(input string) bool {
 	return strings.HasPrefix(input, "/")
 }
 
+func (c *CLI) GetToolApproval(toolName, toolArgs string) (bool, error) {
+	input := NewToolApprovalInput(toolName, toolArgs, c.width)
+	p := tea.NewProgram(input)
+	finalModel, err := p.Run()
+	if err != nil {
+		return false, err
+	}
+
+	if finalInput, ok := finalModel.(*ToolApprovalInput); ok {
+		return finalInput.approved, nil
+	}
+	return false, fmt.Errorf("GetToolApproval: unexpected error type")
+}
+
 // SlashCommandResult represents the result of handling a slash command
 type SlashCommandResult struct {
 	Handled      bool
@@ -377,7 +387,6 @@ func (c *CLI) ClearMessages() {
 
 // displayContainer renders and displays the message container
 func (c *CLI) displayContainer() {
-
 	// Add left padding to the entire container
 	content := c.messageContainer.Render()
 
