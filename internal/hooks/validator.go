@@ -68,7 +68,10 @@ func containsDangerousPattern(command string) bool {
 	return separatorCount > 2
 }
 
-// ValidateHookConfig validates the entire hook configuration
+// ValidateHookConfig validates the entire hook configuration for correctness
+// and security. It checks event validity, regex patterns, hook definitions,
+// and performs security validation on all commands. Returns an error describing
+// any validation failures.
 func ValidateHookConfig(config *HookConfig) error {
 	if config == nil {
 		return fmt.Errorf("nil configuration")

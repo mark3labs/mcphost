@@ -13,17 +13,42 @@ import (
 	"github.com/cloudwego/eino/schema"
 )
 
-// CustomChatModel wraps the eino-ext Claude model with custom tool schema handling
+// CustomChatModel wraps the eino-ext Claude model with custom tool schema handling.
+// It provides a compatibility layer that fixes malformed JSON in tool calls and
+// ensures proper schema validation for Anthropic's API requirements.
+// This wrapper is necessary to handle edge cases where the underlying library
+// may generate invalid JSON for empty tool inputs or missing properties.
 type CustomChatModel struct {
+	// wrapped is the underlying eino-ext Claude model instance
 	wrapped *einoclaude.ChatModel
 }
 
-// CustomRoundTripper intercepts HTTP requests to fix Anthropic function schemas
+// CustomRoundTripper intercepts HTTP requests to fix Anthropic function schemas.
+// It acts as a middleware that modifies requests before they reach the Anthropic API,
+// ensuring that tool schemas and function calls are properly formatted.
+// This is particularly important for handling edge cases like empty tool inputs
+// or missing schema properties that would otherwise cause API errors.
 type CustomRoundTripper struct {
+	// wrapped is the underlying HTTP transport to use for actual requests
 	wrapped http.RoundTripper
 }
 
-// NewCustomChatModel creates a new custom Anthropic chat model
+// NewCustomChatModel creates a new custom Anthropic chat model.
+// It wraps the standard eino-ext Claude model with additional request
+// preprocessing to ensure compatibility with Anthropic's API requirements.
+//
+// Parameters:
+//   - ctx: Context for the operation
+//   - config: Configuration for the Claude model including API key, model name, and parameters
+//
+// Returns:
+//   - *CustomChatModel: A wrapped Claude model with enhanced compatibility
+//   - error: Returns an error if model creation fails
+//
+// The custom model automatically:
+//   - Fixes malformed JSON in tool calls
+//   - Ensures tool schemas have required properties
+//   - Handles empty or missing input fields in function calls
 func NewCustomChatModel(ctx context.Context, config *einoclaude.Config) (*CustomChatModel, error) {
 	// Create a custom HTTP client that intercepts requests
 	if config.HTTPClient == nil {
@@ -49,7 +74,21 @@ func NewCustomChatModel(ctx context.Context, config *einoclaude.Config) (*Custom
 	}, nil
 }
 
-// RoundTrip implements http.RoundTripper to intercept and fix requests
+// RoundTrip implements http.RoundTripper to intercept and fix requests.
+// It preprocesses outgoing requests to the Anthropic API to ensure
+// they meet the API's requirements for tool schemas and function calls.
+//
+// Parameters:
+//   - req: The HTTP request to be sent to the Anthropic API
+//
+// Returns:
+//   - *http.Response: The response from the Anthropic API
+//   - error: Any error that occurred during the request
+//
+// The method performs the following fixes:
+//   - Ensures tool input_schema properties are not null
+//   - Fixes malformed JSON patterns in tool_use content
+//   - Validates and corrects empty or invalid function call inputs
 func (rt *CustomRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
 	// Only process Anthropic API requests
 	if !strings.Contains(req.URL.Host, "anthropic.com") {
@@ -191,17 +230,47 @@ func (rt *CustomRoundTripper) RoundTrip(req *http.Request) (*http.Response, erro
 	return rt.wrapped.RoundTrip(req)
 }
 
-// Generate implements the model.BaseChatModel interface
+// Generate implements the model.BaseChatModel interface.
+// It generates a single response from the model based on the input messages.
+//
+// Parameters:
+//   - ctx: Context for the operation, supporting cancellation and deadlines
+//   - input: The conversation history as a slice of messages
+//   - opts: Optional configuration options for the generation
+//
+// Returns:
+//   - *schema.Message: The generated response message
+//   - error: Any error that occurred during generation
 func (m *CustomChatModel) Generate(ctx context.Context, input []*schema.Message, opts ...model.Option) (*schema.Message, error) {
 	return m.wrapped.Generate(ctx, input, opts...)
 }
 
-// Stream implements the model.BaseChatModel interface
+// Stream implements the model.BaseChatModel interface.
+// It generates a streaming response from the model, allowing incremental
+// processing of the model's output as it's generated.
+//
+// Parameters:
+//   - ctx: Context for the operation, supporting cancellation and deadlines
+//   - input: The conversation history as a slice of messages
+//   - opts: Optional configuration options for the generation
+//
+// Returns:
+//   - *schema.StreamReader[*schema.Message]: A reader for the streaming response
+//   - error: Any error that occurred during stream setup
 func (m *CustomChatModel) Stream(ctx context.Context, input []*schema.Message, opts ...model.Option) (*schema.StreamReader[*schema.Message], error) {
 	return m.wrapped.Stream(ctx, input, opts...)
 }
 
-// WithTools implements the model.ToolCallingChatModel interface
+// WithTools implements the model.ToolCallingChatModel interface.
+// It creates a new model instance with the specified tools available for function calling.
+// The original model instance remains unchanged.
+//
+// Parameters:
+//   - tools: A slice of tool definitions that the model can use
+//
+// Returns:
+//   - model.ToolCallingChatModel: A new model instance with tools enabled
+//   - error: Returns an error if tool binding fails
 func (m *CustomChatModel) WithTools(tools []*schema.ToolInfo) (model.ToolCallingChatModel, error) {
 	wrappedWithTools, err := m.wrapped.WithTools(tools)
 	if err != nil {

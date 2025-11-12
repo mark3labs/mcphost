@@ -3,41 +3,99 @@
 
 package models
 
-// ModelInfo represents information about a specific model
+// ModelInfo represents information about a specific model.
+// It contains comprehensive metadata about a model's capabilities,
+// pricing, and limitations sourced from models.dev.
 type ModelInfo struct {
-	ID          string
-	Name        string
-	Attachment  bool
-	Reasoning   bool
+	// ID is the unique identifier for the model
+	// Example: "claude-3-sonnet-20240620" or "gpt-4"
+	ID string
+
+	// Name is the human-readable name of the model
+	// Example: "Claude 3 Sonnet" or "GPT-4"
+	Name string
+
+	// Attachment indicates whether the model supports file attachments
+	Attachment bool
+
+	// Reasoning indicates whether this is a reasoning/chain-of-thought model
+	// Example: OpenAI's o1 models have this set to true
+	Reasoning bool
+
+	// Temperature indicates whether the model supports temperature parameter
 	Temperature bool
-	Cost        Cost
-	Limit       Limit
+
+	// Cost contains the pricing information for input/output tokens
+	Cost Cost
+
+	// Limit contains the context window and output token limits
+	Limit Limit
 }
 
-// Cost represents the pricing information for a model
+// Cost represents the pricing information for a model.
+// Prices are typically in USD per million tokens.
 type Cost struct {
-	Input      float64
-	Output     float64
-	CacheRead  *float64
+	// Input is the cost per million input tokens
+	Input float64
+
+	// Output is the cost per million output tokens
+	Output float64
+
+	// CacheRead is the cost per million cached read tokens (optional)
+	// Only applicable for models that support prompt caching
+	CacheRead *float64
+
+	// CacheWrite is the cost per million cached write tokens (optional)
+	// Only applicable for models that support prompt caching
 	CacheWrite *float64
 }
 
-// Limit represents the context and output limits for a model
+// Limit represents the context and output limits for a model.
+// These define the maximum number of tokens the model can process
+// and generate in a single interaction.
 type Limit struct {
+	// Context is the maximum number of input tokens (context window size)
 	Context int
-	Output  int
+
+	// Output is the maximum number of output tokens that can be generated
+	Output int
 }
 
-// ProviderInfo represents information about a model provider
+// ProviderInfo represents information about a model provider.
+// It contains metadata about the provider and all models it offers.
 type ProviderInfo struct {
-	ID     string
-	Env    []string
-	NPM    string
-	Name   string
+	// ID is the unique identifier for the provider
+	// Example: "anthropic", "openai", "google"
+	ID string
+
+	// Env lists the environment variables checked for API credentials
+	// Example: ["ANTHROPIC_API_KEY"] or ["OPENAI_API_KEY"]
+	Env []string
+
+	// NPM is the NPM package name used by the provider (for reference)
+	NPM string
+
+	// Name is the human-readable name of the provider
+	// Example: "Anthropic", "OpenAI", "Google"
+	Name string
+
+	// Models maps model IDs to their detailed information
 	Models map[string]ModelInfo
 }
 
-// GetModelsData returns the static models data from models.dev
+// GetModelsData returns the static models data from models.dev.
+// This data is automatically generated from the models.dev API
+// and provides comprehensive information about all supported
+// LLM providers and their models.
+//
+// The data includes:
+//   - Provider information (ID, name, environment variables)
+//   - Model capabilities (reasoning, attachments, temperature support)
+//   - Pricing information (input/output costs, cache costs)
+//   - Token limits (context window, max output tokens)
+//
+// Returns:
+//   - map[string]ProviderInfo: A map of provider IDs to their information
 func GetModelsData() map[string]ProviderInfo {
 	return map[string]ProviderInfo{
 		"alibaba": {

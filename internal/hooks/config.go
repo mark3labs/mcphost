@@ -9,26 +9,35 @@ import (
 	"path/filepath"
 )
 
-// HookConfig represents the complete hooks configuration
+// HookConfig represents the complete hooks configuration containing event-triggered
+// hooks for tool execution lifecycle events.
 type HookConfig struct {
 	Hooks map[HookEvent][]HookMatcher `yaml:"hooks" json:"hooks"`
 }
 
-// HookMatcher matches specific tools and defines hooks to execute
+// HookMatcher matches specific tools and defines hooks to execute. The Matcher field
+// contains a pattern to match tool names, and Hooks contains the commands to run
+// when a match occurs. The Merge field controls how this matcher combines with others.
 type HookMatcher struct {
 	Matcher string      `yaml:"matcher,omitempty" json:"matcher,omitempty"`
 	Merge   string      `yaml:"_merge,omitempty" json:"_merge,omitempty"`
 	Hooks   []HookEntry `yaml:"hooks" json:"hooks"`
 }
 
-// HookEntry defines a single hook command
+// HookEntry defines a single hook command to execute. Type specifies the command
+// type (e.g., "bash"), Command contains the actual command to run, and Timeout
+// optionally specifies the maximum execution time in seconds.
 type HookEntry struct {
 	Type    string `yaml:"type" json:"type"`
 	Command string `yaml:"command" json:"command"`
 	Timeout int    `yaml:"timeout,omitempty" json:"timeout,omitempty"`
 }
 
-// LoadHooksConfig loads and merges hook configurations from multiple sources
+// LoadHooksConfig loads and merges hook configurations from multiple sources.
+// It searches for hooks.{json,yml} files in standard locations (XDG config directory,
+// local .mcphost directory) and any custom paths provided. Configurations are merged
+// with later sources taking precedence. Environment variable substitution is applied
+// to all loaded configurations.
 func LoadHooksConfig(customPaths ...string) (*HookConfig, error) {
 	// Get config directory following XDG Base Directory specification
 	configDir := getConfigDir()

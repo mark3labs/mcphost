@@ -24,10 +24,13 @@ func parseVariableWithDefault(varPart string) (varName, defaultValue string, has
 	return varPart, "", false
 }
 
-// EnvSubstituter handles environment variable substitution
+// EnvSubstituter handles environment variable substitution in configuration strings,
+// supporting both ${env://VAR} and ${env://VAR:-default} patterns.
 type EnvSubstituter struct{}
 
-// SubstituteEnvVars replaces ${env://VAR} and ${env://VAR:-default} patterns with environment variables
+// SubstituteEnvVars replaces ${env://VAR} and ${env://VAR:-default} patterns with environment variables.
+// If a variable is not set and has a default value, the default is used. Returns an error
+// if required variables (those without defaults) are not set.
 func (e *EnvSubstituter) SubstituteEnvVars(content string) (string, error) {
 	var errors []string
 
@@ -57,17 +60,21 @@ func (e *EnvSubstituter) SubstituteEnvVars(content string) (string, error) {
 	return result, nil
 }
 
-// ArgsSubstituter handles script argument substitution
+// ArgsSubstituter handles script argument substitution in configuration strings,
+// supporting both ${VAR} and ${VAR:-default} patterns for template variable replacement.
 type ArgsSubstituter struct {
 	args map[string]string
 }
 
-// NewArgsSubstituter creates a new args substituter with the given arguments
+// NewArgsSubstituter creates a new args substituter with the given arguments map.
+// The arguments are used to replace template variables in configuration strings.
 func NewArgsSubstituter(args map[string]string) *ArgsSubstituter {
 	return &ArgsSubstituter{args: args}
 }
 
-// SubstituteArgs replaces ${VAR} and ${VAR:-default} patterns with script arguments
+// SubstituteArgs replaces ${VAR} and ${VAR:-default} patterns with script arguments.
+// If an argument is not provided and has a default value, the default is used.
+// Returns an error if required arguments (those without defaults) are not provided.
 func (a *ArgsSubstituter) SubstituteArgs(content string) (string, error) {
 	var errors []string
 
@@ -97,12 +104,14 @@ func (a *ArgsSubstituter) SubstituteArgs(content string) (string, error) {
 	return result, nil
 }
 
-// HasEnvVars checks if content contains environment variable patterns
+// HasEnvVars checks if content contains environment variable patterns (${env://...}).
+// This is useful for determining if substitution is needed before processing.
 func HasEnvVars(content string) bool {
 	return envVarPattern.MatchString(content)
 }
 
-// HasScriptArgs checks if content contains script argument patterns
+// HasScriptArgs checks if content contains script argument patterns (${...}).
+// This is useful for determining if argument substitution is needed before processing.
 func HasScriptArgs(content string) bool {
 	return scriptArgsPattern.MatchString(content)
 }

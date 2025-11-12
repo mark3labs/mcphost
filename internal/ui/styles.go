@@ -15,12 +15,16 @@ func boolPtr(b bool) *bool       { return &b }
 func stringPtr(s string) *string { return &s }
 func uintPtr(u uint) *uint       { return &u }
 
-// BaseStyle returns a basic lipgloss style
+// BaseStyle returns a new, empty lipgloss style that can be customized with
+// additional styling methods. This serves as the foundation for building more
+// complex styled components.
 func BaseStyle() lipgloss.Style {
 	return lipgloss.NewStyle()
 }
 
-// GetMarkdownRenderer returns a glamour TermRenderer configured for our use
+// GetMarkdownRenderer creates and returns a configured glamour.TermRenderer for
+// rendering markdown content with syntax highlighting and proper formatting. The
+// renderer is customized with our theme colors and adapted to the specified width.
 func GetMarkdownRenderer(width int) *glamour.TermRenderer {
 	r, _ := glamour.NewTermRenderer(
 		glamour.WithStyles(generateMarkdownStyleConfig()),

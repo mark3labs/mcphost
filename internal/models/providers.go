@@ -27,7 +27,9 @@ import (
 )
 
 const (
-	// ClaudeCodePrompt is the required system prompt for OAuth authentication
+	// ClaudeCodePrompt is the required system prompt for OAuth authentication.
+	// This prompt must be included as the first system message when using OAuth-based
+	// authentication with Anthropic's API to properly identify the application.
 	ClaudeCodePrompt = "You are Claude Code, Anthropic's official CLI for Claude."
 )
 
@@ -62,35 +64,93 @@ func resolveModelAlias(provider, modelName string) string {
 	return modelName
 }
 
-// ProviderConfig holds configuration for creating LLM providers
+// ProviderConfig holds configuration for creating LLM providers.
+// It contains all necessary settings to initialize and configure
+// various LLM providers including API keys, model parameters, and
+// provider-specific settings.
 type ProviderConfig struct {
-	ModelString    string
-	SystemPrompt   string
-	ProviderAPIKey string // API key for OpenAI and Anthropic
-	ProviderURL    string // Base URL for OpenAI, Anthropic, and Ollama
+	// ModelString specifies the model in the format "provider:model"
+	// Example: "anthropic:claude-3-sonnet-20240620" or "openai:gpt-4"
+	ModelString string
+
+	// SystemPrompt sets the system message/instructions for the model
+	SystemPrompt string
+
+	// ProviderAPIKey is the API key for authentication with the provider
+	// Used for OpenAI, Anthropic, Google, and Azure providers
+	ProviderAPIKey string
+
+	// ProviderURL is the base URL for the provider's API endpoint
+	// Can be used to specify custom endpoints for OpenAI, Anthropic, Ollama, or Azure
+	ProviderURL string
 
 	// Model generation parameters
-	MaxTokens     int
-	Temperature   *float32
-	TopP          *float32
-	TopK          *int32
+
+	// MaxTokens limits the maximum number of tokens in the response
+	MaxTokens int
+
+	// Temperature controls randomness in generation (0.0 to 1.0)
+	// Lower values make output more focused and deterministic
+	Temperature *float32
+
+	// TopP implements nucleus sampling, controlling diversity
+	// Value between 0.0 and 1.0, where 1.0 considers all tokens
+	TopP *float32
+
+	// TopK limits the number of tokens to sample from
+	// Used by Anthropic and Google providers
+	TopK *int32
+
+	// StopSequences is a list of sequences that will stop generation
 	StopSequences []string
 
 	// Ollama-specific parameters
-	NumGPU  *int32
+
+	// NumGPU specifies the number of GPUs to use for inference
+	NumGPU *int32
+
+	// MainGPU specifies which GPU to use as the primary device
 	MainGPU *int32
 
 	// TLS configuration
-	TLSSkipVerify bool // Skip TLS certificate verification (insecure)
+
+	// TLSSkipVerify skips TLS certificate verification (insecure)
+	// Should only be used for development or with self-signed certificates
+	TLSSkipVerify bool
 }
 
-// ProviderResult contains the result of provider creation
+// ProviderResult contains the result of provider creation.
+// It includes both the created model instance and any informational
+// messages that should be displayed to the user.
 type ProviderResult struct {
-	Model   model.ToolCallingChatModel
-	Message string // Optional message for user feedback (e.g., GPU fallback info)
+	// Model is the created LLM provider instance that implements
+	// the ToolCallingChatModel interface for tool-enabled conversations
+	Model model.ToolCallingChatModel
+
+	// Message contains optional feedback for the user
+	// Example: "Insufficient GPU memory, falling back to CPU inference"
+	Message string
 }
 
-// CreateProvider creates an eino ToolCallingChatModel based on the provider configuration
+// CreateProvider creates an eino ToolCallingChatModel based on the provider configuration.
+// It validates the model, checks required environment variables, and initializes
+// the appropriate provider (Anthropic, OpenAI, Google, Ollama, or Azure).
+//
+// Parameters:
+//   - ctx: Context for the operation, used for cancellation and deadlines
+//   - config: Provider configuration containing model details and parameters
+//
+// Returns:
+//   - *ProviderResult: Contains the created model and any informational messages
+//   - error: Returns an error if provider creation fails, model validation fails,
+//     or required credentials are missing
+//
+// Supported providers:
+//   - anthropic: Claude models with API key or OAuth authentication
+//   - openai: GPT models including reasoning models like o1
+//   - google: Gemini models
+//   - ollama: Local models with automatic GPU/CPU fallback
+//   - azure: Azure OpenAI Service deployments
 func CreateProvider(ctx context.Context, config *ProviderConfig) (*ProviderResult, error) {
 	parts := strings.SplitN(config.ModelString, ":", 2)
 	if len(parts) < 2 {
@@ -407,9 +467,17 @@ func createGoogleProvider(ctx context.Context, config *ProviderConfig, modelName
 	return gemini.NewChatModel(ctx, geminiConfig)
 }
 
-// OllamaLoadingResult contains the result of model loading with actual settings used
+// OllamaLoadingResult contains the result of model loading with actual settings used.
+// It provides information about how the model was loaded, including any fallback
+// behavior that occurred during initialization.
 type OllamaLoadingResult struct {
+	// Options contains the actual Ollama options used for loading
+	// May differ from requested options if fallback occurred (e.g., CPU instead of GPU)
 	Options *api.Options
+
+	// Message describes the loading result
+	// Example: "Model loaded successfully on GPU" or
+	// "Insufficient GPU memory, falling back to CPU inference"
 	Message string
 }
 

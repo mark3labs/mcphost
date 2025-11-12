@@ -13,7 +13,9 @@ import (
 	"time"
 )
 
-// OAuthClient handles OAuth authentication with Anthropic
+// OAuthClient handles OAuth 2.0 authentication flow with Anthropic using the
+// PKCE (Proof Key for Code Exchange) extension for enhanced security in public clients.
+// It manages the authorization URL generation, code exchange, and token refresh operations.
 type OAuthClient struct {
 	ClientID     string
 	AuthorizeURL string
@@ -22,13 +24,18 @@ type OAuthClient struct {
 	Scopes       string
 }
 
-// AuthData contains authorization URL and PKCE verifier
+// AuthData contains the authorization URL for user authentication and the PKCE
+// verifier needed for the subsequent code exchange. The verifier must be stored
+// securely and used when exchanging the authorization code for tokens.
 type AuthData struct {
 	URL      string
 	Verifier string
 }
 
-// NewOAuthClient creates a new OAuth client with Anthropic configuration
+// NewOAuthClient creates a new OAuth client configured for Anthropic's OAuth service.
+// The client uses a public client ID (as per OAuth 2.0 public client specification)
+// with PKCE for security. The configuration includes the authorization endpoint,
+// token endpoint, redirect URI, and required scopes for API key creation and inference.
 func NewOAuthClient() *OAuthClient {
 	return &OAuthClient{
 		// OAuth client ID is public by design for CLI applications (OAuth public clients).
@@ -42,7 +49,11 @@ func NewOAuthClient() *OAuthClient {
 	}
 }
 
-// GeneratePKCE generates PKCE verifier and challenge for OAuth flow
+// GeneratePKCE generates a cryptographically secure PKCE verifier and challenge pair
+// for the OAuth 2.0 PKCE flow. The verifier is a random 32-byte string encoded as
+// base64url, and the challenge is the SHA256 hash of the verifier, also base64url encoded.
+// Returns the verifier (to be stored securely), challenge (to be sent with auth request),
+// and any error encountered during generation.
 func GeneratePKCE() (verifier, challenge string, err error) {
 	// Generate 32 bytes of random data
 	verifierBytes := make([]byte, 32)
@@ -60,7 +71,10 @@ func GeneratePKCE() (verifier, challenge string, err error) {
 	return verifier, challenge, nil
 }
 
-// GetAuthorizationURL generates the authorization URL with PKCE parameters
+// GetAuthorizationURL generates a complete authorization URL for the OAuth flow with
+// PKCE parameters. The URL includes the client ID, redirect URI, requested scopes,
+// and PKCE challenge. Returns an AuthData structure containing the URL for user
+// authentication and the PKCE verifier for the subsequent code exchange.
 func (c *OAuthClient) GetAuthorizationURL() (*AuthData, error) {
 	verifier, challenge, err := GeneratePKCE()
 	if err != nil {
@@ -86,7 +100,10 @@ func (c *OAuthClient) GetAuthorizationURL() (*AuthData, error) {
 	}, nil
 }
 
-// ExchangeCode exchanges an authorization code for tokens
+// ExchangeCode exchanges an authorization code for access and refresh tokens.
+// The code parameter should be the authorization code received from the OAuth callback.
+// The verifier parameter must be the same PKCE verifier generated during GetAuthorizationURL.
+// Returns AnthropicCredentials containing the tokens and expiration information.
 func (c *OAuthClient) ExchangeCode(code, verifier string) (*AnthropicCredentials, error) {
 	// Parse code and state
 	parsedCode, parsedState := c.parseCodeAndState(code)
@@ -109,7 +126,10 @@ func (c *OAuthClient) ExchangeCode(code, verifier string) (*AnthropicCredentials
 	return c.makeTokenRequest(reqBody)
 }
 
-// RefreshToken refreshes an access token using a refresh token
+// RefreshToken refreshes an expired or expiring access token using a refresh token.
+// Returns new AnthropicCredentials with updated access token, refresh token (may be
+// rotated), and new expiration timestamp. Returns an error if the refresh fails or
+// the refresh token is invalid.
 func (c *OAuthClient) RefreshToken(refreshToken string) (*AnthropicCredentials, error) {
 	reqBody := map[string]interface{}{
 		"grant_type":    "refresh_token",
@@ -179,7 +199,9 @@ func (c *OAuthClient) parseCodeAndState(code string) (parsedCode, parsedState st
 	return
 }
 
-// SetOAuthCredentials stores OAuth credentials
+// SetOAuthCredentials stores OAuth credentials in the credential manager's secure storage.
+// The credentials should include access token, refresh token, and expiration information.
+// Returns an error if the credentials cannot be saved.
 func (cm *CredentialManager) SetOAuthCredentials(creds *AnthropicCredentials) error {
 	store, err := cm.LoadCredentials()
 	if err != nil {
@@ -190,7 +212,10 @@ func (cm *CredentialManager) SetOAuthCredentials(creds *AnthropicCredentials) er
 	return cm.SaveCredentials(store)
 }
 
-// GetValidAccessToken returns a valid access token, refreshing if necessary
+// GetValidAccessToken returns a valid access token for API requests. For OAuth credentials,
+// it automatically refreshes the token if it's expired or about to expire. For API key
+// credentials, it simply returns the API key. Returns an error if no credentials are found,
+// if token refresh fails, or if the credential type is unknown.
 func (cm *CredentialManager) GetValidAccessToken() (string, error) {
 	creds, err := cm.GetAnthropicCredentials()
 	if err != nil {

@@ -15,16 +15,20 @@ import (
 	"github.com/mark3labs/mcphost/internal/config"
 )
 
-// ConnectionPoolConfig configuration for connection pool
+// ConnectionPoolConfig defines configuration parameters for the MCP connection pool.
+// It controls connection lifecycle, health checking, and error handling behaviors.
 type ConnectionPoolConfig struct {
-	MaxIdleTime         time.Duration
-	MaxRetries          int
-	HealthCheckInterval time.Duration
-	MaxErrorCount       int
-	ReconnectDelay      time.Duration
+	MaxIdleTime         time.Duration // Maximum time a connection can remain idle before being marked unhealthy
+	MaxRetries          int           // Maximum number of retry attempts for failed operations
+	HealthCheckInterval time.Duration // Interval between background health checks of all connections
+	MaxErrorCount       int           // Maximum consecutive errors before marking a connection unhealthy
+	ReconnectDelay      time.Duration // Delay before attempting to reconnect after connection failure
 }
 
-// DefaultConnectionPoolConfig returns default configuration
+// DefaultConnectionPoolConfig returns a connection pool configuration with sensible defaults.
+// Default values: 5 minute max idle time, 3 retries, 30 second health check interval,
+// 3 max errors before marking unhealthy, and 2 second reconnect delay.
+// These defaults are suitable for most MCP server deployments.
 func DefaultConnectionPoolConfig() *ConnectionPoolConfig {
 	return &ConnectionPoolConfig{
 		MaxIdleTime:         5 * time.Minute,
@@ -35,7 +39,10 @@ func DefaultConnectionPoolConfig() *ConnectionPoolConfig {
 	}
 }
 
-// MCPConnection represents an MCP connection
+// MCPConnection represents a single MCP client connection with health tracking and metadata.
+// It wraps an MCP client and maintains state about connection health, usage patterns,
+// and error history. Access to connection state is protected by a read-write mutex
+// for thread-safe concurrent access.
 type MCPConnection struct {
 	client       client.MCPClient
 	serverName   string
@@ -47,7 +54,11 @@ type MCPConnection struct {
 	mu           sync.RWMutex
 }
 
-// MCPConnectionPool manages MCP connections
+// MCPConnectionPool manages a pool of MCP client connections with automatic health checking,
+// connection reuse, and failure recovery. It provides thread-safe connection management
+// across multiple MCP servers, automatically handling connection lifecycle including
+// creation, health monitoring, and cleanup. The pool runs background health checks
+// to proactively identify and remove unhealthy connections.
 type MCPConnectionPool struct {
 	connections map[string]*MCPConnection
 	config      *ConnectionPoolConfig
@@ -59,7 +70,11 @@ type MCPConnectionPool struct {
 	debugLogger DebugLogger
 }
 
-// NewMCPConnectionPool creates a new connection pool
+// NewMCPConnectionPool creates a new MCP connection pool with the specified configuration.
+// If config is nil, default configuration values will be used. The pool starts a background
+// goroutine for periodic health checks that runs until Close is called.
+// The model parameter is used for MCP servers that require sampling support.
+// Thread-safe for concurrent use immediately after creation.
 func NewMCPConnectionPool(config *ConnectionPoolConfig, model model.ToolCallingChatModel, debug bool) *MCPConnectionPool {
 	if config == nil {
 		config = DefaultConnectionPoolConfig()
@@ -79,14 +94,20 @@ func NewMCPConnectionPool(config *ConnectionPoolConfig, model model.ToolCallingC
 	return pool
 }
 
-// SetDebugLogger sets the debug logger for the connection pool
+// SetDebugLogger sets the debug logger for the connection pool.
+// The logger will be used to output detailed information about connection lifecycle,
+// health checks, and error conditions. Thread-safe and can be called at any time.
 func (p *MCPConnectionPool) SetDebugLogger(logger DebugLogger) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	p.debugLogger = logger
 }
 
-// GetConnection gets a connection from the pool
+// GetConnection retrieves or creates a connection for the specified MCP server.
+// If a healthy, non-idle connection exists in the pool, it will be reused.
+// Otherwise, a new connection is created and added to the pool.
+// Returns an error if connection creation or initialization fails.
+// Thread-safe for concurrent calls.
 func (p *MCPConnectionPool) GetConnection(ctx context.Context, serverName string, serverConfig config.MCPServerConfig) (*MCPConnection, error) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
@@ -127,7 +148,12 @@ func (p *MCPConnectionPool) GetConnection(ctx context.Context, serverName string
 	return conn, nil
 }
 
-// GetConnectionWithHealthCheck gets a connection from the pool with proactive health check
+// GetConnectionWithHealthCheck retrieves a connection with an additional proactive health check.
+// Unlike GetConnection, this method performs a health check on existing connections before
+// returning them, ensuring the connection is truly healthy. This is useful for critical
+// operations where connection reliability is paramount. Creates a new connection if the
+// existing one fails the health check or doesn't exist.
+// Thread-safe for concurrent calls.
 func (p *MCPConnectionPool) GetConnectionWithHealthCheck(ctx context.Context, serverName string, serverConfig config.MCPServerConfig) (*MCPConnection, error) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
@@ -430,7 +456,11 @@ func (p *MCPConnectionPool) checkConnectionsHealth() {
 	}
 }
 
-// HandleConnectionError handles connection errors
+// HandleConnectionError records and handles errors for a specific connection.
+// It increments the error count and may mark the connection as unhealthy based on
+// the error type and configured thresholds. Connection errors (network, transport, 404)
+// immediately mark the connection as unhealthy for removal on next access.
+// Thread-safe for concurrent error reporting.
 func (p *MCPConnectionPool) HandleConnectionError(serverName string, err error) {
 	p.mu.RLock()
 	conn, exists := p.connections[serverName]
@@ -460,7 +490,10 @@ func (p *MCPConnectionPool) HandleConnectionError(serverName string, err error) 
 	}
 }
 
-// GetConnectionStats returns connection statistics
+// GetConnectionStats returns detailed statistics for all connections in the pool.
+// The returned map includes health status, last usage time, error counts, and
+// last error for each connection. Useful for monitoring and debugging connection
+// pool behavior. The returned data is a snapshot and safe for concurrent access.
 func (p *MCPConnectionPool) GetConnectionStats() map[string]interface{} {
 	p.mu.RLock()
 	defer p.mu.RUnlock()
@@ -480,12 +513,17 @@ func (p *MCPConnectionPool) GetConnectionStats() map[string]interface{} {
 	return stats
 }
 
-// ServerName returns the server name for this connection
+// ServerName returns the server name associated with this MCP connection.
+// This is the configured name from the MCPHost configuration, not necessarily
+// the actual server implementation name.
 func (c *MCPConnection) ServerName() string {
 	return c.serverName
 }
 
-// GetClients returns all client names in the pool
+// GetClients returns a map of all MCP clients currently in the pool.
+// The map keys are server names and values are the corresponding MCP client instances.
+// The returned map is a copy and modifications won't affect the pool.
+// Note that clients may be unhealthy; use GetConnectionStats to check health status.
 func (p *MCPConnectionPool) GetClients() map[string]client.MCPClient {
 	p.mu.RLock()
 	defer p.mu.RUnlock()
@@ -497,7 +535,11 @@ func (p *MCPConnectionPool) GetClients() map[string]client.MCPClient {
 	return clients
 }
 
-// Close closes the connection pool
+// Close gracefully shuts down the connection pool, closing all client connections
+// and stopping the background health check goroutine. It attempts to close all
+// connections even if some fail, logging any errors encountered.
+// Safe to call multiple times; subsequent calls are no-ops.
+// Always call Close when done with the pool to prevent resource leaks.
 func (p *MCPConnectionPool) Close() error {
 	p.cancel()
 

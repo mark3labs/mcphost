@@ -6,17 +6,25 @@ import (
 	"time"
 )
 
-// CLIDebugLogger implements the tools.DebugLogger interface using CLI rendering
+// CLIDebugLogger implements the tools.DebugLogger interface using CLI rendering.
+// It provides debug logging functionality that integrates with the CLI's display
+// system, ensuring debug messages are properly formatted and displayed alongside
+// other conversation content.
 type CLIDebugLogger struct {
 	cli *CLI
 }
 
-// NewCLIDebugLogger creates a new CLI debug logger
+// NewCLIDebugLogger creates and returns a new CLIDebugLogger instance that routes
+// debug output through the provided CLI instance. The logger will respect the CLI's
+// debug mode setting and display format preferences.
 func NewCLIDebugLogger(cli *CLI) *CLIDebugLogger {
 	return &CLIDebugLogger{cli: cli}
 }
 
-// LogDebug logs a debug message using the CLI's debug message renderer
+// LogDebug processes and displays a debug message through the CLI's rendering system.
+// Messages are formatted with appropriate emojis and tags based on their content type
+// (DEBUG, POOL, etc.) and only displayed when debug mode is enabled. The method handles
+// multi-line debug output and connection pool status messages with context-aware formatting.
 func (l *CLIDebugLogger) LogDebug(message string) {
 	if l.cli == nil || !l.cli.debug {
 		return
@@ -70,7 +78,9 @@ func (l *CLIDebugLogger) LogDebug(message string) {
 	l.cli.displayContainer()
 }
 
-// IsDebugEnabled returns whether debug logging is enabled
+// IsDebugEnabled checks whether debug logging is currently active. Returns true
+// if the CLI instance exists and has debug mode enabled, allowing callers to
+// conditionally perform expensive debug operations only when necessary.
 func (l *CLIDebugLogger) IsDebugEnabled() bool {
 	return l.cli != nil && l.cli.debug
 }

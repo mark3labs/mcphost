@@ -8,7 +8,8 @@ import (
 	"github.com/cloudwego/eino/schema"
 )
 
-// StreamWithCallback streams content with real-time callbacks and returns complete response
+// StreamWithCallback streams content with real-time callbacks and returns the complete response.
+// It accumulates content and tool calls from the stream, invoking the callback for each content chunk.
 // IMPORTANT: Tool calls are only processed after EOF is reached to ensure we have the complete
 // and final tool call information. This prevents premature tool execution on partial data.
 // Handles different provider streaming patterns:

@@ -21,6 +21,10 @@ import (
 	"github.com/spf13/viper"
 )
 
+// scriptCmd represents the script command for executing MCPHost script files.
+// Script files can contain YAML frontmatter configuration followed by a prompt,
+// allowing for reproducible AI interactions with custom configurations and
+// variable substitution support.
 var scriptCmd = &cobra.Command{
 	Use:   "script <script-file>",
 	Short: "Execute a script file with YAML frontmatter configuration",
@@ -413,11 +417,13 @@ func parseScriptContent(content string, variables map[string]string) (*config.Co
 	return &scriptConfig, nil
 }
 
-// Variable represents a script variable with optional default value
+// Variable represents a script variable with optional default value.
+// Variables can be declared in scripts using ${variable} syntax for required variables
+// or ${variable:-default} syntax for variables with default values.
 type Variable struct {
-	Name         string
-	DefaultValue string
-	HasDefault   bool
+	Name         string // The name of the variable as it appears in the script
+	DefaultValue string // The default value if specified using ${variable:-default} syntax
+	HasDefault   bool   // Whether this variable has a default value
 }
 
 // findVariables extracts all unique variable names from ${variable} patterns in content

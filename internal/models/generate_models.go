@@ -12,37 +12,61 @@ import (
 	"time"
 )
 
-// ModelInfo represents information about a specific model
+// ModelInfo represents information about a specific model.
+// This struct is used during code generation to parse model data
+// from the models.dev API and generate the static Go code.
 type ModelInfo struct {
-	ID          string `json:"id"`
-	Name        string `json:"name"`
-	Attachment  bool   `json:"attachment"`
-	Reasoning   bool   `json:"reasoning"`
-	Temperature bool   `json:"temperature"`
-	Cost        Cost   `json:"cost"`
-	Limit       Limit  `json:"limit"`
+	// ID is the unique identifier for the model
+	ID string `json:"id"`
+	// Name is the human-readable name of the model
+	Name string `json:"name"`
+	// Attachment indicates whether the model supports file attachments
+	Attachment bool `json:"attachment"`
+	// Reasoning indicates whether this is a reasoning/chain-of-thought model
+	Reasoning bool `json:"reasoning"`
+	// Temperature indicates whether the model supports temperature parameter
+	Temperature bool `json:"temperature"`
+	// Cost contains the pricing information for the model
+	Cost Cost `json:"cost"`
+	// Limit contains the context and output token limits
+	Limit Limit `json:"limit"`
 }
 
-// Cost represents the pricing information for a model
+// Cost represents the pricing information for a model.
+// Used during code generation to parse pricing data from models.dev.
 type Cost struct {
-	Input      float64  `json:"input"`
-	Output     float64  `json:"output"`
-	CacheRead  *float64 `json:"cache_read,omitempty"`
+	// Input is the cost per million input tokens
+	Input float64 `json:"input"`
+	// Output is the cost per million output tokens
+	Output float64 `json:"output"`
+	// CacheRead is the cost per million cached read tokens (optional)
+	CacheRead *float64 `json:"cache_read,omitempty"`
+	// CacheWrite is the cost per million cached write tokens (optional)
 	CacheWrite *float64 `json:"cache_write,omitempty"`
 }
 
-// Limit represents the context and output limits for a model
+// Limit represents the context and output limits for a model.
+// Used during code generation to parse token limit data from models.dev.
 type Limit struct {
+	// Context is the maximum number of input tokens
 	Context int `json:"context"`
-	Output  int `json:"output"`
+	// Output is the maximum number of output tokens
+	Output int `json:"output"`
 }
 
-// ProviderInfo represents information about a model provider
+// ProviderInfo represents information about a model provider.
+// Used during code generation to parse provider data from models.dev
+// and generate the static provider registry.
 type ProviderInfo struct {
-	ID     string               `json:"id"`
-	Env    []string             `json:"env"`
-	NPM    string               `json:"npm"`
-	Name   string               `json:"name"`
+	// ID is the unique identifier for the provider
+	ID string `json:"id"`
+	// Env lists the environment variables for API credentials
+	Env []string `json:"env"`
+	// NPM is the NPM package name (for reference)
+	NPM string `json:"npm"`
+	// Name is the human-readable provider name
+	Name string `json:"name"`
+	// Models maps model IDs to their information
 	Models map[string]ModelInfo `json:"models"`
 }
 

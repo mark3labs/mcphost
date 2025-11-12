@@ -12,7 +12,9 @@ import (
 	"time"
 )
 
-// Executor handles hook execution
+// Executor handles hook execution for MCPHost lifecycle events. It manages
+// hook configuration, executes matching hooks in parallel, and processes
+// their outputs to determine application behavior.
 type Executor struct {
 	config      *HookConfig
 	sessionID   string
@@ -22,7 +24,9 @@ type Executor struct {
 	mu          sync.RWMutex
 }
 
-// NewExecutor creates a new hook executor
+// NewExecutor creates a new hook executor with the given configuration,
+// session ID, and transcript path. The executor manages hook execution
+// throughout the application lifecycle.
 func NewExecutor(config *HookConfig, sessionID, transcriptPath string) *Executor {
 	return &Executor{
 		config:     config,
@@ -31,21 +35,25 @@ func NewExecutor(config *HookConfig, sessionID, transcriptPath string) *Executor
 	}
 }
 
-// SetModel sets the model name for hook context
+// SetModel sets the model name for hook context. This information is passed
+// to hooks as part of their input data for context-aware processing.
 func (e *Executor) SetModel(model string) {
 	e.mu.Lock()
 	defer e.mu.Unlock()
 	e.model = model
 }
 
-// SetInteractive sets whether we're in interactive mode
+// SetInteractive sets whether the application is running in interactive mode.
+// This information is passed to hooks for mode-specific behavior.
 func (e *Executor) SetInteractive(interactive bool) {
 	e.mu.Lock()
 	defer e.mu.Unlock()
 	e.interactive = interactive
 }
 
-// PopulateCommonFields fills in the common fields for any hook input
+// PopulateCommonFields fills in the common fields for any hook input, including
+// session ID, transcript path, working directory, event name, timestamp, model,
+// and interactive mode. These fields provide context to hooks regardless of event type.
 func (e *Executor) PopulateCommonFields(event HookEvent) CommonInput {
 	e.mu.RLock()
 	defer e.mu.RUnlock()
@@ -62,7 +70,10 @@ func (e *Executor) PopulateCommonFields(event HookEvent) CommonInput {
 	}
 }
 
-// ExecuteHooks runs all matching hooks for an event
+// ExecuteHooks runs all matching hooks for an event. For tool-related events,
+// it matches hooks based on tool name patterns. Hooks are executed in parallel
+// with configurable timeouts. Returns a combined HookOutput from all executed
+// hooks, with blocking decisions taking precedence.
 func (e *Executor) ExecuteHooks(ctx context.Context, event HookEvent, input interface{}) (*HookOutput, error) {
 	matchers, ok := e.config.Hooks[event]
 	if !ok || len(matchers) == 0 {

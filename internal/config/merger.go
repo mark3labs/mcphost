@@ -7,7 +7,9 @@ import (
 	"github.com/spf13/viper"
 )
 
-// MergeConfigs merges script frontmatter config with base config
+// MergeConfigs merges script frontmatter config with base config, allowing scripts
+// to override MCP server configurations. The script config takes precedence over
+// the base config for any fields that are specified.
 func MergeConfigs(baseConfig *Config, scriptConfig *Config) *Config {
 	merged := *baseConfig // Copy base config
 
@@ -20,7 +22,9 @@ func MergeConfigs(baseConfig *Config, scriptConfig *Config) *Config {
 	return &merged
 }
 
-// LoadAndValidateConfig loads config from viper and validates it
+// LoadAndValidateConfig loads configuration from viper, fixes environment variable
+// casing issues, and validates the configuration. Returns an error if loading or
+// validation fails.
 func LoadAndValidateConfig() (*Config, error) {
 	config := &Config{
 		MCPServers: make(map[string]MCPServerConfig),

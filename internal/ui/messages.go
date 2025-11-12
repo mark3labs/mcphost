@@ -10,7 +10,8 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-// MessageType represents the type of message
+// MessageType represents different categories of messages displayed in the UI,
+// each with distinct visual styling and formatting rules.
 type MessageType int
 
 const (
@@ -22,7 +23,9 @@ const (
 	ErrorMessage    // New type for error messages
 )
 
-// UIMessage represents a rendered message for display
+// UIMessage encapsulates a fully rendered message ready for display in the UI,
+// including its formatted content, display metrics, and metadata. Messages can
+// be static or streaming (progressively updated).
 type UIMessage struct {
 	ID        string
 	Type      MessageType
@@ -38,7 +41,9 @@ func getTheme() Theme {
 	return GetTheme()
 }
 
-// MessageRenderer handles rendering of messages with proper styling
+// MessageRenderer handles the formatting and rendering of different message types
+// with consistent styling, markdown support, and appropriate visual hierarchies
+// for the standard (non-compact) display mode.
 type MessageRenderer struct {
 	width int
 	debug bool
@@ -59,7 +64,9 @@ func getSystemUsername() string {
 	return "User"
 }
 
-// NewMessageRenderer creates a new message renderer
+// NewMessageRenderer creates and initializes a new MessageRenderer with the specified
+// terminal width and debug mode setting. The width parameter determines line wrapping
+// and layout calculations.
 func NewMessageRenderer(width int, debug bool) *MessageRenderer {
 	return &MessageRenderer{
 		width: width,
@@ -67,12 +74,15 @@ func NewMessageRenderer(width int, debug bool) *MessageRenderer {
 	}
 }
 
-// SetWidth updates the renderer width
+// SetWidth updates the terminal width for the renderer, affecting how content
+// is wrapped and formatted in subsequent render operations.
 func (r *MessageRenderer) SetWidth(width int) {
 	r.width = width
 }
 
-// RenderUserMessage renders a user message with right border and background header
+// RenderUserMessage renders a user's input message with distinctive right-aligned
+// formatting, including the system username, timestamp, and markdown-rendered content.
+// The message is displayed with a colored right border for visual distinction.
 func (r *MessageRenderer) RenderUserMessage(content string, timestamp time.Time) UIMessage {
 	// Format timestamp and username
 	timeStr := timestamp.Local().Format("15:04")
@@ -106,7 +116,10 @@ func (r *MessageRenderer) RenderUserMessage(content string, timestamp time.Time)
 	}
 }
 
-// RenderAssistantMessage renders an assistant message with left border and background header
+// RenderAssistantMessage renders an AI assistant's response with left-aligned formatting,
+// including the model name, timestamp, and markdown-rendered content. Empty responses
+// are displayed with a special "Finished without output" message. The message features
+// a colored left border for visual distinction.
 func (r *MessageRenderer) RenderAssistantMessage(content string, timestamp time.Time, modelName string) UIMessage {
 	// Format timestamp and model info with better defaults
 	timeStr := timestamp.Local().Format("15:04")
@@ -151,7 +164,9 @@ func (r *MessageRenderer) RenderAssistantMessage(content string, timestamp time.
 	}
 }
 
-// RenderSystemMessage renders a system message with left border and background header
+// RenderSystemMessage renders MCPHost system messages such as help text, command outputs,
+// and informational notifications. These messages are displayed with a distinctive system
+// color border and "MCPHost System" label to differentiate them from user and AI content.
 func (r *MessageRenderer) RenderSystemMessage(content string, timestamp time.Time) UIMessage {
 	// Format timestamp
 	timeStr := timestamp.Local().Format("15:04")
@@ -193,7 +208,9 @@ func (r *MessageRenderer) RenderSystemMessage(content string, timestamp time.Tim
 	}
 }
 
-// RenderDebugMessage renders debug messages with tool response block styling
+// RenderDebugMessage renders diagnostic and debugging information with special formatting
+// including a debug icon, colored border, and structured layout. Debug messages are only
+// displayed when debug mode is enabled and help developers troubleshoot issues.
 func (r *MessageRenderer) RenderDebugMessage(message string, timestamp time.Time) UIMessage {
 	baseStyle := lipgloss.NewStyle()
 
@@ -251,7 +268,9 @@ func (r *MessageRenderer) RenderDebugMessage(message string, timestamp time.Time
 	}
 }
 
-// RenderDebugConfigMessage renders debug configuration settings with tool response block styling
+// RenderDebugConfigMessage renders configuration settings in a formatted debug display
+// with key-value pairs shown in a structured layout. Used to display runtime configuration
+// for debugging purposes with a distinctive icon and border styling.
 func (r *MessageRenderer) RenderDebugConfigMessage(config map[string]any, timestamp time.Time) UIMessage {
 	baseStyle := lipgloss.NewStyle()
 
@@ -311,7 +330,9 @@ func (r *MessageRenderer) RenderDebugConfigMessage(config map[string]any, timest
 	}
 }
 
-// RenderErrorMessage renders an error message with left border and background header
+// RenderErrorMessage renders error notifications with distinctive red coloring and
+// bold text to ensure visibility. Error messages include timestamp information and
+// are displayed with an error-colored border for immediate recognition.
 func (r *MessageRenderer) RenderErrorMessage(errorMsg string, timestamp time.Time) UIMessage {
 	// Format timestamp
 	timeStr := timestamp.Local().Format("15:04")
@@ -347,7 +368,9 @@ func (r *MessageRenderer) RenderErrorMessage(errorMsg string, timestamp time.Tim
 	}
 }
 
-// RenderToolCallMessage renders a tool call in progress with left border and background header
+// RenderToolCallMessage renders a notification that a tool is being executed, showing
+// the tool name, formatted arguments (if any), and execution timestamp. The message
+// uses tool-specific coloring to distinguish it from regular conversation messages.
 func (r *MessageRenderer) RenderToolCallMessage(toolName, toolArgs string, timestamp time.Time) UIMessage {
 	// Format timestamp
 	timeStr := timestamp.Local().Format("15:04")
@@ -391,7 +414,10 @@ func (r *MessageRenderer) RenderToolCallMessage(toolName, toolArgs string, times
 	}
 }
 
-// RenderToolMessage renders a tool call message with proper styling
+// RenderToolMessage renders the result of a tool execution, formatting the output
+// based on the tool type and whether it succeeded or failed. Error results are
+// displayed in red, while successful results are formatted according to the tool's
+// output type (bash, file content, etc.).
 func (r *MessageRenderer) RenderToolMessage(toolName, toolArgs, toolResult string, isError bool) UIMessage {
 	theme := getTheme()
 
@@ -595,7 +621,9 @@ func (r *MessageRenderer) renderMarkdown(content string, width int) string {
 	return strings.TrimSuffix(rendered, "\n")
 }
 
-// MessageContainer wraps multiple messages in a container
+// MessageContainer manages a collection of UI messages, handling their display,
+// updates, and layout within the terminal. It supports both standard and compact
+// display modes and maintains state for streaming message updates.
 type MessageContainer struct {
 	messages    []UIMessage
 	width       int
@@ -605,7 +633,9 @@ type MessageContainer struct {
 	wasCleared  bool   // Track if container was explicitly cleared
 }
 
-// NewMessageContainer creates a new message container
+// NewMessageContainer creates and initializes a new MessageContainer with the
+// specified dimensions and display mode. The container starts empty and will
+// display a welcome message until the first message is added.
 func NewMessageContainer(width, height int, compact bool) *MessageContainer {
 	return &MessageContainer{
 		messages:    make([]UIMessage, 0),
@@ -615,18 +645,22 @@ func NewMessageContainer(width, height int, compact bool) *MessageContainer {
 	}
 }
 
-// AddMessage adds a message to the container
+// AddMessage appends a new UIMessage to the container's collection and resets
+// the cleared state flag. Messages are displayed in the order they were added.
 func (c *MessageContainer) AddMessage(msg UIMessage) {
 	c.messages = append(c.messages, msg)
 	c.wasCleared = false // Reset the cleared flag when adding messages
 }
 
-// SetModelName sets the current model name for the container
+// SetModelName updates the AI model name used for rendering assistant messages.
+// This name is displayed in message headers to indicate which model is responding.
 func (c *MessageContainer) SetModelName(modelName string) {
 	c.modelName = modelName
 }
 
-// UpdateLastMessage updates the content of the last message efficiently
+// UpdateLastMessage efficiently updates the content of the most recent message
+// in the container. This is primarily used for streaming responses where the
+// assistant's message is progressively built. Only works for assistant messages.
 func (c *MessageContainer) UpdateLastMessage(content string) {
 	if len(c.messages) == 0 {
 		return
@@ -651,19 +685,23 @@ func (c *MessageContainer) UpdateLastMessage(content string) {
 	}
 }
 
-// Clear clears all messages from the container
+// Clear removes all messages from the container and sets a flag to prevent
+// showing the welcome screen. Used when starting a fresh conversation.
 func (c *MessageContainer) Clear() {
 	c.messages = make([]UIMessage, 0)
 	c.wasCleared = true
 }
 
-// SetSize updates the container size
+// SetSize updates the container's dimensions, typically called when the terminal
+// is resized. This affects how messages are wrapped and displayed.
 func (c *MessageContainer) SetSize(width, height int) {
 	c.width = width
 	c.height = height
 }
 
-// Render renders all messages in the container
+// Render generates the complete visual representation of all messages in the
+// container. Returns an empty state display if no messages exist, or formats
+// all messages according to the current display mode (standard or compact).
 func (c *MessageContainer) Render() string {
 	if len(c.messages) == 0 {
 		// Don't show welcome box if explicitly cleared

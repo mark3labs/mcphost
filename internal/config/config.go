@@ -11,7 +11,9 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// MCPServerConfig represents configuration for an MCP server
+// MCPServerConfig represents configuration for an MCP server, supporting both
+// local (stdio), remote (StreamableHTTP/SSE), and builtin (in-process) server types.
+// It maintains backward compatibility with legacy configuration formats.
 type MCPServerConfig struct {
 	Type          string            `json:"type"`
 	Command       []string          `json:"command,omitempty"`
@@ -29,7 +31,9 @@ type MCPServerConfig struct {
 	Headers   []string       `json:"headers,omitempty"`
 }
 
-// UnmarshalJSON handles both new and legacy config formats
+// UnmarshalJSON handles both new and legacy config formats for backward compatibility.
+// New format uses "type" field with "local", "remote", or "builtin" values.
+// Legacy format uses "transport", "command", "args", and "env" fields.
 func (s *MCPServerConfig) UnmarshalJSON(data []byte) error {
 	// First try to unmarshal as the new format
 	type newFormat struct {
@@ -100,11 +104,15 @@ func (s *MCPServerConfig) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// AdaptiveColor represents a color that adapts to light and dark themes.
+// Either light or dark can be specified, or both for theme-aware coloring.
 type AdaptiveColor struct {
 	Light string `json:"light,omitempty" yaml:"light,omitempty"`
 	Dark  string `json:"dark,omitempty" yaml:"dark,omitempty"`
 }
 
+// Theme defines the color scheme for the application UI with adaptive colors
+// that support both light and dark modes.
 type Theme struct {
 	Primary     AdaptiveColor `json:"primary" yaml:"primary"`
 	Secondary   AdaptiveColor `json:"secondary" yaml:"secondary"`
@@ -124,6 +132,8 @@ type Theme struct {
 	Highlight   AdaptiveColor `json:"highlight" yaml:"highlight"`
 }
 
+// MarkdownTheme defines the color scheme for markdown rendering with syntax
+// highlighting support and adaptive colors for light and dark modes.
 type MarkdownTheme struct {
 	Text    AdaptiveColor `json:"text" yaml:"text"`
 	Muted   AdaptiveColor `json:"muted" yaml:"muted"`
@@ -139,7 +149,9 @@ type MarkdownTheme struct {
 	Comment AdaptiveColor `json:"comment" yaml:"comment"`
 }
 
-// Config represents the application configuration
+// Config represents the complete application configuration including MCP servers,
+// model settings, UI preferences, and API credentials. It supports both command-line
+// flags and configuration file settings.
 type Config struct {
 	MCPServers     map[string]MCPServerConfig `json:"mcpServers" yaml:"mcpServers"`
 	Model          string                     `json:"model,omitempty" yaml:"model,omitempty"`
@@ -166,7 +178,9 @@ type Config struct {
 	TLSSkipVerify bool `json:"tls-skip-verify,omitempty" yaml:"tls-skip-verify,omitempty"`
 }
 
-// GetTransportType returns the transport type for the server config
+// GetTransportType returns the transport type for the server config, mapping
+// simplified type names to actual transport protocols. Supports legacy format
+// detection and automatic type inference from configuration.
 func (s *MCPServerConfig) GetTransportType() string {
 	// Legacy format support - check explicit transport first
 	if s.Transport != "" {
@@ -197,7 +211,9 @@ func (s *MCPServerConfig) GetTransportType() string {
 	return "stdio" // default
 }
 
-// Validate validates the configuration
+// Validate validates the configuration, ensuring required fields are present
+// for each server type and that tool filters are used correctly. Returns an
+// error describing any validation failures.
 func (c *Config) Validate() error {
 	for serverName, serverConfig := range c.MCPServers {
 		if len(serverConfig.AllowedTools) > 0 && len(serverConfig.ExcludedTools) > 0 {
@@ -226,7 +242,9 @@ func (c *Config) Validate() error {
 	return nil
 }
 
-// LoadSystemPrompt loads system prompt from file or returns the string directly
+// LoadSystemPrompt loads system prompt from file or returns the string directly.
+// If input is a path to an existing file, its contents are read and returned.
+// Otherwise, the input string is returned as-is.
 func LoadSystemPrompt(input string) (string, error) {
 	if input == "" {
 		return "", nil
@@ -246,7 +264,9 @@ func LoadSystemPrompt(input string) (string, error) {
 	return input, nil
 }
 
-// EnsureConfigExists checks if a config file exists and creates a default one if not
+// EnsureConfigExists checks if a config file exists and creates a default one if not.
+// It searches for .mcphost.{yml,yaml,json} or legacy .mcp.{yml,yaml,json} files in
+// the user's home directory. If none exist, creates a default .mcphost.yml with examples.
 func EnsureConfigExists() error {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
@@ -378,6 +398,10 @@ mcpServers:
 	return nil
 }
 
+// FilepathOr reads a configuration value that can be either a direct value or a
+// filepath to a JSON/YAML file containing the value. If the value is a string
+// starting with "~/" or a relative path, it's expanded to an absolute path.
+// The contents of the file are then unmarshaled into the provided value pointer.
 func FilepathOr[T any](key string, value *T) error {
 	var field any
 	err := viper.UnmarshalKey(key, &field)
@@ -428,6 +452,9 @@ func FilepathOr[T any](key string, value *T) error {
 
 var configPath string
 
+// SetConfigPath sets the configuration file path for resolving relative paths
+// in configuration values. This should be called when the configuration file
+// location is known.
 func SetConfigPath(path string) {
 	configPath = path
 }

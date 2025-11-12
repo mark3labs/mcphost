@@ -17,21 +17,27 @@ import (
 
 var _ model.ToolCallingChatModel = (*ChatModel)(nil)
 
-// NewChatModel creates a new Gemini chat model instance
+// NewChatModel creates a new Gemini chat model instance.
+// It initializes a Google Gemini model with the specified configuration,
+// supporting both text generation and tool calling capabilities.
 //
 // Parameters:
-//   - ctx: The context for the operation
-//   - cfg: Configuration for the Gemini model
+//   - ctx: The context for the operation (currently unused but kept for interface consistency)
+//   - cfg: Configuration for the Gemini model including client, model name, and parameters
 //
 // Returns:
-//   - model.ChatModel: A chat model interface implementation
+//   - *ChatModel: A Gemini chat model instance implementing ToolCallingChatModel
 //   - error: Any error that occurred during creation
 //
 // Example:
 //
+//	client, _ := genai.NewClient(ctx, &genai.ClientConfig{
+//	    APIKey: "your-api-key",
+//	})
 //	model, err := gemini.NewChatModel(ctx, &gemini.Config{
 //	    Client: client,
 //	    Model: "gemini-pro",
+//	    MaxTokens: &maxTokens,
 //	})
 func NewChatModel(_ context.Context, cfg *Config) (*ChatModel, error) {
 	return &ChatModel{
@@ -90,28 +96,58 @@ type Config struct {
 	SafetySettings []*genai.SafetySetting
 }
 
-// options contains Gemini-specific options for model configuration
+// options contains Gemini-specific options for model configuration.
+// These are options that are specific to the Gemini API and not part
+// of the common model options interface.
 type options struct {
-	TopK           *int32
+	// TopK limits the number of tokens to sample from
+	TopK *int32
+	// ResponseSchema defines the expected JSON structure for responses
 	ResponseSchema *openapi3.Schema
 }
 
+// ChatModel implements the Gemini chat model for the eino framework.
+// It provides integration with Google's Gemini API, supporting both
+// text generation and tool calling capabilities.
 type ChatModel struct {
+	// cli is the Gemini API client instance
 	cli *genai.Client
 
-	model               string
-	maxTokens           *int
-	topP                *float32
-	temperature         *float32
-	topK                *int32
-	responseSchema      *openapi3.Schema
-	tools               []*genai.Tool
-	origTools           []*schema.ToolInfo
-	toolChoice          *schema.ToolChoice
+	// model specifies which Gemini model to use
+	model string
+	// maxTokens limits the response length
+	maxTokens *int
+	// topP controls nucleus sampling
+	topP *float32
+	// temperature controls randomness
+	temperature *float32
+	// topK limits token sampling
+	topK *int32
+	// responseSchema for structured JSON output
+	responseSchema *openapi3.Schema
+	// tools converted to Gemini format
+	tools []*genai.Tool
+	// origTools stores the original tool definitions
+	origTools []*schema.ToolInfo
+	// toolChoice controls how tools are used
+	toolChoice *schema.ToolChoice
+	// enableCodeExecution allows code execution (use with caution)
 	enableCodeExecution bool
-	safetySettings      []*genai.SafetySetting
+	// safetySettings for content filtering
+	safetySettings []*genai.SafetySetting
 }
 
+// Generate generates a single response from the Gemini model.
+// It processes the input messages and returns a complete response.
+//
+// Parameters:
+//   - ctx: Context for the operation, supporting cancellation and callbacks
+//   - input: The conversation history as a slice of messages
+//   - opts: Optional configuration options for the generation
+//
+// Returns:
+//   - *schema.Message: The generated response message with content and metadata
+//   - error: Any error that occurred during generation
 func (cm *ChatModel) Generate(ctx context.Context, input []*schema.Message, opts ...model.Option) (message *schema.Message, err error) {
 	ctx = callbacks.EnsureRunInfo(ctx, cm.GetType(), components.ComponentOfChatModel)
 
@@ -154,6 +190,17 @@ func (cm *ChatModel) Generate(ctx context.Context, input []*schema.Message, opts
 	return message, nil
 }
 
+// Stream generates a streaming response from the Gemini model.
+// It allows incremental processing of the model's output as it's generated.
+//
+// Parameters:
+//   - ctx: Context for the operation, supporting cancellation and callbacks
+//   - input: The conversation history as a slice of messages
+//   - opts: Optional configuration options for the generation
+//
+// Returns:
+//   - *schema.StreamReader[*schema.Message]: A reader for the streaming response
+//   - error: Any error that occurred during stream setup
 func (cm *ChatModel) Stream(ctx context.Context, input []*schema.Message, opts ...model.Option) (result *schema.StreamReader[*schema.Message], err error) {
 	ctx = callbacks.EnsureRunInfo(ctx, cm.GetType(), components.ComponentOfChatModel)
 
@@ -218,6 +265,16 @@ func (cm *ChatModel) Stream(ctx context.Context, input []*schema.Message, opts .
 	}), nil
 }
 
+// WithTools creates a new model instance with the specified tools available.
+// It returns a new ChatModel with tools configured for function calling.
+// The original model instance remains unchanged.
+//
+// Parameters:
+//   - tools: A slice of tool definitions that the model can use
+//
+// Returns:
+//   - model.ToolCallingChatModel: A new model instance with tools enabled
+//   - error: Returns an error if no tools provided or conversion fails
 func (cm *ChatModel) WithTools(tools []*schema.ToolInfo) (model.ToolCallingChatModel, error) {
 	if len(tools) == 0 {
 		return nil, errors.New("no tools to bind")
@@ -235,6 +292,15 @@ func (cm *ChatModel) WithTools(tools []*schema.ToolInfo) (model.ToolCallingChatM
 	return &ncm, nil
 }
 
+// BindTools binds tools to the current model instance.
+// Unlike WithTools, this modifies the current instance rather than
+// creating a new one. Tools are set to "allowed" mode by default.
+//
+// Parameters:
+//   - tools: A slice of tool definitions to bind to the model
+//
+// Returns:
+//   - error: Returns an error if no tools provided or conversion fails
 func (cm *ChatModel) BindTools(tools []*schema.ToolInfo) error {
 	if len(tools) == 0 {
 		return errors.New("no tools to bind")
@@ -251,6 +317,15 @@ func (cm *ChatModel) BindTools(tools []*schema.ToolInfo) error {
 	return nil
 }
 
+// BindForcedTools binds tools to the current model instance in forced mode.
+// This ensures the model will always use one of the provided tools
+// rather than generating a text response.
+//
+// Parameters:
+//   - tools: A slice of tool definitions to bind to the model
+//
+// Returns:
+//   - error: Returns an error if no tools provided or conversion fails
 func (cm *ChatModel) BindForcedTools(tools []*schema.ToolInfo) error {
 	if len(tools) == 0 {
 		return errors.New("no tools to bind")
@@ -679,12 +754,24 @@ func (cm *ChatModel) convertCallbackOutput(message *schema.Message, conf *model.
 	return callbackOutput
 }
 
+// IsCallbacksEnabled indicates whether this model supports callbacks.
+// For the Gemini model, callbacks are always enabled to support
+// token usage tracking and other monitoring features.
+//
+// Returns:
+//   - bool: Always returns true for Gemini models
 func (cm *ChatModel) IsCallbacksEnabled() bool {
 	return true
 }
 
 const typ = "Gemini"
 
+// GetType returns the type identifier for this model.
+// This is used for logging and debugging purposes to identify
+// which model implementation is being used.
+//
+// Returns:
+//   - string: Returns "Gemini" as the model type
 func (cm *ChatModel) GetType() string {
 	return typ
 }

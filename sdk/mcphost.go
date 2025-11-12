@@ -13,14 +13,18 @@ import (
 	"github.com/spf13/viper"
 )
 
-// MCPHost provides programmatic access to mcphost
+// MCPHost provides programmatic access to mcphost functionality, allowing
+// integration of MCP tools and LLM interactions into Go applications. It manages
+// agents, sessions, and model configurations.
 type MCPHost struct {
 	agent       *agent.Agent
 	sessionMgr  *session.Manager
 	modelString string
 }
 
-// Options for creating MCPHost (all optional - will use CLI defaults)
+// Options configures MCPHost creation with optional overrides for model,
+// prompts, configuration, and behavior settings. All fields are optional
+// and will use CLI defaults if not specified.
 type Options struct {
 	Model        string // Override model (e.g., "anthropic:claude-3-sonnet")
 	SystemPrompt string // Override system prompt
@@ -30,7 +34,9 @@ type Options struct {
 	Quiet        bool   // Suppress debug output
 }
 
-// New creates MCPHost instance using the same initialization as CLI
+// New creates an MCPHost instance using the same initialization as the CLI.
+// It loads configuration, initializes MCP servers, creates the LLM model, and
+// sets up the agent for interaction. Returns an error if initialization fails.
 func New(ctx context.Context, opts *Options) (*MCPHost, error) {
 	if opts == nil {
 		opts = &Options{}
@@ -118,7 +124,9 @@ func New(ctx context.Context, opts *Options) (*MCPHost, error) {
 	}, nil
 }
 
-// Prompt sends a message and returns the response
+// Prompt sends a message to the agent and returns the response. The agent may
+// use tools as needed to generate the response. The conversation history is
+// automatically maintained in the session. Returns an error if generation fails.
 func (m *MCPHost) Prompt(ctx context.Context, message string) (string, error) {
 	// Get messages from session
 	messages := m.sessionMgr.GetMessages()
@@ -148,7 +156,9 @@ func (m *MCPHost) Prompt(ctx context.Context, message string) (string, error) {
 	return result.FinalResponse.Content, nil
 }
 
-// PromptWithCallbacks sends a message with callbacks for tool execution
+// PromptWithCallbacks sends a message with callbacks for monitoring tool execution
+// and streaming responses. The callbacks allow real-time observation of tool calls,
+// results, and response generation. Returns the final response or an error.
 func (m *MCPHost) PromptWithCallbacks(
 	ctx context.Context,
 	message string,
@@ -184,12 +194,14 @@ func (m *MCPHost) PromptWithCallbacks(
 	return result.FinalResponse.Content, nil
 }
 
-// GetSessionManager returns the current session manager
+// GetSessionManager returns the current session manager for direct access
+// to conversation history and session manipulation.
 func (m *MCPHost) GetSessionManager() *session.Manager {
 	return m.sessionMgr
 }
 
-// LoadSession loads a session from file
+// LoadSession loads a previously saved session from a file, restoring the
+// conversation history. Returns an error if the file cannot be loaded or parsed.
 func (m *MCPHost) LoadSession(path string) error {
 	s, err := session.LoadFromFile(path)
 	if err != nil {
@@ -199,22 +211,27 @@ func (m *MCPHost) LoadSession(path string) error {
 	return nil
 }
 
-// SaveSession saves the current session to file
+// SaveSession saves the current session to a file for later restoration.
+// Returns an error if the session cannot be written to the specified path.
 func (m *MCPHost) SaveSession(path string) error {
 	return m.sessionMgr.GetSession().SaveToFile(path)
 }
 
-// ClearSession clears the current session history
+// ClearSession clears the current session history, starting a new conversation
+// with an empty message history.
 func (m *MCPHost) ClearSession() {
 	m.sessionMgr = session.NewManager("")
 }
 
-// GetModelString returns the current model string
+// GetModelString returns the current model string identifier (e.g.,
+// "anthropic:claude-3-sonnet" or "openai:gpt-4") being used by the agent.
 func (m *MCPHost) GetModelString() string {
 	return m.modelString
 }
 
-// Close cleans up resources
+// Close cleans up resources including MCP server connections and model resources.
+// Should be called when the MCPHost instance is no longer needed. Returns an
+// error if cleanup fails.
 func (m *MCPHost) Close() error {
 	return m.agent.Close()
 }

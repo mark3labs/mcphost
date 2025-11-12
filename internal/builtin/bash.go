@@ -37,7 +37,10 @@ var bannedCommands = []string{
 	"safari",
 }
 
-// NewBashServer creates a new bash MCP server
+// NewBashServer creates a new MCP server that provides bash command execution capabilities.
+// The server includes a single tool "run_shell_cmd" that executes shell commands with
+// security restrictions, timeout controls, and output truncation. Returns an error if
+// server initialization fails.
 func NewBashServer() (*server.MCPServer, error) {
 	s := server.NewMCPServer("bash-server", "1.0.0", server.WithToolCapabilities(true))
 

@@ -1,6 +1,8 @@
 package ui
 
-// SlashCommand represents a slash command with its metadata
+// SlashCommand represents a user-invokable slash command with its metadata.
+// Commands can have multiple aliases and are organized by category for better
+// discoverability and help display.
 type SlashCommand struct {
 	Name        string
 	Description string
@@ -8,7 +10,9 @@ type SlashCommand struct {
 	Category    string // e.g., "Navigation", "System", "Info"
 }
 
-// SlashCommands is the registry of all available slash commands
+// SlashCommands provides the global registry of all available slash commands
+// in the application. Commands are organized by category (Info, System) and
+// include their primary names, descriptions, and alternative aliases.
 var SlashCommands = []SlashCommand{
 	{
 		Name:        "/help",
@@ -55,7 +59,9 @@ var SlashCommands = []SlashCommand{
 	},
 }
 
-// GetCommandByName returns a command by its name or alias
+// GetCommandByName looks up a slash command by its primary name or any of its
+// aliases. Returns a pointer to the matching SlashCommand, or nil if no command
+// matches the provided name.
 func GetCommandByName(name string) *SlashCommand {
 	for i := range SlashCommands {
 		cmd := &SlashCommands[i]
@@ -71,7 +77,9 @@ func GetCommandByName(name string) *SlashCommand {
 	return nil
 }
 
-// GetAllCommandNames returns all command names and aliases
+// GetAllCommandNames returns a complete list of all command names and their aliases.
+// This is useful for command completion, validation, and help display. The returned
+// slice contains both primary command names and all alternative aliases.
 func GetAllCommandNames() []string {
 	var names []string
 	for _, cmd := range SlashCommands {

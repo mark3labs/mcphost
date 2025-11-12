@@ -11,7 +11,9 @@ import (
 	"github.com/mark3labs/mcp-go/server"
 )
 
-// TodoInfo represents a single todo item
+// TodoInfo represents a single todo item with content, status, priority, and ID.
+// Status can be "pending", "in_progress", or "completed". Priority can be "high",
+// "medium", or "low". Each todo must have a unique ID.
 type TodoInfo struct {
 	Content  string `json:"content"`
 	Status   string `json:"status"`
@@ -19,13 +21,18 @@ type TodoInfo struct {
 	ID       string `json:"id"`
 }
 
-// TodoServer implements a todo management MCP server with in-memory storage
+// TodoServer implements a todo management MCP server with in-memory storage.
+// It provides thread-safe operations for reading and writing todo lists, with
+// support for task status tracking and priority levels.
 type TodoServer struct {
 	todos []TodoInfo
 	mutex sync.RWMutex
 }
 
-// NewTodoServer creates a new todo MCP server with in-memory storage
+// NewTodoServer creates a new MCP server that provides todo list management capabilities.
+// The server includes two tools: "todowrite" for updating the todo list and "todoread"
+// for retrieving the current list. Todos are stored in memory and not persisted.
+// Returns an error if server initialization fails.
 func NewTodoServer() (*server.MCPServer, error) {
 	todoServer := &TodoServer{
 		todos: make([]TodoInfo, 0),

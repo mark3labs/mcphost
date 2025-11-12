@@ -10,6 +10,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// authCmd represents the auth command for managing AI provider authentication.
+// This command provides subcommands for login, logout, and status checking
+// of authentication credentials for various AI providers, with OAuth support
+// for providers like Anthropic.
 var authCmd = &cobra.Command{
 	Use:   "auth",
 	Short: "Manage authentication credentials for AI providers",
@@ -27,6 +31,9 @@ Examples:
   mcphost auth status`,
 }
 
+// authLoginCmd represents the login subcommand for authenticating with AI providers.
+// It handles OAuth flow for supported providers, opening a browser for authentication
+// and securely storing the resulting credentials for future use.
 var authLoginCmd = &cobra.Command{
 	Use:   "login [provider]",
 	Short: "Authenticate with an AI provider using OAuth",
@@ -45,6 +52,9 @@ Example:
 	RunE: runAuthLogin,
 }
 
+// authLogoutCmd represents the logout subcommand for removing stored authentication credentials.
+// This command removes stored API keys or OAuth tokens for specified providers,
+// requiring the user to authenticate again or use environment variables.
 var authLogoutCmd = &cobra.Command{
 	Use:   "logout [provider]",
 	Short: "Remove stored authentication credentials for a provider",
@@ -62,6 +72,9 @@ Example:
 	RunE: runAuthLogout,
 }
 
+// authStatusCmd represents the status subcommand for checking authentication status.
+// It displays which providers have stored credentials, their types (OAuth vs API key),
+// creation dates, and expiration status without revealing the actual credentials.
 var authStatusCmd = &cobra.Command{
 	Use:   "status",
 	Short: "Show authentication status for all providers",

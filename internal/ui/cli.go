@@ -17,7 +17,10 @@ var (
 	promptStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("12"))
 )
 
-// CLI handles the command line interface with improved message rendering
+// CLI manages the command-line interface for MCPHost, providing message rendering,
+// user input handling, and display management. It supports both standard and compact
+// display modes, handles streaming responses, tracks token usage, and manages the
+// overall conversation flow between the user and AI assistants.
 type CLI struct {
 	messageRenderer  *MessageRenderer
 	compactRenderer  *CompactRenderer // Add compact renderer
@@ -32,7 +35,10 @@ type CLI struct {
 	usageDisplayed   bool   // track if usage info was displayed after last assistant message
 }
 
-// NewCLI creates a new CLI instance with message container
+// NewCLI creates and initializes a new CLI instance with the specified display modes.
+// The debug parameter enables debug message rendering, while compact enables a more
+// condensed display format. Returns an initialized CLI ready for interaction or an
+// error if initialization fails.
 func NewCLI(debug bool, compact bool) (*CLI, error) {
 	cli := &CLI{
 		compactMode: compact,
@@ -46,7 +52,9 @@ func NewCLI(debug bool, compact bool) (*CLI, error) {
 	return cli, nil
 }
 
-// SetUsageTracker sets the usage tracker for the CLI
+// SetUsageTracker attaches a usage tracker to the CLI for monitoring token
+// consumption and costs. The tracker will be automatically updated with the
+// current display width for proper rendering.
 func (c *CLI) SetUsageTracker(tracker *UsageTracker) {
 	c.usageTracker = tracker
 	if c.usageTracker != nil {
@@ -54,12 +62,14 @@ func (c *CLI) SetUsageTracker(tracker *UsageTracker) {
 	}
 }
 
-// GetDebugLogger returns a debug logger that uses the CLI for rendering
+// GetDebugLogger returns a CLIDebugLogger instance that routes debug output
+// through the CLI's rendering system for consistent message formatting and display.
 func (c *CLI) GetDebugLogger() *CLIDebugLogger {
 	return NewCLIDebugLogger(c)
 }
 
-// SetModelName sets the current model name for the CLI
+// SetModelName updates the current AI model name being used in the conversation.
+// This name is displayed in message headers to indicate which model is responding.
 func (c *CLI) SetModelName(modelName string) {
 	c.modelName = modelName
 	if c.messageContainer != nil {
@@ -67,7 +77,10 @@ func (c *CLI) SetModelName(modelName string) {
 	}
 }
 
-// GetPrompt gets user input using the huh library with divider and padding
+// GetPrompt displays an interactive prompt and waits for user input. It provides
+// slash command support, multi-line editing, and cancellation handling. Returns
+// the user's input as a string, or an error if the operation was cancelled or
+// failed. Returns io.EOF for clean exit signals.
 func (c *CLI) GetPrompt() (string, error) {
 	// Usage info is now displayed immediately after responses via DisplayUsageAfterResponse()
 	// No need to display it here to avoid duplication
@@ -107,7 +120,9 @@ func (c *CLI) GetPrompt() (string, error) {
 	return "", fmt.Errorf("unexpected model type")
 }
 
-// ShowSpinner displays a spinner with the given message and executes the action
+// ShowSpinner displays an animated spinner with the specified message while
+// executing the provided action function. The spinner automatically stops when
+// the action completes. Returns any error returned by the action function.
 func (c *CLI) ShowSpinner(message string, action func() error) error {
 	spinner := NewSpinner(message)
 	spinner.Start()
@@ -119,7 +134,9 @@ func (c *CLI) ShowSpinner(message string, action func() error) error {
 	return err
 }
 
-// DisplayUserMessage displays the user's message using the appropriate renderer
+// DisplayUserMessage renders and displays a user's message with appropriate
+// formatting based on the current display mode (standard or compact). The message
+// is timestamped and styled according to the active theme.
 func (c *CLI) DisplayUserMessage(message string) {
 	var msg UIMessage
 	if c.compactMode {
@@ -131,12 +148,16 @@ func (c *CLI) DisplayUserMessage(message string) {
 	c.displayContainer()
 }
 
-// DisplayAssistantMessage displays the assistant's message using the new renderer
+// DisplayAssistantMessage renders and displays an AI assistant's response message
+// with appropriate formatting. This method delegates to DisplayAssistantMessageWithModel
+// with an empty model name for backward compatibility.
 func (c *CLI) DisplayAssistantMessage(message string) error {
 	return c.DisplayAssistantMessageWithModel(message, "")
 }
 
-// DisplayAssistantMessageWithModel displays the assistant's message with model info
+// DisplayAssistantMessageWithModel renders and displays an AI assistant's response
+// with the specified model name shown in the message header. The message is
+// formatted according to the current display mode and includes timestamp information.
 func (c *CLI) DisplayAssistantMessageWithModel(message, modelName string) error {
 	var msg UIMessage
 	if c.compactMode {
@@ -149,7 +170,9 @@ func (c *CLI) DisplayAssistantMessageWithModel(message, modelName string) error 
 	return nil
 }
 
-// DisplayToolCallMessage displays a tool call in progress
+// DisplayToolCallMessage renders and displays a message indicating that a tool
+// is being executed. Shows the tool name and its arguments formatted appropriately
+// for the current display mode. This is typically shown while a tool is running.
 func (c *CLI) DisplayToolCallMessage(toolName, toolArgs string) {
 
 	c.messageContainer.messages = nil // clear previous messages (they should have been printed already)
@@ -167,7 +190,9 @@ func (c *CLI) DisplayToolCallMessage(toolName, toolArgs string) {
 	c.displayContainer()
 }
 
-// DisplayToolMessage displays a tool call message
+// DisplayToolMessage renders and displays the complete result of a tool execution,
+// including the tool name, arguments, and result. The isError parameter determines
+// whether the result should be displayed as an error or success message.
 func (c *CLI) DisplayToolMessage(toolName, toolArgs, toolResult string, isError bool) {
 	var msg UIMessage
 	if c.compactMode {
@@ -181,7 +206,9 @@ func (c *CLI) DisplayToolMessage(toolName, toolArgs, toolResult string, isError 
 	c.displayContainer()
 }
 
-// StartStreamingMessage starts a streaming assistant message
+// StartStreamingMessage initializes a new streaming message display for real-time
+// AI responses. The message will be progressively updated as content arrives.
+// The modelName parameter indicates which AI model is generating the response.
 func (c *CLI) StartStreamingMessage(modelName string) {
 	// Add an empty assistant message that we'll update during streaming
 	var msg UIMessage
@@ -196,14 +223,18 @@ func (c *CLI) StartStreamingMessage(modelName string) {
 	c.displayContainer()
 }
 
-// UpdateStreamingMessage updates the streaming message with new content
+// UpdateStreamingMessage updates the currently streaming message with new content.
+// This method should be called after StartStreamingMessage to progressively display
+// AI responses as they are generated in real-time.
 func (c *CLI) UpdateStreamingMessage(content string) {
 	// Update the last message (which should be the streaming assistant message)
 	c.messageContainer.UpdateLastMessage(content)
 	c.displayContainer()
 }
 
-// DisplayError displays an error message using the appropriate renderer
+// DisplayError renders and displays an error message with distinctive formatting
+// to ensure visibility. The error is timestamped and styled according to the
+// current display mode's error theme.
 func (c *CLI) DisplayError(err error) {
 	var msg UIMessage
 	if c.compactMode {
@@ -215,7 +246,9 @@ func (c *CLI) DisplayError(err error) {
 	c.displayContainer()
 }
 
-// DisplayInfo displays an informational message using the appropriate renderer
+// DisplayInfo renders and displays an informational system message. These messages
+// are typically used for status updates, notifications, or other non-error system
+// communications to the user.
 func (c *CLI) DisplayInfo(message string) {
 	var msg UIMessage
 	if c.compactMode {
@@ -227,7 +260,8 @@ func (c *CLI) DisplayInfo(message string) {
 	c.displayContainer()
 }
 
-// DisplayCancellation displays a cancellation message
+// DisplayCancellation displays a system message indicating that the current
+// AI generation has been cancelled by the user (typically via ESC key).
 func (c *CLI) DisplayCancellation() {
 	var msg UIMessage
 	if c.compactMode {
@@ -239,7 +273,9 @@ func (c *CLI) DisplayCancellation() {
 	c.displayContainer()
 }
 
-// DisplayDebugMessage displays debug messages using the appropriate renderer
+// DisplayDebugMessage renders and displays a debug message if debug mode is enabled.
+// Debug messages are formatted distinctively and only shown when the CLI is
+// initialized with debug=true.
 func (c *CLI) DisplayDebugMessage(message string) {
 	if !c.debug {
 		return
@@ -254,7 +290,9 @@ func (c *CLI) DisplayDebugMessage(message string) {
 	c.displayContainer()
 }
 
-// DisplayDebugConfig displays configuration settings using the appropriate renderer
+// DisplayDebugConfig renders and displays configuration settings in a formatted
+// debug message. The config parameter should contain key-value pairs representing
+// configuration options that will be displayed for debugging purposes.
 func (c *CLI) DisplayDebugConfig(config map[string]any) {
 	var msg UIMessage
 	if c.compactMode {
@@ -266,7 +304,9 @@ func (c *CLI) DisplayDebugConfig(config map[string]any) {
 	c.displayContainer()
 }
 
-// DisplayHelp displays help information in a message block
+// DisplayHelp renders and displays comprehensive help information showing all
+// available slash commands, keyboard shortcuts, and usage instructions in a
+// formatted system message block.
 func (c *CLI) DisplayHelp() {
 	help := `## Available Commands
 
@@ -288,7 +328,9 @@ You can also just type your message to chat with the AI assistant.`
 	c.displayContainer()
 }
 
-// DisplayTools displays available tools in a message block
+// DisplayTools renders and displays a formatted list of all available tools
+// that can be used by the AI assistant. Each tool is numbered and shown in
+// a system message block for easy reference.
 func (c *CLI) DisplayTools(tools []string) {
 	var content strings.Builder
 	content.WriteString("## Available Tools\n\n")
@@ -307,7 +349,9 @@ func (c *CLI) DisplayTools(tools []string) {
 	c.displayContainer()
 }
 
-// DisplayServers displays configured MCP servers in a message block
+// DisplayServers renders and displays a formatted list of all configured MCP
+// (Model Context Protocol) servers. Each server is numbered and shown in a
+// system message block for easy reference.
 func (c *CLI) DisplayServers(servers []string) {
 	var content strings.Builder
 	content.WriteString("## Configured MCP Servers\n\n")
@@ -326,18 +370,25 @@ func (c *CLI) DisplayServers(servers []string) {
 	c.displayContainer()
 }
 
-// IsSlashCommand checks if the input is a slash command
+// IsSlashCommand determines whether the provided input string is a slash command
+// by checking if it starts with a forward slash (/). Returns true for commands
+// like "/help", "/tools", etc.
 func (c *CLI) IsSlashCommand(input string) bool {
 	return strings.HasPrefix(input, "/")
 }
 
-// SlashCommandResult represents the result of handling a slash command
+// SlashCommandResult encapsulates the outcome of processing a slash command,
+// indicating whether the command was recognized and handled, and whether the
+// conversation history should be cleared as a result of the command.
 type SlashCommandResult struct {
 	Handled      bool
 	ClearHistory bool
 }
 
-// HandleSlashCommand handles slash commands and returns the result
+// HandleSlashCommand processes and executes slash commands, returning a result
+// that indicates whether the command was handled and any side effects. The servers
+// and tools parameters provide context for commands that display available resources.
+// Supported commands include /help, /tools, /servers, /clear, /usage, /reset-usage, and /quit.
 func (c *CLI) HandleSlashCommand(input string, servers []string, tools []string) SlashCommandResult {
 	switch input {
 	case "/help":
@@ -369,7 +420,9 @@ func (c *CLI) HandleSlashCommand(input string, servers []string, tools []string)
 	}
 }
 
-// ClearMessages clears all messages from the container
+// ClearMessages removes all messages from the display container and refreshes
+// the screen. This is typically used when starting a new conversation or
+// clearing the chat history.
 func (c *CLI) ClearMessages() {
 	c.messageContainer.Clear()
 	c.displayContainer()
@@ -422,14 +475,19 @@ func (c *CLI) displayContainer() {
 	}
 }
 
-// UpdateUsage updates the usage tracker with token counts and costs
+// UpdateUsage estimates and records token usage based on input and output text.
+// This method uses text-based estimation when actual token counts are not available
+// from the AI provider's response metadata.
 func (c *CLI) UpdateUsage(inputText, outputText string) {
 	if c.usageTracker != nil {
 		c.usageTracker.EstimateAndUpdateUsage(inputText, outputText)
 	}
 }
 
-// UpdateUsageFromResponse updates the usage tracker using token usage from response metadata
+// UpdateUsageFromResponse records token usage using metadata from the AI provider's
+// response when available. Falls back to text-based estimation if the metadata is
+// missing or appears unreliable. This provides more accurate usage tracking when
+// providers supply token count information.
 func (c *CLI) UpdateUsageFromResponse(response *schema.Message, inputText string) {
 	if c.usageTracker == nil {
 		return
@@ -461,7 +519,9 @@ func (c *CLI) UpdateUsageFromResponse(response *schema.Message, inputText string
 	}
 }
 
-// DisplayUsageStats displays current usage statistics
+// DisplayUsageStats renders and displays comprehensive token usage statistics
+// including the last request's token counts and costs, as well as session totals.
+// Shows a message if usage tracking is not available for the current model.
 func (c *CLI) DisplayUsageStats() {
 	if c.usageTracker == nil {
 		c.DisplayInfo("Usage tracking is not available for this model.")
@@ -492,7 +552,9 @@ func (c *CLI) DisplayUsageStats() {
 	c.displayContainer()
 }
 
-// ResetUsageStats resets the usage tracking statistics
+// ResetUsageStats clears all accumulated usage statistics, resetting token counts
+// and costs to zero. Displays a confirmation message after resetting or an info
+// message if usage tracking is not available.
 func (c *CLI) ResetUsageStats() {
 	if c.usageTracker == nil {
 		c.DisplayInfo("Usage tracking is not available for this model.")
@@ -503,7 +565,9 @@ func (c *CLI) ResetUsageStats() {
 	c.DisplayInfo("Usage statistics have been reset.")
 }
 
-// DisplayUsageAfterResponse displays usage information immediately after a response
+// DisplayUsageAfterResponse renders and displays token usage information immediately
+// following an AI response. This provides real-time feedback about the cost and
+// token consumption of each interaction.
 func (c *CLI) DisplayUsageAfterResponse() {
 	if c.usageTracker == nil {
 		return

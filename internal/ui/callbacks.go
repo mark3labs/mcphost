@@ -9,7 +9,11 @@ import (
 	utilCallbacks "github.com/cloudwego/eino/utils/callbacks"
 )
 
-// CreateCallbackHandler creates a callback handler using HandlerHelper
+// CreateCallbackHandler creates and returns a callbacks.Handler that manages
+// tool execution callbacks for the CLI. The handler displays tool calls,
+// handles errors, and manages streaming output for interactive tool operations.
+// It integrates with the eino callback system to provide real-time UI feedback
+// during tool execution.
 func (c *CLI) CreateCallbackHandler() callbacks.Handler {
 	toolHandler := &utilCallbacks.ToolCallbackHandler{
 		OnStart: func(ctx context.Context, runInfo *callbacks.RunInfo, input *tool.CallbackInput) context.Context {

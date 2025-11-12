@@ -9,28 +9,36 @@ import (
 	"github.com/mark3labs/mcp-go/server"
 )
 
-// BuiltinServerWrapper wraps an external MCP server for builtin use
+// BuiltinServerWrapper wraps an external MCP server for builtin use, providing
+// a consistent interface for all builtin servers regardless of their implementation.
 type BuiltinServerWrapper struct {
 	server *server.MCPServer
 }
 
-// Initialize initializes the wrapped server
+// Initialize initializes the wrapped server. For builtin servers, this is typically
+// a no-op as the server is initialized during creation. Returns an error if
+// initialization fails.
 func (w *BuiltinServerWrapper) Initialize() error {
 	// The server is already initialized when created
 	return nil
 }
 
-// GetServer returns the wrapped MCP server
+// GetServer returns the wrapped MCP server instance that can be used to handle
+// tool calls and other MCP protocol operations.
 func (w *BuiltinServerWrapper) GetServer() *server.MCPServer {
 	return w.server
 }
 
-// Registry holds all available builtin servers
+// Registry holds all available builtin servers and their factory functions.
+// It provides a centralized registry for creating instances of builtin MCP servers
+// with their respective configurations.
 type Registry struct {
 	servers map[string]func(options map[string]any, model model.ToolCallingChatModel) (*BuiltinServerWrapper, error)
 }
 
-// NewRegistry creates a new builtin server registry
+// NewRegistry creates a new builtin server registry with all available builtin
+// servers registered. The registry includes filesystem (fs), bash, todo, fetch,
+// and HTTP servers.
 func NewRegistry() *Registry {
 	r := &Registry{
 		servers: make(map[string]func(options map[string]any, model model.ToolCallingChatModel) (*BuiltinServerWrapper, error)),
@@ -46,7 +54,10 @@ func NewRegistry() *Registry {
 	return r
 }
 
-// CreateServer creates a new instance of a builtin server
+// CreateServer creates a new instance of a builtin server by name. The options
+// parameter provides server-specific configuration, and the model parameter provides
+// an optional LLM for AI-powered features. Returns an error if the server name
+// is unknown or if creation fails.
 func (r *Registry) CreateServer(name string, options map[string]any, model model.ToolCallingChatModel) (*BuiltinServerWrapper, error) {
 	factory, exists := r.servers[name]
 	if !exists {
@@ -56,7 +67,8 @@ func (r *Registry) CreateServer(name string, options map[string]any, model model
 	return factory(options, model)
 }
 
-// ListServers returns a list of available builtin server names
+// ListServers returns a list of all available builtin server names that can be
+// created using CreateServer. The order of names is not guaranteed.
 func (r *Registry) ListServers() []string {
 	names := make([]string, 0, len(r.servers))
 	for name := range r.servers {

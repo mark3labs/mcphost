@@ -10,12 +10,18 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// hooksCmd represents the hooks command for managing MCPHost hook configurations.
+// Hooks allow users to execute custom scripts or commands at various points
+// during MCPHost execution, such as before/after tool use or when prompts are submitted.
 var hooksCmd = &cobra.Command{
 	Use:   "hooks",
 	Short: "Manage MCPHost hooks",
 	Long:  "Commands for managing and testing MCPHost hooks configuration",
 }
 
+// hooksListCmd represents the list subcommand for displaying all configured hooks.
+// It shows a formatted table of hook events, matchers, commands, and timeouts
+// to help users understand their current hook configuration.
 var hooksListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List all configured hooks",
@@ -45,6 +51,9 @@ var hooksListCmd = &cobra.Command{
 	},
 }
 
+// hooksValidateCmd represents the validate subcommand for checking hook configuration validity.
+// It loads and validates the hooks configuration file, ensuring proper syntax,
+// valid event types, and correct matcher patterns before use.
 var hooksValidateCmd = &cobra.Command{
 	Use:   "validate",
 	Short: "Validate hooks configuration",
@@ -64,6 +73,9 @@ var hooksValidateCmd = &cobra.Command{
 	},
 }
 
+// hooksInitCmd represents the init subcommand for generating an example hooks configuration.
+// It creates a .mcphost/hooks.yml file with sample hook configurations demonstrating
+// various hook events and common use cases like logging commands and tool usage.
 var hooksInitCmd = &cobra.Command{
 	Use:   "init",
 	Short: "Generate example hooks configuration",

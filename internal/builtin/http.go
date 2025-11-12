@@ -28,7 +28,11 @@ const (
 // httpServerModel holds the model for the HTTP server
 var httpServerModel model.ToolCallingChatModel
 
-// NewHTTPServer creates a new HTTP MCP server
+// NewHTTPServer creates a new MCP server providing advanced HTTP fetching capabilities.
+// The server includes tools for fetching web content, summarizing pages, extracting
+// specific information, and filtering JSON responses. If an LLM model is provided,
+// AI-powered summarization and extraction tools are enabled. Returns an error if
+// server initialization fails.
 func NewHTTPServer(llmModel model.ToolCallingChatModel) (*server.MCPServer, error) {
 	// Store the model globally for use in tool handlers
 	httpServerModel = llmModel

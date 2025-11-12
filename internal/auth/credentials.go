@@ -9,12 +9,16 @@ import (
 	"time"
 )
 
-// CredentialStore holds all stored credentials
+// CredentialStore holds all stored credentials for various providers.
+// Currently supports Anthropic credentials with both OAuth and API key authentication methods.
 type CredentialStore struct {
 	Anthropic *AnthropicCredentials `json:"anthropic,omitempty"`
 }
 
-// AnthropicCredentials holds Anthropic API credentials
+// AnthropicCredentials holds Anthropic API credentials supporting both OAuth
+// and API key authentication methods. The Type field indicates which authentication
+// method is being used. For OAuth, tokens are stored with expiration timestamps
+// for automatic refresh. For API keys, only the key itself is stored.
 type AnthropicCredentials struct {
 	Type         string    `json:"type"`                    // "oauth" or "api_key"
 	APIKey       string    `json:"api_key,omitempty"`       // For API key auth
@@ -24,7 +28,8 @@ type AnthropicCredentials struct {
 	CreatedAt    time.Time `json:"created_at"`
 }
 
-// IsExpired checks if the OAuth token is expired
+// IsExpired checks if the OAuth token is expired based on the ExpiresAt timestamp.
+// Returns false for API key authentication or if no expiration is set.
 func (c *AnthropicCredentials) IsExpired() bool {
 	if c.Type != "oauth" || c.ExpiresAt == 0 {
 		return false
@@ -32,7 +37,10 @@ func (c *AnthropicCredentials) IsExpired() bool {
 	return time.Now().Unix() >= c.ExpiresAt
 }
 
-// NeedsRefresh checks if the OAuth token needs refresh (5 minutes before expiry)
+// NeedsRefresh checks if the OAuth token needs refresh, returning true if the token
+// will expire within the next 5 minutes. This allows for proactive token refresh
+// to avoid authentication failures during operations. Returns false for API key
+// authentication or if no expiration is set.
 func (c *AnthropicCredentials) NeedsRefresh() bool {
 	if c.Type != "oauth" || c.ExpiresAt == 0 {
 		return false
@@ -40,12 +48,17 @@ func (c *AnthropicCredentials) NeedsRefresh() bool {
 	return time.Now().Unix() >= (c.ExpiresAt - 300) // 5 minutes buffer
 }
 
-// CredentialManager handles credential storage and retrieval
+// CredentialManager handles secure storage and retrieval of authentication credentials.
+// It manages a JSON file stored in the user's config directory with appropriate
+// file permissions for security.
 type CredentialManager struct {
 	credentialsPath string
 }
 
-// NewCredentialManager creates a new credential manager
+// NewCredentialManager creates a new credential manager instance. It determines
+// the appropriate credentials path based on XDG_CONFIG_HOME or falls back to
+// ~/.config/.mcphost/credentials.json. Returns an error if the home directory
+// cannot be determined.
 func NewCredentialManager() (*CredentialManager, error) {
 	credentialsPath, err := getCredentialsPath()
 	if err != nil {
@@ -73,7 +86,9 @@ func getCredentialsPath() (string, error) {
 	return filepath.Join(homeDir, ".config", ".mcphost", "credentials.json"), nil
 }
 
-// LoadCredentials loads credentials from the file
+// LoadCredentials loads credentials from the JSON file. If the file doesn't exist,
+// it returns an empty CredentialStore instead of an error, allowing for graceful
+// initialization. Returns an error if the file exists but cannot be read or parsed.
 func (cm *CredentialManager) LoadCredentials() (*CredentialStore, error) {
 	// If file doesn't exist, return empty store
 	if _, err := os.Stat(cm.credentialsPath); os.IsNotExist(err) {
@@ -93,7 +108,10 @@ func (cm *CredentialManager) LoadCredentials() (*CredentialStore, error) {
 	return &store, nil
 }
 
-// SaveCredentials saves credentials to the file
+// SaveCredentials saves credentials to the JSON file with secure permissions (0600).
+// It creates the parent directory if it doesn't exist. The file is written atomically
+// to prevent corruption. Returns an error if the directory cannot be created or the
+// file cannot be written.
 func (cm *CredentialManager) SaveCredentials(store *CredentialStore) error {
 	// Ensure directory exists
 	dir := filepath.Dir(cm.credentialsPath)
@@ -114,7 +132,10 @@ func (cm *CredentialManager) SaveCredentials(store *CredentialStore) error {
 	return nil
 }
 
-// SetAnthropicCredentials stores Anthropic API credentials (for API key auth)
+// SetAnthropicCredentials stores Anthropic API key credentials. It validates the
+// API key format before storing. The API key must start with "sk-ant-" and be
+// at least 20 characters long. Returns an error if the API key is invalid or
+// if storage fails.
 func (cm *CredentialManager) SetAnthropicCredentials(apiKey string) error {
 	if err := validateAnthropicAPIKey(apiKey); err != nil {
 		return err
@@ -134,7 +155,9 @@ func (cm *CredentialManager) SetAnthropicCredentials(apiKey string) error {
 	return cm.SaveCredentials(store)
 }
 
-// GetAnthropicCredentials retrieves Anthropic API credentials
+// GetAnthropicCredentials retrieves stored Anthropic credentials. Returns nil if
+// no credentials are stored. The returned credentials may be either OAuth or API
+// key type, check the Type field to determine which.
 func (cm *CredentialManager) GetAnthropicCredentials() (*AnthropicCredentials, error) {
 	store, err := cm.LoadCredentials()
 	if err != nil {
@@ -144,7 +167,9 @@ func (cm *CredentialManager) GetAnthropicCredentials() (*AnthropicCredentials, e
 	return store.Anthropic, nil
 }
 
-// RemoveAnthropicCredentials removes stored Anthropic credentials
+// RemoveAnthropicCredentials removes stored Anthropic credentials from storage.
+// If this was the only credential stored, the entire credentials file is removed.
+// Returns an error if the removal fails.
 func (cm *CredentialManager) RemoveAnthropicCredentials() error {
 	store, err := cm.LoadCredentials()
 	if err != nil {
@@ -164,7 +189,9 @@ func (cm *CredentialManager) RemoveAnthropicCredentials() error {
 	return cm.SaveCredentials(store)
 }
 
-// HasAnthropicCredentials checks if Anthropic credentials are stored
+// HasAnthropicCredentials checks if valid Anthropic credentials are stored.
+// Returns true if either a non-empty OAuth access token or API key is present,
+// false otherwise. Returns an error if credentials cannot be loaded.
 func (cm *CredentialManager) HasAnthropicCredentials() (bool, error) {
 	creds, err := cm.GetAnthropicCredentials()
 	if err != nil {
@@ -185,7 +212,8 @@ func (cm *CredentialManager) HasAnthropicCredentials() (bool, error) {
 	}
 }
 
-// GetCredentialsPath returns the path to the credentials file
+// GetCredentialsPath returns the absolute path to the credentials JSON file.
+// This is useful for debugging or displaying the storage location to users.
 func (cm *CredentialManager) GetCredentialsPath() string {
 	return cm.credentialsPath
 }
@@ -210,8 +238,12 @@ func validateAnthropicAPIKey(apiKey string) error {
 	return nil
 }
 
-// GetAnthropicAPIKey is a convenience function that checks stored credentials first,
-// then falls back to environment variables and flags
+// GetAnthropicAPIKey retrieves an Anthropic API key from multiple sources in priority order:
+// 1. Command-line flag value (highest priority)
+// 2. Stored credentials (OAuth or API key)
+// 3. ANTHROPIC_API_KEY environment variable (lowest priority)
+// Returns the API key, a description of its source, and any error encountered.
+// For OAuth credentials, it automatically refreshes expired tokens.
 func GetAnthropicAPIKey(flagValue string) (string, string, error) {
 	// 1. Check flag value first (highest priority)
 	if flagValue != "" {

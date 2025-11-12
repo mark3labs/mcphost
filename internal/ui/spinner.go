@@ -10,7 +10,9 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-// Spinner wraps the bubbles spinner for both interactive and non-interactive mode
+// Spinner provides an animated loading indicator that displays while long-running
+// operations are in progress. It wraps the bubbles spinner component and manages
+// its lifecycle through a tea.Program for proper terminal handling.
 type Spinner struct {
 	model  spinner.Model
 	done   chan struct{}
@@ -72,7 +74,9 @@ func (m spinnerModel) View() string {
 // quitMsg is sent when we want to quit the spinner
 type quitMsg struct{}
 
-// NewSpinner creates a new spinner with enhanced styling
+// NewSpinner creates a new animated spinner with the specified message. The spinner
+// uses the theme's primary color and a modern animation style. It runs in a separate
+// tea.Program to avoid interfering with other terminal operations.
 func NewSpinner(message string) *Spinner {
 	s := spinner.New()
 	s.Spinner = spinner.Points // More modern spinner style
@@ -97,7 +101,9 @@ func NewSpinner(message string) *Spinner {
 	}
 }
 
-// NewThemedSpinner creates a new spinner with the given message and color
+// NewThemedSpinner creates a new animated spinner with custom color styling.
+// This allows for different spinner colors based on the operation type or status.
+// The spinner runs independently in its own tea.Program.
 func NewThemedSpinner(message string, color lipgloss.AdaptiveColor) *Spinner {
 	s := spinner.New()
 	s.Spinner = spinner.Dot
@@ -121,7 +127,9 @@ func NewThemedSpinner(message string, color lipgloss.AdaptiveColor) *Spinner {
 	}
 }
 
-// Start begins the spinner animation
+// Start begins the spinner animation in a separate goroutine. The spinner will
+// continue animating until Stop is called. The animation runs in a separate
+// tea.Program to maintain smooth animation independent of other operations.
 func (s *Spinner) Start() {
 	go func() {
 		defer close(s.done)
@@ -136,7 +144,8 @@ func (s *Spinner) Start() {
 	}()
 }
 
-// Stop ends the spinner animation
+// Stop halts the spinner animation and cleans up resources. This method blocks
+// until the spinner has fully stopped and the terminal state is restored.
 func (s *Spinner) Stop() {
 	s.cancel()
 	<-s.done

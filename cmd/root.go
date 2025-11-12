@@ -84,6 +84,10 @@ func (a *agentUIAdapter) GetLoadedServerNames() []string {
 	return a.agent.GetLoadedServerNames()
 }
 
+// rootCmd represents the base command when called without any subcommands.
+// This is the main entry point for the MCPHost CLI application, providing
+// an interface to interact with various AI models through a unified interface
+// with support for MCP servers and tool integration.
 var rootCmd = &cobra.Command{
 	Use:   "mcphost",
 	Short: "Chat with AI models through a unified interface",
@@ -120,12 +124,21 @@ Examples:
 	},
 }
 
-// GetRootCommand returns the root command with the version set
+// GetRootCommand returns the root command with the version set.
+// This function is the main entry point for the MCPHost CLI and should be
+// called from main.go with the appropriate version string.
 func GetRootCommand(v string) *cobra.Command {
 	rootCmd.Version = v
 	return rootCmd
 }
 
+// InitConfig initializes the configuration for MCPHost by loading config files,
+// environment variables, and hooks configuration. It follows this priority order:
+// 1. Command-line specified config file (--config flag)
+// 2. Current directory config file (.mcphost or .mcp)
+// 3. Home directory config file (~/.mcphost or ~/.mcp)
+// 4. Environment variables (MCPHOST_* prefix)
+// This function is automatically called by cobra before command execution.
 func InitConfig() {
 	if configFile != "" {
 		// Use config file from the flag
@@ -202,7 +215,12 @@ func InitConfig() {
 
 }
 
-// LoadConfigWithEnvSubstitution loads a config file with environment variable substitution
+// LoadConfigWithEnvSubstitution loads a config file with environment variable substitution.
+// It reads the config file, replaces any ${ENV_VAR} patterns with their corresponding
+// environment variable values, and then parses the resulting configuration using viper.
+// The function automatically detects JSON or YAML format based on file extension.
+// Returns an error if the file cannot be read, environment variable substitution fails,
+// or the configuration cannot be parsed.
 func LoadConfigWithEnvSubstitution(configPath string) error {
 	// Read raw config file content
 	rawContent, err := os.ReadFile(configPath)
@@ -728,7 +746,9 @@ func runNormalMode(ctx context.Context) error {
 	return runInteractiveMode(ctx, mcpAgent, cli, serverNames, toolNames, modelName, messages, sessionManager, hookExecutor)
 }
 
-// AgenticLoopConfig configures the behavior of the unified agentic loop
+// AgenticLoopConfig configures the behavior of the unified agentic loop.
+// This struct controls how the main interaction loop operates, whether in
+// interactive or non-interactive mode, and manages various UI and session options.
 type AgenticLoopConfig struct {
 	// Mode configuration
 	IsInteractive    bool   // true for interactive mode, false for non-interactive

@@ -19,7 +19,11 @@ import (
 	"github.com/mark3labs/mcphost/internal/config"
 )
 
-// MCPToolManager manages MCP tools and clients
+// MCPToolManager manages MCP (Model Context Protocol) tools and clients across multiple servers.
+// It provides a unified interface for loading, managing, and executing tools from various MCP servers,
+// including stdio, SSE, streamable HTTP, and built-in server types. The manager handles connection
+// pooling, health checks, tool name prefixing to avoid conflicts, and sampling support for LLM interactions.
+// Thread-safe for concurrent tool invocations.
 type MCPToolManager struct {
 	connectionPool *MCPConnectionPool
 	tools          []tool.BaseTool
@@ -44,7 +48,9 @@ type mcpToolImpl struct {
 	mapping *toolMapping
 }
 
-// NewMCPToolManager creates a new MCP tool manager
+// NewMCPToolManager creates a new MCP tool manager instance.
+// Returns an initialized manager with empty tool collections ready to load tools from MCP servers.
+// The manager must be configured with SetModel and LoadTools before use.
 func NewMCPToolManager() *MCPToolManager {
 	return &MCPToolManager{
 		tools:   make([]tool.BaseTool, 0),
@@ -52,12 +58,18 @@ func NewMCPToolManager() *MCPToolManager {
 	}
 }
 
-// SetModel sets the LLM model for sampling support
+// SetModel sets the LLM model for sampling support.
+// The model is used when MCP servers request sampling operations, allowing them to
+// leverage the host's LLM capabilities for text generation tasks.
+// This method should be called before LoadTools if any MCP servers require sampling support.
 func (m *MCPToolManager) SetModel(model model.ToolCallingChatModel) {
 	m.model = model
 }
 
-// SetDebugLogger sets the debug logger
+// SetDebugLogger sets the debug logger for the tool manager.
+// The logger will be used to output detailed debugging information about MCP connections,
+// tool loading, and execution. If a connection pool exists, it will also be configured
+// to use the same logger for consistent debugging output.
 func (m *MCPToolManager) SetDebugLogger(logger DebugLogger) {
 	m.debugLogger = logger
 	if m.connectionPool != nil {
@@ -70,7 +82,10 @@ type samplingHandler struct {
 	model model.ToolCallingChatModel
 }
 
-// CreateMessage handles sampling requests from MCP servers
+// CreateMessage handles sampling requests from MCP servers by forwarding them to the configured LLM model.
+// It converts MCP message formats to eino message formats, invokes the model for generation,
+// and converts the response back to MCP format. Returns an error if no model is available
+// or if generation fails.
 func (h *samplingHandler) CreateMessage(ctx context.Context, request mcp.CreateMessageRequest) (*mcp.CreateMessageResult, error) {
 	if h.model == nil {
 		return nil, fmt.Errorf("no model available for sampling")
@@ -126,7 +141,11 @@ func (h *samplingHandler) CreateMessage(ctx context.Context, request mcp.CreateM
 	return result, nil
 }
 
-// LoadTools loads tools from MCP servers based on configuration
+// LoadTools loads tools from all configured MCP servers based on the provided configuration.
+// It initializes the connection pool, connects to each configured server, and loads their tools.
+// Tools from different servers are prefixed with the server name to avoid naming conflicts.
+// Returns an error only if all configured servers fail to load; partial failures are logged as warnings.
+// This method is thread-safe and idempotent.
 func (m *MCPToolManager) LoadTools(ctx context.Context, config *config.Config) error {
 	// Initialize connection pool
 	m.config = config
@@ -243,12 +262,18 @@ func (m *MCPToolManager) loadServerTools(ctx context.Context, serverName string,
 	return nil
 }
 
-// Info returns the tool information
+// Info returns the tool information including name, description, and parameter schema.
+// This method implements the eino tool.BaseTool interface.
+// The returned ToolInfo contains the prefixed tool name to ensure uniqueness across servers.
 func (t *mcpToolImpl) Info(ctx context.Context) (*schema.ToolInfo, error) {
 	return t.info, nil
 }
 
-// InvokableRun executes the tool by mapping back to the original name and server
+// InvokableRun executes the tool by mapping the prefixed name back to the original tool name and server.
+// It retrieves a healthy connection from the pool, invokes the tool on the appropriate MCP server,
+// and returns the result as a JSON string. The method handles connection errors by marking
+// connections as unhealthy in the pool for automatic recovery on subsequent requests.
+// Thread-safe for concurrent invocations.
 func (t *mcpToolImpl) InvokableRun(ctx context.Context, argumentsInJSON string, opts ...tool.Option) (string, error) {
 	// Handle empty or invalid JSON arguments
 	var arguments any
@@ -300,12 +325,16 @@ func (t *mcpToolImpl) InvokableRun(ctx context.Context, argumentsInJSON string, 
 	return marshaledResult, nil
 }
 
-// GetTools returns all loaded tools
+// GetTools returns all loaded tools from all configured MCP servers.
+// Tools are returned with their prefixed names (serverName__toolName) to ensure uniqueness.
+// The returned slice is a copy and can be safely modified by the caller.
 func (m *MCPToolManager) GetTools() []tool.BaseTool {
 	return m.tools
 }
 
-// GetLoadedServerNames returns the names of successfully loaded MCP servers
+// GetLoadedServerNames returns the names of all successfully loaded MCP servers.
+// This includes servers that are currently connected and have had their tools loaded,
+// regardless of their current health status. Useful for debugging and status reporting.
 func (m *MCPToolManager) GetLoadedServerNames() []string {
 	var names []string
 	for serverName := range m.connectionPool.GetClients() {
@@ -314,7 +343,10 @@ func (m *MCPToolManager) GetLoadedServerNames() []string {
 	return names
 }
 
-// Close closes all MCP clients
+// Close closes all MCP client connections and cleans up resources.
+// This method should be called when the tool manager is no longer needed to ensure
+// proper cleanup of stdio processes, network connections, and other resources.
+// It is safe to call Close multiple times.
 func (m *MCPToolManager) Close() error {
 	return m.connectionPool.Close()
 }

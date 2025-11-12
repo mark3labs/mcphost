@@ -9,7 +9,9 @@ import (
 	"github.com/mark3labs/mcphost/internal/tokens"
 )
 
-// UsageStats represents token and cost information for a single request/response
+// UsageStats encapsulates detailed token usage and cost breakdown for a single
+// LLM request/response cycle, including input, output, and cache token counts
+// along with their associated costs.
 type UsageStats struct {
 	InputTokens      int
 	OutputTokens     int
@@ -22,7 +24,9 @@ type UsageStats struct {
 	TotalCost        float64
 }
 
-// SessionStats represents cumulative stats for the entire session
+// SessionStats aggregates token usage and cost information across all requests
+// in a session, providing totals and request counts for usage analysis and
+// cost tracking.
 type SessionStats struct {
 	TotalInputTokens      int
 	TotalOutputTokens     int
@@ -32,7 +36,9 @@ type SessionStats struct {
 	RequestCount          int
 }
 
-// UsageTracker tracks token usage and costs for LLM interactions
+// UsageTracker monitors and accumulates token usage statistics and associated costs
+// for LLM interactions throughout a session. It provides real-time usage information
+// and supports both estimated and actual token counts. OAuth users see $0 costs.
 type UsageTracker struct {
 	mu           sync.RWMutex
 	modelInfo    *models.ModelInfo
@@ -43,7 +49,10 @@ type UsageTracker struct {
 	isOAuth      bool // Whether OAuth credentials are being used (costs should be $0)
 }
 
-// NewUsageTracker creates a new usage tracker for the given model
+// NewUsageTracker creates and initializes a new UsageTracker for the specified model.
+// The tracker uses model-specific pricing information to calculate costs, unless OAuth
+// credentials are being used (in which case costs are shown as $0). Width determines
+// the display formatting.
 func NewUsageTracker(modelInfo *models.ModelInfo, provider string, width int, isOAuth bool) *UsageTracker {
 	return &UsageTracker{
 		modelInfo: modelInfo,
@@ -53,15 +62,19 @@ func NewUsageTracker(modelInfo *models.ModelInfo, provider string, width int, is
 	}
 }
 
-// EstimateTokens provides a rough estimate of tokens in text
-// This is a simple approximation - real token counting would require the actual tokenizer
+// EstimateTokens provides a rough estimate of the number of tokens in the given text.
+// This uses a simple heuristic of approximately 4 characters per token, which is a
+// reasonable approximation for most models but not precise. Actual token counts may vary
+// significantly based on the specific tokenizer used by each model.
 func EstimateTokens(text string) int {
 	// Rough approximation: ~4 characters per token for most models
 	// This is not accurate but gives a reasonable estimate
 	return len(text) / 4
 }
 
-// UpdateUsage updates the tracker with new usage information
+// UpdateUsage records new token usage data and calculates associated costs based on
+// the model's pricing. Updates both the last request statistics and cumulative session
+// totals. For OAuth users, costs are recorded as $0 while still tracking token counts.
 func (ut *UsageTracker) UpdateUsage(inputTokens, outputTokens, cacheReadTokens, cacheWriteTokens int) {
 	ut.mu.Lock()
 	defer ut.mu.Unlock()
@@ -107,21 +120,27 @@ func (ut *UsageTracker) UpdateUsage(inputTokens, outputTokens, cacheReadTokens, 
 	ut.sessionStats.RequestCount++
 }
 
-// EstimateAndUpdateUsage estimates tokens from text and updates usage
+// EstimateAndUpdateUsage estimates token counts from raw text strings and updates
+// the usage statistics. This method is used when actual token counts are not available
+// from the API response.
 func (ut *UsageTracker) EstimateAndUpdateUsage(inputText, outputText string) {
 	inputTokens := tokens.EstimateTokens(inputText)
 	outputTokens := tokens.EstimateTokens(outputText)
 	ut.UpdateUsage(inputTokens, outputTokens, 0, 0)
 }
 
-// EstimateAndUpdateUsageFromText estimates tokens from text and updates usage
+// EstimateAndUpdateUsageFromText is an alias for EstimateAndUpdateUsage, providing
+// backward compatibility. It estimates token counts from text and updates usage statistics.
 func (ut *UsageTracker) EstimateAndUpdateUsageFromText(inputText, outputText string) {
 	inputTokens := tokens.EstimateTokens(inputText)
 	outputTokens := tokens.EstimateTokens(outputText)
 	ut.UpdateUsage(inputTokens, outputTokens, 0, 0)
 }
 
-// RenderUsageInfo renders enhanced usage information with better styling
+// RenderUsageInfo generates a formatted string displaying current usage statistics
+// including token counts, context utilization percentage, and costs. The display
+// adapts colors based on usage levels and formats large numbers with K/M suffixes
+// for readability.
 func (ut *UsageTracker) RenderUsageInfo() string {
 	ut.mu.RLock()
 	defer ut.mu.RUnlock()
@@ -199,14 +218,18 @@ func (ut *UsageTracker) RenderUsageInfo() string {
 		tokensLabel, tokensValue, percentageStr, costLabel, costStr)
 }
 
-// GetSessionStats returns a copy of the current session statistics
+// GetSessionStats returns a copy of the cumulative session statistics including
+// total token counts, costs, and request count. The returned copy is safe to use
+// without additional synchronization.
 func (ut *UsageTracker) GetSessionStats() SessionStats {
 	ut.mu.RLock()
 	defer ut.mu.RUnlock()
 	return ut.sessionStats
 }
 
-// GetLastRequestStats returns a copy of the last request statistics
+// GetLastRequestStats returns a copy of the usage statistics from the most recent
+// request, or nil if no requests have been made. The returned copy is safe to use
+// without additional synchronization.
 func (ut *UsageTracker) GetLastRequestStats() *UsageStats {
 	ut.mu.RLock()
 	defer ut.mu.RUnlock()
@@ -217,7 +240,9 @@ func (ut *UsageTracker) GetLastRequestStats() *UsageStats {
 	return &stats
 }
 
-// Reset clears all usage statistics
+// Reset clears all accumulated usage statistics, resetting both session totals
+// and last request information to their initial empty state. This is typically
+// used when starting a new conversation or clearing usage history.
 func (ut *UsageTracker) Reset() {
 	ut.mu.Lock()
 	defer ut.mu.Unlock()
@@ -225,7 +250,9 @@ func (ut *UsageTracker) Reset() {
 	ut.lastRequest = nil
 }
 
-// SetWidth updates the display width for rendering
+// SetWidth updates the terminal width used for formatting usage information display.
+// This should be called when the terminal is resized to ensure proper text wrapping
+// and alignment.
 func (ut *UsageTracker) SetWidth(width int) {
 	ut.mu.Lock()
 	defer ut.mu.Unlock()

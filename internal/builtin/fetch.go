@@ -21,7 +21,9 @@ const (
 	maxFetchTimeout     = 120 * time.Second
 )
 
-// NewFetchServer creates a new fetch MCP server
+// NewFetchServer creates a new MCP server that provides web content fetching capabilities.
+// The server includes a single tool "fetch" that retrieves content from URLs and converts
+// it to text, markdown, or HTML format. Returns an error if server initialization fails.
 func NewFetchServer() (*server.MCPServer, error) {
 	s := server.NewMCPServer("fetch-server", "1.0.0", server.WithToolCapabilities(true))
 

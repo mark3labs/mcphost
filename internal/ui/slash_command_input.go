@@ -9,7 +9,9 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-// SlashCommandInput is a custom input field with slash command autocomplete
+// SlashCommandInput provides an interactive text input field with intelligent
+// slash command autocomplete functionality. It displays a popup menu of matching
+// commands as the user types, supporting fuzzy matching and keyboard navigation.
 type SlashCommandInput struct {
 	textarea      textarea.Model
 	commands      []SlashCommand
@@ -26,7 +28,9 @@ type SlashCommandInput struct {
 	renderedLines int  // Track how many lines were rendered
 }
 
-// NewSlashCommandInput creates a new slash command input field
+// NewSlashCommandInput creates and initializes a new slash command input field with
+// the specified width and title. The input supports multi-line text entry, command
+// autocomplete, and is styled to match the application's theme.
 func NewSlashCommandInput(width int, title string) *SlashCommandInput {
 	ta := textarea.New()
 	ta.Placeholder = "Type your message..."
@@ -54,12 +58,15 @@ func NewSlashCommandInput(width int, title string) *SlashCommandInput {
 	}
 }
 
-// Init implements tea.Model
+// Init implements the tea.Model interface, returning the initial command to start
+// the cursor blinking animation for the text input field.
 func (s *SlashCommandInput) Init() tea.Cmd {
 	return textarea.Blink
 }
 
-// Update implements tea.Model
+// Update implements the tea.Model interface, handling keyboard input for text entry,
+// command selection, and navigation. Manages the autocomplete popup display and
+// processes submission or cancellation actions.
 func (s *SlashCommandInput) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
@@ -168,7 +175,9 @@ func (s *SlashCommandInput) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 }
 
-// View implements tea.Model
+// View implements the tea.Model interface, rendering the complete input field
+// including the title, text area, autocomplete popup (when active), and help text.
+// The view adapts based on whether single or multi-line input is detected.
 func (s *SlashCommandInput) View() string {
 	// Add left padding to entire component (2 spaces like other UI elements)
 	containerStyle := lipgloss.NewStyle().PaddingLeft(2)
@@ -324,17 +333,21 @@ func (s *SlashCommandInput) renderPopup() string {
 	return popupStyle.Render(popupContent)
 }
 
-// Value returns the final value
+// Value returns the final text value entered by the user after submission.
+// This will be empty if the input was cancelled.
 func (s *SlashCommandInput) Value() string {
 	return s.value
 }
 
-// Cancelled returns true if the user cancelled
+// Cancelled returns true if the user cancelled the input operation (e.g., by
+// pressing ESC or Ctrl+C) without submitting any text.
 func (s *SlashCommandInput) Cancelled() bool {
 	return s.quitting && s.value == ""
 }
 
-// RenderedLines returns how many lines were rendered
+// RenderedLines returns the total number of terminal lines used by the last
+// rendered view, including the title, input area, popup, and help text. This
+// is used for proper screen clearing when the input is dismissed.
 func (s *SlashCommandInput) RenderedLines() int {
 	return s.renderedLines
 }

@@ -4,13 +4,17 @@ import (
 	"strings"
 )
 
-// FuzzyMatch represents a match result with score
+// FuzzyMatch represents the result of a fuzzy string matching operation,
+// containing the matched command and its relevance score. Higher scores
+// indicate better matches.
 type FuzzyMatch struct {
 	Command *SlashCommand
 	Score   int
 }
 
-// FuzzyMatchCommands performs fuzzy matching on slash commands
+// FuzzyMatchCommands performs fuzzy string matching on the provided slash commands
+// based on the query string. Returns a slice of matches sorted by relevance score
+// in descending order. An empty query returns all commands with zero scores.
 func FuzzyMatchCommands(query string, commands []SlashCommand) []FuzzyMatch {
 	if query == "" || query == "/" {
 		// Return all commands when query is empty or just "/"

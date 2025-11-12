@@ -11,17 +11,21 @@ import (
 // Global theme instance
 var currentTheme = DefaultTheme()
 
-// GetTheme returns the current theme
+// GetTheme returns the currently active UI theme. The theme controls all color
+// and styling decisions throughout the application's interface.
 func GetTheme() Theme {
 	return currentTheme
 }
 
-// SetTheme sets the current theme
+// SetTheme updates the global UI theme, affecting all subsequent rendering
+// operations. This allows runtime theme switching for different visual preferences.
 func SetTheme(theme Theme) {
 	currentTheme = theme
 }
 
-// Theme represents a complete UI theme
+// Theme defines a comprehensive color scheme for the application's UI, supporting
+// both light and dark terminal modes through adaptive colors. It includes semantic
+// colors for different message types and UI elements, based on the Catppuccin color palette.
 type Theme struct {
 	Primary     lipgloss.AdaptiveColor
 	Secondary   lipgloss.AdaptiveColor
@@ -41,7 +45,9 @@ type Theme struct {
 	Highlight   lipgloss.AdaptiveColor
 }
 
-// DefaultTheme returns the default MCPHost theme (Catppuccin Mocha)
+// DefaultTheme creates and returns the default MCPHost theme based on the Catppuccin
+// Mocha (dark) and Latte (light) color palettes. This theme provides a cohesive,
+// pleasant visual experience with carefully selected colors for different UI elements.
 func DefaultTheme() Theme {
 	return Theme{
 		Primary: lipgloss.AdaptiveColor{
@@ -111,7 +117,9 @@ func DefaultTheme() Theme {
 	}
 }
 
-// StyleCard creates a styled card container
+// StyleCard creates a lipgloss style for card-like containers with rounded borders,
+// padding, and appropriate width. Used for grouping related content in a visually
+// distinct box.
 func StyleCard(width int, theme Theme) lipgloss.Style {
 	return lipgloss.NewStyle().
 		Width(width).
@@ -121,56 +129,64 @@ func StyleCard(width int, theme Theme) lipgloss.Style {
 		MarginBottom(1)
 }
 
-// StyleHeader creates a styled header
+// StyleHeader creates a lipgloss style for primary headers using the theme's
+// primary color with bold text for emphasis and hierarchy.
 func StyleHeader(theme Theme) lipgloss.Style {
 	return lipgloss.NewStyle().
 		Foreground(theme.Primary).
 		Bold(true)
 }
 
-// StyleSubheader creates a styled subheader
+// StyleSubheader creates a lipgloss style for secondary headers using the theme's
+// secondary color with bold text, providing visual hierarchy below primary headers.
 func StyleSubheader(theme Theme) lipgloss.Style {
 	return lipgloss.NewStyle().
 		Foreground(theme.Secondary).
 		Bold(true)
 }
 
-// StyleMuted creates muted text styling
+// StyleMuted creates a lipgloss style for de-emphasized text using muted colors
+// and italic formatting, suitable for supplementary or less important information.
 func StyleMuted(theme Theme) lipgloss.Style {
 	return lipgloss.NewStyle().
 		Foreground(theme.Muted).
 		Italic(true)
 }
 
-// StyleSuccess creates success text styling
+// StyleSuccess creates a lipgloss style for success messages using green colors
+// with bold text to indicate successful operations or positive outcomes.
 func StyleSuccess(theme Theme) lipgloss.Style {
 	return lipgloss.NewStyle().
 		Foreground(theme.Success).
 		Bold(true)
 }
 
-// StyleError creates error text styling
+// StyleError creates a lipgloss style for error messages using red colors
+// with bold text to ensure visibility of problems or failures.
 func StyleError(theme Theme) lipgloss.Style {
 	return lipgloss.NewStyle().
 		Foreground(theme.Error).
 		Bold(true)
 }
 
-// StyleWarning creates warning text styling
+// StyleWarning creates a lipgloss style for warning messages using yellow/amber
+// colors with bold text to draw attention to potential issues or cautions.
 func StyleWarning(theme Theme) lipgloss.Style {
 	return lipgloss.NewStyle().
 		Foreground(theme.Warning).
 		Bold(true)
 }
 
-// StyleInfo creates info text styling
+// StyleInfo creates a lipgloss style for informational messages using blue colors
+// with bold text for general notifications and status updates.
 func StyleInfo(theme Theme) lipgloss.Style {
 	return lipgloss.NewStyle().
 		Foreground(theme.Info).
 		Bold(true)
 }
 
-// CreateSeparator creates a styled separator line
+// CreateSeparator generates a horizontal separator line with the specified width,
+// character, and color. Useful for visually dividing sections of content in the UI.
 func CreateSeparator(width int, char string, color lipgloss.AdaptiveColor) string {
 	return lipgloss.NewStyle().
 		Foreground(color).
@@ -178,7 +194,9 @@ func CreateSeparator(width int, char string, color lipgloss.AdaptiveColor) strin
 		Render(lipgloss.PlaceHorizontal(width, lipgloss.Center, char))
 }
 
-// CreateProgressBar creates a simple progress bar
+// CreateProgressBar generates a visual progress bar with filled and empty segments
+// based on the percentage complete. The bar uses Unicode block characters for smooth
+// appearance and theme colors to indicate progress.
 func CreateProgressBar(width int, percentage float64, theme Theme) string {
 	filled := int(float64(width) * percentage / 100)
 	empty := width - filled
@@ -194,7 +212,8 @@ func CreateProgressBar(width int, percentage float64, theme Theme) string {
 	return filledBar + emptyBar
 }
 
-// CreateBadge creates a styled badge
+// CreateBadge generates a styled badge or label with inverted colors (text on
+// colored background) for highlighting important tags, statuses, or categories.
 func CreateBadge(text string, color lipgloss.AdaptiveColor) string {
 	return lipgloss.NewStyle().
 		Foreground(lipgloss.AdaptiveColor{Light: "#FFFFFF", Dark: "#000000"}).
@@ -204,7 +223,9 @@ func CreateBadge(text string, color lipgloss.AdaptiveColor) string {
 		Render(text)
 }
 
-// CreateGradientText creates text with gradient-like effect using different shades
+// CreateGradientText creates styled text with a gradient-like effect. Currently
+// implements a simplified version using the start color only, as true gradients
+// require more complex terminal capabilities.
 func CreateGradientText(text string, startColor, endColor lipgloss.AdaptiveColor) string {
 	// For now, just use the start color - true gradients would require more complex implementation
 	return lipgloss.NewStyle().
@@ -215,14 +236,16 @@ func CreateGradientText(text string, startColor, endColor lipgloss.AdaptiveColor
 
 // Compact styling utilities
 
-// StyleCompactSymbol creates a styled symbol for compact mode
+// StyleCompactSymbol creates a lipgloss style for message type indicators in
+// compact mode, using bold colored text to distinguish different message categories.
 func StyleCompactSymbol(symbol string, color lipgloss.AdaptiveColor) lipgloss.Style {
 	return lipgloss.NewStyle().
 		Foreground(color).
 		Bold(true)
 }
 
-// StyleCompactLabel creates a styled label for compact mode
+// StyleCompactLabel creates a lipgloss style for message labels in compact mode
+// with fixed width for alignment and bold colored text for readability.
 func StyleCompactLabel(color lipgloss.AdaptiveColor) lipgloss.Style {
 	return lipgloss.NewStyle().
 		Foreground(color).
@@ -230,13 +253,16 @@ func StyleCompactLabel(color lipgloss.AdaptiveColor) lipgloss.Style {
 		Width(8)
 }
 
-// StyleCompactContent creates basic content styling for compact mode
+// StyleCompactContent creates a simple lipgloss style for message content in
+// compact mode, applying only color without additional formatting.
 func StyleCompactContent(color lipgloss.AdaptiveColor) lipgloss.Style {
 	return lipgloss.NewStyle().
 		Foreground(color)
 }
 
-// FormatCompactLine formats a complete compact line with consistent spacing
+// FormatCompactLine assembles a complete compact mode message line with consistent
+// spacing and styling. Combines a symbol, fixed-width label, and content with their
+// respective colors to create a uniform appearance across all message types.
 func FormatCompactLine(symbol, label, content string, symbolColor, labelColor, contentColor lipgloss.AdaptiveColor) string {
 	styledSymbol := StyleCompactSymbol(symbol, symbolColor).Render(symbol)
 	styledLabel := StyleCompactLabel(labelColor).Render(label)

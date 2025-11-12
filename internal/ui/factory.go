@@ -8,14 +8,17 @@ import (
 	"github.com/mark3labs/mcphost/internal/models"
 )
 
-// AgentInterface defines the interface we need from agent to avoid import cycles
+// AgentInterface defines the minimal interface required from the agent package
+// to avoid circular dependencies while still accessing necessary agent functionality.
 type AgentInterface interface {
 	GetLoadingMessage() string
 	GetTools() []any                // Using any to avoid importing tool types
 	GetLoadedServerNames() []string // Add this method for debug config
 }
 
-// CLISetupOptions contains options for setting up CLI
+// CLISetupOptions encapsulates all configuration parameters needed to initialize
+// and set up a CLI instance, including display preferences, model information,
+// and debugging settings.
 type CLISetupOptions struct {
 	Agent          AgentInterface
 	ModelString    string
@@ -35,7 +38,10 @@ func parseModelName(modelString string) (provider, model string) {
 	return "unknown", "unknown"
 }
 
-// SetupCLI creates and configures CLI with standard info display
+// SetupCLI creates, configures, and initializes a CLI instance with the provided
+// options. It sets up model display, usage tracking for supported providers, and
+// shows initial loading information. Returns nil in quiet mode or an initialized
+// CLI instance ready for user interaction.
 func SetupCLI(opts *CLISetupOptions) (*CLI, error) {
 	if opts.Quiet {
 		return nil, nil // No CLI in quiet mode

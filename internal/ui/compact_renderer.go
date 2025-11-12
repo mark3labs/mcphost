@@ -8,13 +8,17 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-// CompactRenderer handles rendering messages in compact format
+// CompactRenderer handles rendering messages in a space-efficient compact format,
+// optimized for terminals with limited vertical space. It displays messages with
+// minimal decorations while maintaining readability and essential information.
 type CompactRenderer struct {
 	width int
 	debug bool
 }
 
-// NewCompactRenderer creates a new compact message renderer
+// NewCompactRenderer creates and initializes a new CompactRenderer with the specified
+// terminal width and debug mode setting. The width parameter determines line wrapping,
+// while debug enables additional diagnostic output in rendered messages.
 func NewCompactRenderer(width int, debug bool) *CompactRenderer {
 	return &CompactRenderer{
 		width: width,
@@ -22,12 +26,16 @@ func NewCompactRenderer(width int, debug bool) *CompactRenderer {
 	}
 }
 
-// SetWidth updates the renderer width
+// SetWidth updates the terminal width for the renderer, affecting how content
+// is wrapped and formatted in subsequent render operations.
 func (r *CompactRenderer) SetWidth(width int) {
 	r.width = width
 }
 
-// RenderUserMessage renders a user message in compact format
+// RenderUserMessage renders a user's input message in compact format with a
+// distinctive symbol (>) and label. The content is formatted to preserve structure
+// while minimizing vertical space usage. Returns a UIMessage with formatted content
+// and metadata.
 func (r *CompactRenderer) RenderUserMessage(content string, timestamp time.Time) UIMessage {
 	theme := getTheme()
 	symbol := lipgloss.NewStyle().Foreground(theme.Secondary).Render(">")
@@ -58,7 +66,9 @@ func (r *CompactRenderer) RenderUserMessage(content string, timestamp time.Time)
 	}
 }
 
-// RenderAssistantMessage renders an assistant message in compact format
+// RenderAssistantMessage renders an AI assistant's response in compact format with
+// a distinctive symbol (<) and the model name as label. Empty content is displayed
+// as "(no output)". Returns a UIMessage with formatted content and metadata.
 func (r *CompactRenderer) RenderAssistantMessage(content string, timestamp time.Time, modelName string) UIMessage {
 	theme := getTheme()
 	symbol := lipgloss.NewStyle().Foreground(theme.Primary).Render("<")
@@ -97,7 +107,9 @@ func (r *CompactRenderer) RenderAssistantMessage(content string, timestamp time.
 	}
 }
 
-// RenderToolCallMessage renders a tool call in progress in compact format
+// RenderToolCallMessage renders a tool call notification in compact format, showing
+// the tool being executed with its arguments in a single line. The tool name is
+// highlighted and arguments are displayed in a muted color for visual distinction.
 func (r *CompactRenderer) RenderToolCallMessage(toolName, toolArgs string, timestamp time.Time) UIMessage {
 	theme := getTheme()
 	symbol := lipgloss.NewStyle().Foreground(theme.Tool).Render("[")
@@ -119,7 +131,9 @@ func (r *CompactRenderer) RenderToolCallMessage(toolName, toolArgs string, times
 	}
 }
 
-// RenderToolMessage renders a tool result in compact format
+// RenderToolMessage renders the result of a tool execution in compact format,
+// displaying the outcome with appropriate styling based on success or error status.
+// Results are limited to 5 lines to maintain compact display while preserving key information.
 func (r *CompactRenderer) RenderToolMessage(toolName, toolArgs, toolResult string, isError bool) UIMessage {
 	theme := getTheme()
 	symbol := lipgloss.NewStyle().Foreground(theme.Muted).Render("]")
@@ -165,7 +179,9 @@ func (r *CompactRenderer) RenderToolMessage(toolName, toolArgs, toolResult strin
 	}
 }
 
-// RenderSystemMessage renders a system message in compact format
+// RenderSystemMessage renders a system notification or informational message in
+// compact format with a distinctive symbol (*) and "System" label. Content is
+// formatted to fit on a single line for minimal space usage.
 func (r *CompactRenderer) RenderSystemMessage(content string, timestamp time.Time) UIMessage {
 	theme := getTheme()
 	symbol := lipgloss.NewStyle().Foreground(theme.System).Render("*")
@@ -183,7 +199,9 @@ func (r *CompactRenderer) RenderSystemMessage(content string, timestamp time.Tim
 	}
 }
 
-// RenderErrorMessage renders an error message in compact format
+// RenderErrorMessage renders an error notification in compact format with a
+// distinctive error symbol (!) and styling to ensure visibility. The error
+// content is displayed in a single line with appropriate color highlighting.
 func (r *CompactRenderer) RenderErrorMessage(errorMsg string, timestamp time.Time) UIMessage {
 	theme := getTheme()
 	symbol := lipgloss.NewStyle().Foreground(theme.Error).Render("!")
@@ -201,7 +219,9 @@ func (r *CompactRenderer) RenderErrorMessage(errorMsg string, timestamp time.Tim
 	}
 }
 
-// RenderDebugMessage renders debug messages in compact format
+// RenderDebugMessage renders diagnostic information in compact format when debug
+// mode is enabled. Messages are truncated if they exceed the available width to
+// maintain single-line display.
 func (r *CompactRenderer) RenderDebugMessage(message string, timestamp time.Time) UIMessage {
 	theme := getTheme()
 	symbol := lipgloss.NewStyle().Foreground(theme.Tool).Render("*")
@@ -223,7 +243,9 @@ func (r *CompactRenderer) RenderDebugMessage(message string, timestamp time.Time
 	}
 }
 
-// RenderDebugConfigMessage renders debug config in compact format
+// RenderDebugConfigMessage renders configuration settings in compact format for
+// debugging purposes. Config entries are displayed as key=value pairs separated
+// by commas, truncated if necessary to fit on a single line.
 func (r *CompactRenderer) RenderDebugConfigMessage(config map[string]any, timestamp time.Time) UIMessage {
 	theme := getTheme()
 	symbol := lipgloss.NewStyle().Foreground(theme.Tool).Render("*")
