@@ -4,6 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
+	"time"
+
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/cloudwego/eino/components/model"
 	"github.com/cloudwego/eino/components/tool"
@@ -12,8 +15,6 @@ import (
 	"github.com/mark3labs/mcphost/internal/config"
 	"github.com/mark3labs/mcphost/internal/models"
 	"github.com/mark3labs/mcphost/internal/tools"
-	"strings"
-	"time"
 )
 
 // AgentConfig holds configuration options for creating a new Agent.
