@@ -38,6 +38,7 @@ var (
 	streamFlag       bool           // Enable streaming output
 	compactMode      bool           // Enable compact output mode
 	scriptMCPConfig  *config.Config // Used to override config in script mode
+	approveToolRun   bool
 
 	// Session management
 	saveSessionPath string
@@ -302,6 +303,8 @@ func init() {
 		BoolVar(&compactMode, "compact", false, "enable compact output mode without fancy styling")
 	rootCmd.PersistentFlags().
 		BoolVar(&noHooks, "no-hooks", false, "disable all hooks execution")
+	rootCmd.PersistentFlags().
+		BoolVar(&approveToolRun, "approve-tool-run", false, "enable requiring user approval for every tool call")
 
 	// Session management flags
 	rootCmd.PersistentFlags().
@@ -347,6 +350,7 @@ func init() {
 	viper.BindPFlag("num-gpu-layers", rootCmd.PersistentFlags().Lookup("num-gpu-layers"))
 	viper.BindPFlag("main-gpu", rootCmd.PersistentFlags().Lookup("main-gpu"))
 	viper.BindPFlag("tls-skip-verify", rootCmd.PersistentFlags().Lookup("tls-skip-verify"))
+	viper.BindPFlag("approve-tool-run", rootCmd.PersistentFlags().Lookup("approve-tool-run"))
 
 	// Defaults are already set in flag definitions, no need to duplicate in viper
 
@@ -445,7 +449,8 @@ func runNormalMode(ctx context.Context) error {
 		debugLogger = bufferedLogger
 	}
 
-	mcpAgent, err := agent.CreateAgent(ctx, &agent.AgentCreationOptions{ModelConfig: modelConfig,
+	mcpAgent, err := agent.CreateAgent(ctx, &agent.AgentCreationOptions{
+		ModelConfig:      modelConfig,
 		MCPConfig:        mcpConfig,
 		SystemPrompt:     systemPrompt,
 		MaxSteps:         viper.GetInt("max-steps"),
@@ -743,7 +748,8 @@ func runNormalMode(ctx context.Context) error {
 		return fmt.Errorf("--quiet flag can only be used with --prompt/-p")
 	}
 
-	return runInteractiveMode(ctx, mcpAgent, cli, serverNames, toolNames, modelName, messages, sessionManager, hookExecutor)
+	approveToolRun := viper.GetBool("approve-tool-run")
+	return runInteractiveMode(ctx, mcpAgent, cli, serverNames, toolNames, modelName, messages, sessionManager, hookExecutor, approveToolRun)
 }
 
 // AgenticLoopConfig configures the behavior of the unified agentic loop.
@@ -754,6 +760,7 @@ type AgenticLoopConfig struct {
 	IsInteractive    bool   // true for interactive mode, false for non-interactive
 	InitialPrompt    string // initial prompt for non-interactive mode
 	ContinueAfterRun bool   // true to continue to interactive mode after initial run (--no-exit)
+	ApproveToolRun   bool   // only used in interactive mode
 
 	// UI configuration
 	Quiet bool // suppress all output except final response
@@ -1103,7 +1110,27 @@ func runAgenticStep(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI, mes
 				currentSpinner.Start()
 			}
 		},
-		streamingCallback, // Add streaming callback as the last parameter
+		// Add streaming callback handler
+		streamingCallback,
+		// Tool call approval handler - called before tool execution to get user approval
+		func(toolName, toolArgs string) (bool, error) {
+			if !config.IsInteractive || !config.ApproveToolRun {
+				return true, nil
+			}
+			if currentSpinner != nil {
+				currentSpinner.Stop()
+				currentSpinner = nil
+			}
+			allow, err := cli.GetToolApproval(toolName, toolArgs)
+			if err != nil {
+				return false, err
+			}
+			// Start spinner again for tool calls
+			currentSpinner = ui.NewSpinner("Thinking...")
+			currentSpinner.Start()
+
+			return allow, nil
+		},
 	)
 
 	// Make sure spinner is stopped if still running
@@ -1306,6 +1333,7 @@ func runNonInteractiveMode(ctx context.Context, mcpAgent *agent.Agent, cli *ui.C
 		IsInteractive:    false,
 		InitialPrompt:    prompt,
 		ContinueAfterRun: noExit,
+		ApproveToolRun:   false,
 		Quiet:            quiet,
 		ServerNames:      serverNames,
 		ToolNames:        toolNames,
@@ -1318,12 +1346,13 @@ func runNonInteractiveMode(ctx context.Context, mcpAgent *agent.Agent, cli *ui.C
 }
 
 // runInteractiveMode handles the interactive mode execution
-func runInteractiveMode(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI, serverNames, toolNames []string, modelName string, messages []*schema.Message, sessionManager *session.Manager, hookExecutor *hooks.Executor) error {
+func runInteractiveMode(ctx context.Context, mcpAgent *agent.Agent, cli *ui.CLI, serverNames, toolNames []string, modelName string, messages []*schema.Message, sessionManager *session.Manager, hookExecutor *hooks.Executor, approveToolRun bool) error {
 	// Configure and run unified agentic loop
 	config := AgenticLoopConfig{
 		IsInteractive:    true,
 		InitialPrompt:    "",
 		ContinueAfterRun: false,
+		ApproveToolRun:   approveToolRun,
 		Quiet:            false,
 		ServerNames:      serverNames,
 		ToolNames:        toolNames,

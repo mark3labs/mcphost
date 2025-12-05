@@ -4,6 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
+	"time"
+
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/cloudwego/eino/components/model"
 	"github.com/cloudwego/eino/components/tool"
@@ -12,8 +15,6 @@ import (
 	"github.com/mark3labs/mcphost/internal/config"
 	"github.com/mark3labs/mcphost/internal/models"
 	"github.com/mark3labs/mcphost/internal/tools"
-	"strings"
-	"time"
 )
 
 // AgentConfig holds configuration options for creating a new Agent.
@@ -56,6 +57,10 @@ type StreamingResponseHandler func(content string)
 // ToolCallContentHandler is a function type for handling content that accompanies tool calls.
 // It receives any text content that the model generates alongside tool calls.
 type ToolCallContentHandler func(content string)
+
+// ToolApprovalHandler is a function type for handling user approval of tool calls.
+// It receives the tool name and arguments, and returns true if the user approves.
+type ToolApprovalHandler func(toolName, toolArgs string) (bool, error)
 
 // Agent represents an AI agent with MCP tool integration and real-time tool call display.
 // It manages the interaction between an LLM and various tools through the MCP protocol.
@@ -128,17 +133,17 @@ type GenerateWithLoopResult struct {
 // It handles the conversation flow, executing tools as needed and invoking callbacks for various events.
 // This method does not support streaming responses; use GenerateWithLoopAndStreaming for streaming support.
 func (a *Agent) GenerateWithLoop(ctx context.Context, messages []*schema.Message,
-	onToolCall ToolCallHandler, onToolExecution ToolExecutionHandler, onToolResult ToolResultHandler, onResponse ResponseHandler, onToolCallContent ToolCallContentHandler) (*GenerateWithLoopResult, error) {
-
-	return a.GenerateWithLoopAndStreaming(ctx, messages, onToolCall, onToolExecution, onToolResult, onResponse, onToolCallContent, nil)
+	onToolCall ToolCallHandler, onToolExecution ToolExecutionHandler, onToolResult ToolResultHandler, onResponse ResponseHandler, onToolCallContent ToolCallContentHandler, onToolApproval ToolApprovalHandler,
+) (*GenerateWithLoopResult, error) {
+	return a.GenerateWithLoopAndStreaming(ctx, messages, onToolCall, onToolExecution, onToolResult, onResponse, onToolCallContent, nil, onToolApproval)
 }
 
 // GenerateWithLoopAndStreaming processes messages with a custom loop that displays tool calls in real-time and supports streaming callbacks.
 // It handles the conversation flow, executing tools as needed and invoking callbacks for various events including streaming chunks.
 // The onStreamingResponse callback is invoked for each content chunk during streaming if streaming is enabled.
 func (a *Agent) GenerateWithLoopAndStreaming(ctx context.Context, messages []*schema.Message,
-	onToolCall ToolCallHandler, onToolExecution ToolExecutionHandler, onToolResult ToolResultHandler, onResponse ResponseHandler, onToolCallContent ToolCallContentHandler, onStreamingResponse StreamingResponseHandler) (*GenerateWithLoopResult, error) {
-
+	onToolCall ToolCallHandler, onToolExecution ToolExecutionHandler, onToolResult ToolResultHandler, onResponse ResponseHandler, onToolCallContent ToolCallContentHandler, onStreamingResponse StreamingResponseHandler, onToolApproval ToolApprovalHandler,
+) (*GenerateWithLoopResult, error) {
 	// Create a copy of messages to avoid modifying the original
 	workingMessages := make([]*schema.Message, len(messages))
 	copy(workingMessages, messages)
@@ -200,6 +205,19 @@ func (a *Agent) GenerateWithLoopAndStreaming(ctx context.Context, messages []*sc
 
 			// Handle tool calls
 			for _, toolCall := range response.ToolCalls {
+				if onToolApproval != nil {
+					approved, err := onToolApproval(toolCall.Function.Name, toolCall.Function.Arguments)
+					if err != nil {
+						return nil, err
+					}
+					if !approved {
+						rejectedMsg := fmt.Sprintf("The user did not allow tool call %s. Reason: User cancelled.", toolCall.Function.Name)
+						toolMessage := schema.ToolMessage(rejectedMsg, toolCall.ID)
+						workingMessages = append(workingMessages, toolMessage)
+						continue
+					}
+				}
+
 				// Notify about tool call
 				if onToolCall != nil {
 					onToolCall(toolCall.Function.Name, toolCall.Function.Arguments)
