@@ -2,12 +2,17 @@ package sdk_test
 
 import (
 	"context"
+	"os"
 	"testing"
 
 	"github.com/mark3labs/mcphost/sdk"
 )
 
 func TestNew(t *testing.T) {
+	if os.Getenv("ANTHROPIC_API_KEY") == "" {
+		t.Skip("Skipping test: ANTHROPIC_API_KEY not set")
+	}
+
 	ctx := context.Background()
 
 	// Test default initialization
@@ -23,6 +28,10 @@ func TestNew(t *testing.T) {
 }
 
 func TestNewWithOptions(t *testing.T) {
+	if os.Getenv("ANTHROPIC_API_KEY") == "" {
+		t.Skip("Skipping test: ANTHROPIC_API_KEY not set")
+	}
+
 	ctx := context.Background()
 
 	opts := &sdk.Options{
@@ -43,6 +52,10 @@ func TestNewWithOptions(t *testing.T) {
 }
 
 func TestSessionManagement(t *testing.T) {
+	if os.Getenv("ANTHROPIC_API_KEY") == "" {
+		t.Skip("Skipping test: ANTHROPIC_API_KEY not set")
+	}
+
 	ctx := context.Background()
 
 	host, err := sdk.New(ctx, &sdk.Options{Quiet: true})
