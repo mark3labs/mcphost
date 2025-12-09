@@ -13,9 +13,7 @@ import (
 	"golang.org/x/term"
 )
 
-var (
-	promptStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("12"))
-)
+var promptStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("12"))
 
 // CLI manages the command-line interface for MCPHost, providing message rendering,
 // user input handling, and display management. It supports both standard and compact
@@ -375,6 +373,22 @@ func (c *CLI) DisplayServers(servers []string) {
 // like "/help", "/tools", etc.
 func (c *CLI) IsSlashCommand(input string) bool {
 	return strings.HasPrefix(input, "/")
+}
+
+// GetToolApproval asks the user for permission to execute the tool with the given
+// arguments. Returns true if the user approves.
+func (c *CLI) GetToolApproval(toolName, toolArgs string) (bool, error) {
+	input := NewToolApprovalInput(toolName, toolArgs, c.width)
+	p := tea.NewProgram(input)
+	finalModel, err := p.Run()
+	if err != nil {
+		return false, err
+	}
+
+	if finalInput, ok := finalModel.(*ToolApprovalInput); ok {
+		return finalInput.approved, nil
+	}
+	return false, fmt.Errorf("GetToolApproval: unexpected error type")
 }
 
 // SlashCommandResult encapsulates the outcome of processing a slash command,
