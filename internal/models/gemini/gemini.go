@@ -11,6 +11,7 @@ import (
 	"github.com/cloudwego/eino/components"
 	"github.com/cloudwego/eino/components/model"
 	"github.com/cloudwego/eino/schema"
+	"github.com/eino-contrib/jsonschema"
 	"github.com/getkin/kin-openapi/openapi3"
 	"google.golang.org/genai"
 )
@@ -83,7 +84,7 @@ type Config struct {
 
 	// ResponseSchema defines the structure for JSON responses
 	// Optional. Used when you want structured output in JSON format
-	ResponseSchema *openapi3.Schema
+	ResponseSchema *jsonschema.Schema
 
 	// EnableCodeExecution allows the model to execute code
 	// Warning: Be cautious with code execution in production
@@ -103,7 +104,7 @@ type options struct {
 	// TopK limits the number of tokens to sample from
 	TopK *int32
 	// ResponseSchema defines the expected JSON structure for responses
-	ResponseSchema *openapi3.Schema
+	ResponseSchema *jsonschema.Schema
 }
 
 // ChatModel implements the Gemini chat model for the eino framework.
@@ -124,7 +125,7 @@ type ChatModel struct {
 	// topK limits token sampling
 	topK *int32
 	// responseSchema for structured JSON output
-	responseSchema *openapi3.Schema
+	responseSchema *jsonschema.Schema
 	// tools converted to Gemini format
 	tools []*genai.Tool
 	// origTools stores the original tool definitions
@@ -448,7 +449,7 @@ func (cm *ChatModel) buildGenerateConfig(opts ...model.Option) (*genai.GenerateC
 
 	// Set response schema for JSON mode
 	if geminiOptions.ResponseSchema != nil {
-		gSchema, err := cm.convertOpenAPISchema(geminiOptions.ResponseSchema)
+		gSchema, err := cm.convertJSONSchema(geminiOptions.ResponseSchema)
 		if err != nil {
 			return nil, nil, fmt.Errorf("convert response schema failed: %w", err)
 		}
@@ -466,12 +467,12 @@ func (cm *ChatModel) convertToGeminiTools(tools []*schema.ToolInfo) ([]*genai.To
 
 	var functionDeclarations []*genai.FunctionDeclaration
 	for _, tool := range tools {
-		openSchema, err := tool.ToOpenAPIV3()
+		openSchema, err := tool.ToJSONSchema()
 		if err != nil {
 			return nil, fmt.Errorf("get open schema failed: %w", err)
 		}
 
-		gSchema, err := cm.convertOpenAPISchema(openSchema)
+		gSchema, err := cm.convertJSONSchema(openSchema)
 		if err != nil {
 			return nil, fmt.Errorf("convert open schema failed: %w", err)
 		}
@@ -487,7 +488,7 @@ func (cm *ChatModel) convertToGeminiTools(tools []*schema.ToolInfo) ([]*genai.To
 	return []*genai.Tool{{FunctionDeclarations: functionDeclarations}}, nil
 }
 
-func (cm *ChatModel) convertOpenAPISchema(schema *openapi3.Schema) (*genai.Schema, error) {
+func (cm *ChatModel) convertJSONSchema(schema *jsonschema.Schema) (*genai.Schema, error) {
 	if schema == nil {
 		return nil, nil
 	}
@@ -501,15 +502,12 @@ func (cm *ChatModel) convertOpenAPISchema(schema *openapi3.Schema) (*genai.Schem
 		result.Type = genai.TypeObject
 		if schema.Properties != nil {
 			properties := make(map[string]*genai.Schema)
-			for name, prop := range schema.Properties {
-				if prop == nil || prop.Value == nil {
-					continue
-				}
-				propSchema, err := cm.convertOpenAPISchema(prop.Value)
+			for pair := schema.Properties.Oldest(); pair != nil; pair = pair.Next() {
+				propSchema, err := cm.convertJSONSchema(pair.Value)
 				if err != nil {
 					return nil, err
 				}
-				properties[name] = propSchema
+				properties[pair.Key] = propSchema
 			}
 			result.Properties = properties
 		}
@@ -518,8 +516,8 @@ func (cm *ChatModel) convertOpenAPISchema(schema *openapi3.Schema) (*genai.Schem
 		}
 	case openapi3.TypeArray:
 		result.Type = genai.TypeArray
-		if schema.Items != nil && schema.Items.Value != nil {
-			itemSchema, err := cm.convertOpenAPISchema(schema.Items.Value)
+		if schema.Items != nil {
+			itemSchema, err := cm.convertJSONSchema(schema.Items)
 			if err != nil {
 				return nil, err
 			}
