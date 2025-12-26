@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/cloudwego/eino/schema"
-	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/eino-contrib/jsonschema"
 	"github.com/mark3labs/mcphost/internal/config"
 )
 
@@ -132,7 +132,7 @@ func TestMCPToolManager_ToolWithoutProperties(t *testing.T) {
 func TestIssue89_ObjectSchemaMissingProperties(t *testing.T) {
 	// Create a schema that would cause the OpenAI validation error
 	// This simulates what might happen with tools that have no input properties
-	brokenSchema := &openapi3.Schema{
+	brokenSchema := &jsonschema.Schema{
 		Type: "object",
 		// Properties is nil - this causes "object schema missing properties" error in OpenAI
 	}
@@ -144,7 +144,7 @@ func TestIssue89_ObjectSchemaMissingProperties(t *testing.T) {
 
 	// Apply the fix from issue #89
 	if brokenSchema.Type == "object" && brokenSchema.Properties == nil {
-		brokenSchema.Properties = make(openapi3.Schemas)
+		brokenSchema.Properties = jsonschema.NewProperties()
 	}
 
 	// Verify the fix worked
@@ -154,7 +154,7 @@ func TestIssue89_ObjectSchemaMissingProperties(t *testing.T) {
 
 	// Test that we can create a ParamsOneOf from the fixed schema
 	// This is what would fail before the fix
-	paramsOneOf := schema.NewParamsOneOfByOpenAPIV3(brokenSchema)
+	paramsOneOf := schema.NewParamsOneOfByJSONSchema(brokenSchema)
 	if paramsOneOf == nil {
 		t.Error("Failed to create ParamsOneOf from fixed schema - OpenAI function calling would fail")
 	}

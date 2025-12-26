@@ -218,6 +218,12 @@ func CreateProvider(ctx context.Context, config *ProviderConfig) (*ProviderResul
 			return nil, err
 		}
 		return &ProviderResult{Model: model, Message: ""}, nil
+	case "google-vertex-anthropic":
+		model, err := createVertexAnthropicProvider(ctx, config, modelName)
+		if err != nil {
+			return nil, err
+		}
+		return &ProviderResult{Model: model, Message: ""}, nil
 	default:
 		return nil, fmt.Errorf("unsupported provider: %s", provider)
 	}
@@ -336,6 +342,67 @@ func createAnthropicProvider(ctx context.Context, config *ProviderConfig, modelN
 	}
 
 	if config.TopP != nil && *config.TopP != 0.95 {
+		claudeConfig.TopP = config.TopP
+	}
+
+	if config.TopK != nil {
+		claudeConfig.TopK = config.TopK
+	}
+
+	if len(config.StopSequences) > 0 {
+		claudeConfig.StopSequences = config.StopSequences
+	}
+
+	return anthropic.NewCustomChatModel(ctx, claudeConfig)
+}
+
+func createVertexAnthropicProvider(ctx context.Context, config *ProviderConfig, modelName string) (model.ToolCallingChatModel, error) {
+	projectID := os.Getenv("GOOGLE_VERTEX_PROJECT")
+	if projectID == "" {
+		projectID = os.Getenv("ANTHROPIC_VERTEX_PROJECT_ID")
+	}
+	if projectID == "" {
+		projectID = os.Getenv("GOOGLE_CLOUD_PROJECT")
+	}
+	if projectID == "" {
+		projectID = os.Getenv("GCLOUD_PROJECT")
+	}
+	if projectID == "" {
+		projectID = os.Getenv("CLOUDSDK_CORE_PROJECT")
+	}
+	if projectID == "" {
+		return nil, fmt.Errorf("Google Vertex project ID not provided. Set ANTHROPIC_VERTEX_PROJECT_ID, GOOGLE_CLOUD_PROJECT, or GCLOUD_PROJECT environment variable")
+	}
+
+	region := os.Getenv("GOOGLE_VERTEX_LOCATION")
+	if region == "" {
+		region = os.Getenv("ANTHROPIC_VERTEX_REGION")
+	}
+	if region == "" {
+		region = os.Getenv("CLOUD_ML_REGION")
+	}
+	if region == "" {
+		region = "global"
+	}
+
+	maxTokens := config.MaxTokens
+	if maxTokens == 0 {
+		maxTokens = 4096 // Default value
+	}
+
+	claudeConfig := &einoclaude.Config{
+		ByVertex:        true,
+		VertexProjectID: projectID,
+		VertexRegion:    region,
+		Model:           modelName,
+		MaxTokens:       maxTokens,
+	}
+
+	if config.Temperature != nil {
+		claudeConfig.Temperature = config.Temperature
+	}
+
+	if config.TopP != nil {
 		claudeConfig.TopP = config.TopP
 	}
 
