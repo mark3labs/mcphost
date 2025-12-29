@@ -221,6 +221,13 @@ func (m *MCPToolManager) loadServerTools(ctx context.Context, serverName string,
 		if err != nil {
 			return fmt.Errorf("conv mcp tool input schema fail(marshal): %w, tool name: %s", err, mcpTool.Name)
 		}
+
+		// Fix for JSON Schema draft-07 vs draft-04 compatibility:
+		// Chrome DevTools MCP uses draft-07 where exclusiveMinimum/exclusiveMaximum are numbers,
+		// but kin-openapi (OpenAPI 3.0) expects them as booleans (draft-04 format).
+		// Pre-process the schema to convert numeric exclusive bounds to boolean format.
+		marshaledInputSchema = convertExclusiveBoundsToBoolean(marshaledInputSchema)
+
 		inputSchema := &openapi3.Schema{}
 		err = sonic.Unmarshal(marshaledInputSchema, inputSchema)
 		if err != nil {
@@ -553,5 +560,83 @@ func (m *MCPToolManager) debugLogConnectionInfo(serverName string, serverConfig 
 		if len(serverConfig.Headers) > 0 {
 			m.debugLogger.LogDebug(fmt.Sprintf("[DEBUG] Headers: %v", serverConfig.Headers))
 		}
+	}
+}
+
+// convertExclusiveBoundsToBoolean converts JSON Schema draft-07 style exclusive bounds
+// (where exclusiveMinimum/exclusiveMaximum are numbers) to draft-04 style
+// (where they are booleans that modify minimum/maximum).
+// This enables compatibility with kin-openapi which uses OpenAPI 3.0 (draft-04 based) schemas.
+func convertExclusiveBoundsToBoolean(schemaJSON []byte) []byte {
+	var data map[string]interface{}
+	if err := json.Unmarshal(schemaJSON, &data); err != nil {
+		return schemaJSON // Return unchanged on error
+	}
+
+	convertSchemaRecursive(data)
+
+	result, err := json.Marshal(data)
+	if err != nil {
+		return schemaJSON // Return unchanged on error
+	}
+	return result
+}
+
+// convertSchemaRecursive recursively processes a schema map and converts
+// numeric exclusiveMinimum/exclusiveMaximum to boolean format.
+func convertSchemaRecursive(schema map[string]interface{}) {
+	// Convert exclusiveMinimum if it's a number
+	if exMin, ok := schema["exclusiveMinimum"]; ok {
+		if num, isNum := exMin.(float64); isNum {
+			// JSON Schema draft-07: exclusiveMinimum is the limit value
+			// Convert to draft-04: set minimum = value, exclusiveMinimum = true
+			schema["minimum"] = num
+			schema["exclusiveMinimum"] = true
+		}
+	}
+
+	// Convert exclusiveMaximum if it's a number
+	if exMax, ok := schema["exclusiveMaximum"]; ok {
+		if num, isNum := exMax.(float64); isNum {
+			// JSON Schema draft-07: exclusiveMaximum is the limit value
+			// Convert to draft-04: set maximum = value, exclusiveMaximum = true
+			schema["maximum"] = num
+			schema["exclusiveMaximum"] = true
+		}
+	}
+
+	// Recursively process properties
+	if props, ok := schema["properties"].(map[string]interface{}); ok {
+		for _, prop := range props {
+			if propSchema, ok := prop.(map[string]interface{}); ok {
+				convertSchemaRecursive(propSchema)
+			}
+		}
+	}
+
+	// Recursively process items (for arrays)
+	if items, ok := schema["items"].(map[string]interface{}); ok {
+		convertSchemaRecursive(items)
+	}
+
+	// Recursively process additionalProperties
+	if addProps, ok := schema["additionalProperties"].(map[string]interface{}); ok {
+		convertSchemaRecursive(addProps)
+	}
+
+	// Recursively process allOf, anyOf, oneOf
+	for _, key := range []string{"allOf", "anyOf", "oneOf"} {
+		if arr, ok := schema[key].([]interface{}); ok {
+			for _, item := range arr {
+				if itemSchema, ok := item.(map[string]interface{}); ok {
+					convertSchemaRecursive(itemSchema)
+				}
+			}
+		}
+	}
+
+	// Recursively process not
+	if not, ok := schema["not"].(map[string]interface{}); ok {
+		convertSchemaRecursive(not)
 	}
 }
