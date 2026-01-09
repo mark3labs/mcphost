@@ -335,7 +335,7 @@ func createAnthropicProvider(ctx context.Context, config *ProviderConfig, modelN
 		claudeConfig.Temperature = config.Temperature
 	}
 
-	if config.TopP != nil {
+	if config.TopP != nil && *config.TopP != 0.95 {
 		claudeConfig.TopP = config.TopP
 	}
 
