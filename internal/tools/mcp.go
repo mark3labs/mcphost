@@ -11,7 +11,7 @@ import (
 	"github.com/cloudwego/eino/components/model"
 	"github.com/cloudwego/eino/components/tool"
 	"github.com/cloudwego/eino/schema"
-	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/eino-contrib/jsonschema"
 	"github.com/mark3labs/mcp-go/client"
 	"github.com/mark3labs/mcp-go/client/transport"
 	"github.com/mark3labs/mcp-go/mcp"
@@ -228,7 +228,7 @@ func (m *MCPToolManager) loadServerTools(ctx context.Context, serverName string,
 		// Pre-process the schema to convert numeric exclusive bounds to boolean format.
 		marshaledInputSchema = convertExclusiveBoundsToBoolean(marshaledInputSchema)
 
-		inputSchema := &openapi3.Schema{}
+		inputSchema := &jsonschema.Schema{}
 		err = sonic.Unmarshal(marshaledInputSchema, inputSchema)
 		if err != nil {
 			return fmt.Errorf("conv mcp tool input schema fail(unmarshal): %w, tool name: %s", err, mcpTool.Name)
@@ -238,7 +238,7 @@ func (m *MCPToolManager) loadServerTools(ctx context.Context, serverName string,
 		// OpenAI function calling requires object schemas to have a "properties" field
 		// even if it's empty, otherwise it throws "object schema missing properties" error
 		if inputSchema.Type == "object" && inputSchema.Properties == nil {
-			inputSchema.Properties = make(openapi3.Schemas)
+			inputSchema.Properties = jsonschema.NewProperties()
 		}
 
 		// Create prefixed tool name
@@ -258,7 +258,7 @@ func (m *MCPToolManager) loadServerTools(ctx context.Context, serverName string,
 			info: &schema.ToolInfo{
 				Name:        prefixedName,
 				Desc:        mcpTool.Description,
-				ParamsOneOf: schema.NewParamsOneOfByOpenAPIV3(inputSchema),
+				ParamsOneOf: schema.NewParamsOneOfByJSONSchema(inputSchema),
 			},
 			mapping: mapping,
 		}

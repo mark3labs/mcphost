@@ -100,6 +100,19 @@ func (r *ModelsRegistry) ValidateEnvironment(provider string, apiKey string) err
 		return nil
 	}
 
+	// Add alternative environment variable names for google-vertex-anthropic
+	// These match the env vars checked by eino-claude and other tools
+	if provider == "google-vertex-anthropic" {
+		envVars = append(envVars,
+			"ANTHROPIC_VERTEX_PROJECT_ID",
+			"GOOGLE_CLOUD_PROJECT",
+			"GCLOUD_PROJECT",
+			"CLOUDSDK_CORE_PROJECT",
+			"ANTHROPIC_VERTEX_REGION",
+			"CLOUD_ML_REGION",
+		)
+	}
+
 	// Check if at least one environment variable is set
 	var foundVar bool
 	for _, envVar := range envVars {
