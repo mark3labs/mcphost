@@ -19,7 +19,6 @@ import (
 	"github.com/mark3labs/mcphost/internal/models/anthropic"
 	"github.com/mark3labs/mcphost/internal/models/openai"
 	"github.com/mark3labs/mcphost/internal/ui/progress"
-	"github.com/ollama/ollama/api"
 	"google.golang.org/genai"
 
 	"github.com/mark3labs/mcphost/internal/auth"
@@ -540,7 +539,7 @@ func createGoogleProvider(ctx context.Context, config *ProviderConfig, modelName
 type OllamaLoadingResult struct {
 	// Options contains the actual Ollama options used for loading
 	// May differ from requested options if fallback occurred (e.g., CPU instead of GPU)
-	Options *api.Options
+	Options *ollama.Options
 
 	// Message describes the loading result
 	// Example: "Model loaded successfully on GPU" or
@@ -549,7 +548,7 @@ type OllamaLoadingResult struct {
 }
 
 // loadOllamaModelWithFallback loads an Ollama model with GPU settings and automatic CPU fallback
-func loadOllamaModelWithFallback(ctx context.Context, baseURL, modelName string, options *api.Options, tlsSkipVerify bool) (*OllamaLoadingResult, error) {
+func loadOllamaModelWithFallback(ctx context.Context, baseURL, modelName string, options *ollama.Options, tlsSkipVerify bool) (*OllamaLoadingResult, error) {
 	client := createHTTPClientWithTLSConfig(tlsSkipVerify)
 
 	// Phase 1: Check if model exists locally
@@ -657,7 +656,7 @@ func pullOllamaModelWithProgress(ctx context.Context, client *http.Client, baseU
 }
 
 // loadOllamaModelWithOptions loads a model with specific options using a warmup request
-func loadOllamaModelWithOptions(ctx context.Context, client *http.Client, baseURL, modelName string, options *api.Options) (*api.Options, error) {
+func loadOllamaModelWithOptions(ctx context.Context, client *http.Client, baseURL, modelName string, options *ollama.Options) (*ollama.Options, error) {
 	// Create a copy of options for warmup to avoid modifying the original
 	warmupOptions := *options
 	warmupOptions.NumPredict = 1 // Limit response length for warmup
@@ -734,8 +733,8 @@ func createOllamaProviderWithResult(ctx context.Context, config *ProviderConfig,
 		baseURL = config.ProviderURL
 	}
 
-	// Set up options for Ollama using the api.Options struct
-	options := &api.Options{}
+	// Set up options for Ollama using the ollama.Options struct
+	options := &ollama.Options{}
 
 	if config.Temperature != nil {
 		options.Temperature = *config.Temperature
@@ -767,7 +766,7 @@ func createOllamaProviderWithResult(ctx context.Context, config *ProviderConfig,
 	}
 
 	// Create a clean copy of options for the final model
-	finalOptions := &api.Options{}
+	finalOptions := &ollama.Options{}
 	*finalOptions = *options // Copy all fields
 
 	// Try to pre-load the model with GPU settings and automatic CPU fallback
