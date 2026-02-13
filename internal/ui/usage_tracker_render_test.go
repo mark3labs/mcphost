@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mark3labs/mcphost/internal/models"
+	"github.com/ramizpolic/mcphost/internal/models"
 )
 
 func TestUsageTracker_RenderUsageInfo_OAuth(t *testing.T) {

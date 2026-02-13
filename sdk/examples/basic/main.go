@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/mark3labs/mcphost/sdk"
+	"github.com/ramizpolic/mcphost/sdk"
 )
 
 func main() {

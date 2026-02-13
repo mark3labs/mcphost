@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/mark3labs/mcphost/internal/auth"
+	"github.com/ramizpolic/mcphost/internal/auth"
 	"github.com/spf13/cobra"
 )
 

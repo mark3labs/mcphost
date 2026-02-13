@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/charmbracelet/fang"
-	"github.com/mark3labs/mcphost/cmd"
+	"github.com/ramizpolic/mcphost/cmd"
 )
 
 var version = "dev"

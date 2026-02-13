@@ -3,10 +3,11 @@ package hooks
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/mark3labs/mcphost/internal/config"
-	"gopkg.in/yaml.v3"
 	"os"
 	"path/filepath"
+
+	"github.com/ramizpolic/mcphost/internal/config"
+	"gopkg.in/yaml.v3"
 )
 
 // HookConfig represents the complete hooks configuration containing event-triggered

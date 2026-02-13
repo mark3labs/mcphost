@@ -5,11 +5,11 @@ import (
 	"fmt"
 
 	"github.com/cloudwego/eino/schema"
-	"github.com/mark3labs/mcphost/cmd"
-	"github.com/mark3labs/mcphost/internal/agent"
-	"github.com/mark3labs/mcphost/internal/config"
-	"github.com/mark3labs/mcphost/internal/models"
-	"github.com/mark3labs/mcphost/internal/session"
+	"github.com/ramizpolic/mcphost/cmd"
+	"github.com/ramizpolic/mcphost/internal/agent"
+	"github.com/ramizpolic/mcphost/internal/config"
+	"github.com/ramizpolic/mcphost/internal/models"
+	"github.com/ramizpolic/mcphost/internal/session"
 	"github.com/spf13/viper"
 )
 

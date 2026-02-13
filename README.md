@@ -124,7 +124,7 @@ mcphost --provider-url https://192.168.1.100:443 --tls-skip-verify
 ## Installation 📦
 
 ```bash
-go install github.com/mark3labs/mcphost@latest
+go install github.com/ramizpolic/mcphost@latest
 ```
 
 ## SDK Usage 🛠️
@@ -139,7 +139,7 @@ package main
 import (
     "context"
     "fmt"
-    "github.com/mark3labs/mcphost/sdk"
+    "github.com/ramizpolic/mcphost/sdk"
 )
 
 func main() {

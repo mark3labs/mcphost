@@ -11,12 +11,12 @@ import (
 	"time"
 
 	"github.com/cloudwego/eino/schema"
-	"github.com/mark3labs/mcphost/internal/agent"
-	"github.com/mark3labs/mcphost/internal/config"
-	"github.com/mark3labs/mcphost/internal/hooks"
-	"github.com/mark3labs/mcphost/internal/models"
-	"github.com/mark3labs/mcphost/internal/tools"
-	"github.com/mark3labs/mcphost/internal/ui"
+	"github.com/ramizpolic/mcphost/internal/agent"
+	"github.com/ramizpolic/mcphost/internal/config"
+	"github.com/ramizpolic/mcphost/internal/hooks"
+	"github.com/ramizpolic/mcphost/internal/models"
+	"github.com/ramizpolic/mcphost/internal/tools"
+	"github.com/ramizpolic/mcphost/internal/ui"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )

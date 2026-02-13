@@ -11,8 +11,8 @@ import (
 	"github.com/mark3labs/mcp-go/client"
 	"github.com/mark3labs/mcp-go/client/transport"
 	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/mark3labs/mcphost/internal/builtin"
-	"github.com/mark3labs/mcphost/internal/config"
+	"github.com/ramizpolic/mcphost/internal/builtin"
+	"github.com/ramizpolic/mcphost/internal/config"
 )
 
 // ConnectionPoolConfig defines configuration parameters for the MCP connection pool.

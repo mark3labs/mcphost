@@ -8,7 +8,7 @@ import (
 
 	"github.com/cloudwego/eino/schema"
 	"github.com/eino-contrib/jsonschema"
-	"github.com/mark3labs/mcphost/internal/config"
+	"github.com/ramizpolic/mcphost/internal/config"
 )
 
 func TestMCPToolManager_LoadTools_WithTimeout(t *testing.T) {

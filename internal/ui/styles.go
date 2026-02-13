@@ -4,7 +4,7 @@ import (
 	"github.com/charmbracelet/glamour"
 	"github.com/charmbracelet/glamour/ansi"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/mark3labs/mcphost/internal/config"
+	"github.com/ramizpolic/mcphost/internal/config"
 	"github.com/spf13/viper"
 )
 

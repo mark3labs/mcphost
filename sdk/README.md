@@ -5,7 +5,7 @@ The MCPHost SDK allows you to use MCPHost programmatically from Go applications 
 ## Installation
 
 ```bash
-go get github.com/mark3labs/mcphost
+go get github.com/ramizpolic/mcphost
 ```
 
 ## Basic Usage
@@ -18,7 +18,7 @@ import (
     "fmt"
     "log"
     
-    "github.com/mark3labs/mcphost/sdk"
+    "github.com/ramizpolic/mcphost/sdk"
 )
 
 func main() {

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/mark3labs/mcphost/internal/auth"
-	"github.com/mark3labs/mcphost/internal/models"
+	"github.com/ramizpolic/mcphost/internal/auth"
+	"github.com/ramizpolic/mcphost/internal/models"
 )
 
 // AgentInterface defines the minimal interface required from the agent package

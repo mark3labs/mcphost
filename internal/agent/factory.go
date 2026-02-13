@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/mark3labs/mcphost/internal/config"
-	"github.com/mark3labs/mcphost/internal/models"
-	"github.com/mark3labs/mcphost/internal/tools"
+	"github.com/ramizpolic/mcphost/internal/config"
+	"github.com/ramizpolic/mcphost/internal/models"
+	"github.com/ramizpolic/mcphost/internal/tools"
 )
 
 // SpinnerFunc is a function type for showing spinners during agent creation.

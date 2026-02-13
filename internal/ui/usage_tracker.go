@@ -5,8 +5,8 @@ import (
 	"sync"
 
 	"github.com/charmbracelet/lipgloss"
-	"github.com/mark3labs/mcphost/internal/models"
-	"github.com/mark3labs/mcphost/internal/tokens"
+	"github.com/ramizpolic/mcphost/internal/models"
+	"github.com/ramizpolic/mcphost/internal/tokens"
 )
 
 // UsageStats encapsulates detailed token usage and cost breakdown for a single

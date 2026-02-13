@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/mark3labs/mcphost/sdk"
+	"github.com/ramizpolic/mcphost/sdk"
 )
 
 func TestNew(t *testing.T) {

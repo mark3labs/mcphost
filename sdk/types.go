@@ -2,7 +2,7 @@ package sdk
 
 import (
 	"github.com/cloudwego/eino/schema"
-	"github.com/mark3labs/mcphost/internal/session"
+	"github.com/ramizpolic/mcphost/internal/session"
 )
 
 // Message is an alias for session.Message providing SDK users with access

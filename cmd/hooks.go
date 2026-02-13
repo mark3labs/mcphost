@@ -5,7 +5,7 @@ import (
 	"os"
 	"text/tabwriter"
 
-	"github.com/mark3labs/mcphost/internal/hooks"
+	"github.com/ramizpolic/mcphost/internal/hooks"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 )

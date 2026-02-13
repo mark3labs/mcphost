@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mark3labs/mcphost/internal/models"
+	"github.com/ramizpolic/mcphost/internal/models"
 )
 
 // TestDeepSeekChatScriptMode tests the regression where deepseek-chat model

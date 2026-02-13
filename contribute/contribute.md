@@ -3,7 +3,7 @@ Thanks for your contribution, you can follow these step to run this repo and deb
 ## Run demo
 1. clone this repo to your work dir.
     ```bash
-    git clone https://github.com/mark3labs/mcphost.git
+    git clone https://github.com/ramizpolic/mcphost.git
     ```
 
 2. enter the `contribute` dir.
