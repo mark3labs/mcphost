@@ -1,5 +1,7 @@
 # MCPHost 🤖
 
+[![AgentRank](https://agentrank-ai.com/api/badge/tool/mark3labs--mcphost)](https://agentrank-ai.com/tool/mark3labs--mcphost/)
+
 A CLI host application that enables Large Language Models (LLMs) to interact with external tools through the Model Context Protocol (MCP). Currently supports Claude, OpenAI, Google Gemini, and Ollama models.
 
 Discuss the Project on [Discord](https://discord.gg/RqSS2NQVsY)
