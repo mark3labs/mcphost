@@ -1,3 +1,13 @@
+# ⚠️ MCPHost is No Longer Actively Maintained
+
+**Active development on MCPHost has been stopped.** This project has been succeeded by [**Kit**](https://github.com/mark3labs/kit), which builds on the foundations of MCPHost with a more powerful and extensible architecture.
+
+👉 **We recommend all users migrate to [Kit](https://github.com/mark3labs/kit).**
+
+This repository is now archived and will not receive further updates or bug fixes.
+
+---
+
 # MCPHost 🤖
 
 A CLI host application that enables Large Language Models (LLMs) to interact with external tools through the Model Context Protocol (MCP). Currently supports Claude, OpenAI, Google Gemini, and Ollama models.
